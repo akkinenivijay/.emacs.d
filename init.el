@@ -10,9 +10,6 @@
 (unless noninteractive
   (message "Loading %s..." load-file-name))
 
-(when (version< emacs-version "24.1")
-  (error "Emacs >= 24.1 needed and you're using %s" emacs-version))
-
 (defcustom my-paths
   '("lisp"
     "themes")
@@ -99,12 +96,8 @@
       large-file-warning-threshold 100000000
 
       load-prefer-newer t
-
       require-final-newline t
-
       temporary-file-directory my-tmp-dir
-      recentf-save-file (my-savefile-dir "recentf")
-      semanticdb-default-save-directory (my-savefile-dir "semanticdb")
 
       backup-directory-alist `(("." . ,temporary-file-directory))
       backup-by-copying t
@@ -124,12 +117,8 @@
       scroll-margin 2
       scroll-preserve-screen-position t
 
-      Man-width 79
-
       indent-tabs-mode nil
-      tab-width 8
-
-      )
+      tab-width 8)
 
 
 ;; enable dangerous commands
@@ -160,8 +149,6 @@
 (global-unset-key (kbd "C-z"))
 (global-set-key (kbd "M-U") (fprogn (upcase-word -1)))
 (global-set-key (kbd "M-%") #'query-replace-regexp)
-(global-set-key (kbd "C-s") #'isearch-forward-regexp)
-(global-set-key (kbd "C-r") #'isearch-backward-regexp)
 
 (define-key 'help-command (kbd "C-f") #'find-function)
 (define-key 'help-command (kbd "C-k") #'find-function-on-key)
@@ -169,8 +156,46 @@
 (define-key 'help-command (kbd "C-l") #'find-library)
 (define-key 'help-command (kbd "C-i") #'info-display-manual)
 
+(use-package recentf-mode
+  :defer t
+  :config
+  (setq recentf-save-file (my-savefile-dir "recentf")))
+
+(use-package semantic-mode
+  :defer t
+  :config
+  (setq semanticdb-default-save-directory (my-savefile-dir "semanticdb")))
+
+(use-package man
+  :defer t
+  :config
+  (setq Man-width 79))
+
 (use-package my-editing-defuns
   :bind (("M-W" . my-copy-line-as-kill)))
+
+(use-package isearch
+  :bind
+  (("C-s" . isearch-forward-regexp)
+   ("C-r" . isearch-backward-regexp))
+
+  :init
+  (use-package my-isearch-defuns)
+  (use-package helm-swoop
+    :commands (helm-swoop-from-isearch))
+
+  (defvar my-isearch-done-opposite
+    nil
+    "Wether or not isearch should end at the opposite side of the match.")
+
+  (defadvice isearch-done (after my-isearch-done-opposite activate)
+    "After finding a match position the cursor at the opposite side of the match."
+    (when my-isearch-done-opposite
+      (goto-char isearch-other-end)))
+
+  (define-key isearch-mode-map (kbd "C-<return>") #'my-isearch-done-opposite)
+  (define-key isearch-mode-map (kbd "M-o") #'helm-swoop-from-isearch))
+
 
 (use-package my-themes
   :bind ([f8] . my-use-next-theme)
@@ -218,7 +243,7 @@
 						   try-complete-lisp-symbol)))
 
 (use-package uniquify
-  :config (setq uniquify-buffer-name-style 'formward
+  :config (setq uniquify-buffer-name-style 'forward
 		uniquify-separator "/"
 		uniquify-after-kill-buffer-p t
 		uniquify-ignore-buffers-re "^\\*"))
@@ -243,13 +268,17 @@
 	     (defalias 'magit-status-internal 'magit-status))))
 
 (use-package eshell
-  :init (setq eshell-where-to-jump 'begin
-	      eshell-review-quick-commands nil
-	      eshell-smart-space-goes-to-end t))
+  :config
+  (setq eshell-where-to-jump 'begin
+	eshell-review-quick-commands nil
+	eshell-smart-space-goes-to-end t))
 
 (use-package yasnippet
-  :defer t
-  :init (setq yas-wrap-around-region t))
+  :config (setq yas-wrap-around-region t))
+
+(use-package expand-region
+  :bind
+  ("C-@" . er/expand-region))
 
 (use-package multiple-cursors
   :commands (mc/mark-next-like-this
@@ -270,43 +299,110 @@
   :bind ("C-." . ace-jump-mode)
   :config (ace-jump-mode-enable-mark-sync))
 
-(use-package edit-server
-  :if window-system
-  :init
-  (add-hook 'after-init-hook 'server-start t)
-  (add-hook 'after-init-hook 'edit-server-start t))
-
-(use-package emacs-lisp
-  :mode "\\.el\\'"
-  :interpreter "emacs"
-  :init
-  (add-hook 'emacs-lisp-mode-hook 'paredit-mode 1))
-
 (use-package helm-config
+  :commands
+  (helm-M-x
+   helm-show-kill-ring
+   helm-mini
+   helm-find-files
+   helm-apropos
+   helm-info-emacs
+   helm-locate-library)
+
+  :bind
+  (("M-x" . helm-M-x)
+   ("C-x C-m" . helm-M-x)
+   ("M-y" . helm-show-kill-ring)
+   ("C-x b" . helm-mini)
+   ("C-x C-f" . helm-find-files)
+   ("C-h f" . helm-apropos)
+   ("C-h C-l" . helm-locate-library)
+   ("C-c h" . helm-command-prefix))
+
   :config
   (setq helm-split-window-in-side-p t
 	helm-buffers-fuzzy-matching t
 	helm-move-to-line-cycle-in-source t
 	helm-ff-search-library-in-sexp t
 	helm-ff-file-name-history-use-recentf t)
-  (global-set-key (kbd "C-c h") #'helm-command-prefix)
+  
+  ;; (define-key helm-map (kbd "o") #'helm-occur)
+  ;; (define-key helm-map (kbd "SPC") #'helm-all-mark-rings)
+  ;; (define-key helm-map (kbd "r") #'helm-recentf)
 
-  (define-key helm-command-map (kbd "o") #'helm-occur)
-  (define-key helm-command-map (kbd "g") #'helm-do-grep)
-  (define-key helm-command-map (kbd "C-c w") #'helm-wikipedia-suggest)
-  (define-key helm-command-map (kbd "SPC") #'helm-all-mark-rings)
-  (define-key helm-command-map (kbd "r") #'helm-recentf)
+  ;; (define-key minibuffer-local-map (kbd "C-c C-l") #'helm-minibuffer-history)
+  ;; (substitute-key-definition 'find-tag 'helm-etags-select global-map)
+  ;; (add-to-list 'helm-sources-using-default-as-input #'helm-source-man-pages)
 
-  (global-set-key (kbd "M-x") #'helm-M-x)
-  (global-set-key (kbd "C-x C-m") #'helm-M-x)
-  (global-set-key (kbd "M-y") #'helm-show-kill-ring)
-  (global-set-key (kbd "C-x b") #'helm-mini)
-  (global-set-key (kbd "C-x C-f") #'helm-find-files)
-  (global-set-key (kbd "C-h f") #'helm-apropos)
-  (global-set-key (kbd "C-h r") #'helm-info-emacs)
-  (global-set-key (kbd "C-h C-l") #'helm-locate-library)
+  (helm-descbinds-mode)
+  (my-enable-mode 'helm-mode))
 
-  (define-key minibuffer-local-map (kbd "C-c C-l") #'helm-minibuffer-history))
+(use-package projectile
+  :commands
+  (projectile-vc
+   projectile-switch-project
+   projectile-find-file
+   projectile-find-dir
+   projectile-ag
+   projectile-grep
+   projectile-ibuffer)
+
+  :bind
+  (("C-c p p" . projectile-switch-project)
+   ("C-c p v" . projectile-vc)
+   ("C-c p f" . projectile-find-file)
+   ("C-c p d" . projectile-find-dir)
+   ("C-c p b" . projectile-ibuffer)
+   ("C-c p s s" . projectile-ag)
+   ("C-c p s g" . projectile-grep))
+  
+  :config
+  (use-package helm-projectile)
+  (use-package wgrep-helm)
+  
+  (setq projectile-enable-caching t
+	projectile-cache-file (my-savefile-dir "projectile.cache")
+	projectile-known-projects-file (my-savefile-dir "projectile.bookmarks.eld")
+	projectile-completion-system 'helm)
+  
+  (helm-projectile-on)
+  (my-enable-mode 'projectile-global-mode))
+
+
+(use-package emacs-lisp-mode
+  :mode "\\.el\\'"
+  :interpreter "emacs"
+  :init
+  (add-hook 'emacs-lisp-mode-hook 'paredit-mode 1))
+
+(use-package js2-mode
+  :mode "\\.js\\'"
+  :config
+  (use-package js2-refactor)
+  (js2r-add-keybindings-with-prefix "C-c C-m")
+  
+  (add-hook 'js2-mode-hook (fprogn
+			    (setq js2-basic-offset 2
+				  js-indent-level 2
+				  js2-include-node-externs t)
+			    
+			    (my-enable-modes '(subword-mode
+					       electric-pair-mode
+					       aggressive-indent-mode)))))
+
+(use-package html-mode
+  :mode "\\.html\\'"
+  :config
+  (use-package tagedit)
+  (add-hook 'html-mode-hook (fprogn
+			     (tagedit-add-experimental-features)
+
+			     (setq emmet-indent-after-insert t
+				   emmet-indentation 2)
+			     
+			     (my-enable-modes '(tagedit-mode
+						emmet-mode
+						electric-pair-mode)))))
 
 (when window-system
   (let ((elapsed-time (float-time (time-subtract (current-time) emacs-start-time))))

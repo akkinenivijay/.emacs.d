@@ -4,6 +4,7 @@
 
 (depends-on "ace-jump-mode")
 (depends-on "ag")
+(depends-on "aggressive-indent")
 (depends-on "change-inner")
 (depends-on "discover")
 (depends-on "discover-js2-refactor")
@@ -35,5 +36,8 @@
 (depends-on "pallet")
 (depends-on "paredit")
 (depends-on "solarized-theme")
+(depends-on "tagedit")
 (depends-on "use-package")
+(depends-on "wgrep-helm")
+(depends-on "window-numbering")
 (depends-on "yasnippet")
