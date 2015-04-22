@@ -146,15 +146,22 @@
 		    blink-cursor-mode
 		    transient-mark-mode))
 
-(global-unset-key (kbd "C-z"))
-(global-set-key (kbd "M-U") (fprogn (upcase-word -1)))
-(global-set-key (kbd "M-%") #'query-replace-regexp)
+(dolist (r `((?i . (file . ,(expand-file-name "init.el" user-emacs-directory)))
+             (?s . (file . ,(expand-file-name "snippets" user-emacs-directory)))))
+  (set-register (car r) (cdr r)))
 
-(define-key 'help-command (kbd "C-f") #'find-function)
-(define-key 'help-command (kbd "C-k") #'find-function-on-key)
-(define-key 'help-command (kbd "C-v") #'find-variable)
-(define-key 'help-command (kbd "C-l") #'find-library)
-(define-key 'help-command (kbd "C-i") #'info-display-manual)
+(when window-system
+  (unbind-key "C-z"))
+(bind-key "M-U" (fprogn (upcase-word -1)))
+(bind-key "M-%" #'query-replace-regexp)
+(bind-key "C-M-;" #'comment-or-uncomment-region)
+
+(use-package my-editing-defuns
+  :bind (("M-W" . my-copy-line-as-kill)
+	 ("s-M-k" . my-kill-sexp-backwards)
+	 ("C-;" . my-comment-or-uncomment-line)
+	 ("C-M-s" . my-isearch-forward-regexp-other-window)
+	 ("C-M-r" . my-isearch-backward-regexp-other-window)))
 
 (use-package recentf-mode
   :defer t
@@ -170,9 +177,6 @@
   :defer t
   :config
   (setq Man-width 79))
-
-(use-package my-editing-defuns
-  :bind (("M-W" . my-copy-line-as-kill)))
 
 (use-package isearch
   :bind
@@ -199,10 +203,8 @@
 
 (use-package my-themes
   :bind ([f8] . my-use-next-theme)
-  :config (setq my-themes '(default
-			    solarized-light
-			    solarized-dark
-			    ir-black)))
+  :config
+  (my-set-themes '(default solarized-light solarized-dark ir-black)))
 
 (use-package compilation
   :defer t
@@ -260,21 +262,40 @@
   :defer t
   :config (setq server-use-tcp t))
 
+(use-package change-inner
+  :commands (change-inner change-outer)
+  :bind (("M-i" . change-inner)
+	 ("M-o" . change-outer)))
+
+(use-package smart-window
+  :commands (smart-window-move
+	     smart-window-file-split
+	     smart-window-buffer-split)
+  :bind (("M-0" . smart-window-move)
+	 ("M-2" . smart-window-buffer-split)
+	 ("M-3" . smart-window-file-split)))
+
+(use-package yasnippet
+  :defer 2
+  :config
+  (setq yas-wrap-around-region t)
+  (bind-key "C-i" 'yas-next-field-or-maybe-expand yas-keymap)
+  (yas-reload-all))
+
 (use-package magit
   :defer t
-  :config ((setq magit-status-buffer-switch-function #'switch-to-buffer
-		 magit-last-seen-setup-instrucctions "1.4.0")
-	   (when (boundp 'magit-status-internal)
-	     (defalias 'magit-status-internal 'magit-status))))
+  :init (setq magit-last-seen-setup-instructions "1.4.0")
+  :config (setq magit-status-buffer-switch-function #'switch-to-buffer)
+
+  (use-package fullframe
+    :config
+    (fullframe magit-status magit-mode-quit-window nil)))
 
 (use-package eshell
   :config
   (setq eshell-where-to-jump 'begin
 	eshell-review-quick-commands nil
 	eshell-smart-space-goes-to-end t))
-
-(use-package yasnippet
-  :config (setq yas-wrap-around-region t))
 
 (use-package expand-region
   :bind
@@ -325,7 +346,7 @@
 	helm-move-to-line-cycle-in-source t
 	helm-ff-search-library-in-sexp t
 	helm-ff-file-name-history-use-recentf t)
-  
+
   ;; (define-key helm-map (kbd "o") #'helm-occur)
   ;; (define-key helm-map (kbd "SPC") #'helm-all-mark-rings)
   ;; (define-key helm-map (kbd "r") #'helm-recentf)
@@ -355,18 +376,30 @@
    ("C-c p b" . projectile-ibuffer)
    ("C-c p s s" . projectile-ag)
    ("C-c p s g" . projectile-grep))
-  
+
   :config
   (use-package helm-projectile)
   (use-package wgrep-helm)
-  
+
   (setq projectile-enable-caching t
 	projectile-cache-file (my-savefile-dir "projectile.cache")
 	projectile-known-projects-file (my-savefile-dir "projectile.bookmarks.eld")
 	projectile-completion-system 'helm)
-  
+
+  (projectile-load-known-projects)
   (helm-projectile-on)
   (my-enable-mode 'projectile-global-mode))
+
+(use-package whitespace
+  :init
+  (dolist (hook '(prog-mode-hook text-mode-hook conf-mode-hook))
+    (add-hook hook (fprogn
+		    (my-enable-mode 'whitespace-mode)
+		    (add-hook 'before-save-hook #'whitespace-cleanup nil :local))))
+  :config
+  (setq whitespace-line-column nil
+	whitespace-style '(face tabs empty trailing lines-tail))
+  :diminish whitespace-mode)
 
 
 (use-package emacs-lisp-mode
@@ -377,32 +410,46 @@
 
 (use-package js2-mode
   :mode "\\.js\\'"
+  :init (add-hook 'js2-mode-hook (fprogn
+				  (setq js2-basic-offset 2
+					js-indent-level 2
+					js2-include-node-externs t)
+
+				  (my-enable-modes '(subword-mode
+						     electric-pair-mode
+						     aggressive-indent-mode))))
   :config
-  (use-package js2-refactor)
-  (js2r-add-keybindings-with-prefix "C-c C-m")
-  
-  (add-hook 'js2-mode-hook (fprogn
-			    (setq js2-basic-offset 2
-				  js-indent-level 2
-				  js2-include-node-externs t)
-			    
-			    (my-enable-modes '(subword-mode
-					       electric-pair-mode
-					       aggressive-indent-mode)))))
+  (use-package js2-refactor
+    :config (js2r-add-keybindings-with-prefix "C-c C-m")))
+
+(use-package json-mode
+  :mode "\\.json\\'"
+  :init (add-hook 'json-mode-hook (fprogn
+				   (setq json-reformat:indent-width 2
+					 js-indent-level 2)
+
+				   (my-enable-modes '(subword-mode
+						      electric-pair-mode
+						      aggressive-indent-mode)))))
 
 (use-package html-mode
   :mode "\\.html\\'"
-  :config
-  (use-package tagedit)
+  :init
   (add-hook 'html-mode-hook (fprogn
+			     (use-package tagedit)
+			     (use-package emmet)
 			     (tagedit-add-experimental-features)
-
 			     (setq emmet-indent-after-insert t
 				   emmet-indentation 2)
-			     
 			     (my-enable-modes '(tagedit-mode
 						emmet-mode
 						electric-pair-mode)))))
+
+(dolist (hook '(prog-mode-hook conf-mode-hook))
+  (add-hook hook (fprogn
+		  (setq fill-column 999)
+		  (my-enable-mode 'yas-minor-mode))))
+(add-hook 'text-mode-hook (fprogn (setq fill-column 99)))
 
 (when window-system
   (let ((elapsed-time (float-time (time-subtract (current-time) emacs-start-time))))
