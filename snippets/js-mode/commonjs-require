@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: commonJS require
+# key: rq
+# --
+require(${1:'$2'})$0

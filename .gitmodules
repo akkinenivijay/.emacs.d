@@ -1,0 +1,3 @@
+[submodule "lisp/centered-window-mode"]
+	path = lisp/centered-window-mode
+	url = git@github.com:anler/centered-window-mode.git

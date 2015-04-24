@@ -32,7 +32,7 @@
   :group 'personal)
 
 (defcustom my-font-size
-  12
+  14
   "Docs."
   :group 'personal)
 
@@ -77,6 +77,11 @@
 
 (require 'cask "~/.cask/cask.el")
 (cask-initialize)
+;; (let ((bundle (cask-initialize)))
+;;   when hashed bundle != bundle do:
+;;   (when window-system
+;;     (cask-install bundle)
+;;     (cask-update bundle)))
 
 (require 'use-package)
 (require 'pallet)
@@ -87,10 +92,13 @@
   (add-to-list 'default-frame-alist `(font . ,font-and-size))
   (add-to-list 'default-frame-alist `(internal-border-width . ,internal-border))
   (add-hook 'my-after-load-theme-hook (lambda ()
-					(let ((frame (window-frame)))
-					  (when frame
-					    (set-frame-font font-and-size :keep-size `(,frame))
-					    (set-frame-parameter frame 'internal-border-width internal-border))))))
+                                        (let ((frame (window-frame)))
+                                          (when frame
+                                            (set-frame-font font-and-size :keep-size `(,frame))
+                                            (set-frame-parameter frame 'internal-border-width internal-border))))))
+
+(setq-default indent-tabs-mode nil
+              tab-width 8)
 
 (setq gc-cons-threshold 50000000
       large-file-warning-threshold 100000000
@@ -115,36 +123,32 @@
       initial-scratch-message nil
 
       scroll-margin 2
-      scroll-preserve-screen-position t
-
-      indent-tabs-mode nil
-      tab-width 8)
+      scroll-preserve-screen-position t)
 
 
 ;; enable dangerous commands
 (dolist (cmd '(narrow-to-region
-	       narrow-to-page
-	       narrow-to-defun
-	       upcase-region
-	       downcase-region
-	       erase-buffer
-	       eval-expression
-	       set-goal-column))
+               narrow-to-page
+               narrow-to-defun
+               upcase-region
+               downcase-region
+               erase-buffer
+               eval-expression
+               set-goal-column))
   (put cmd 'disabled nil))
 
 
 (my-enable-modes '(global-prettify-symbols-mode
-		   global-auto-revert-mode
-		   delete-selection-mode
-		   column-number-mode
-		   savehist-mode
-		   show-paren-mode))
+                   global-auto-revert-mode
+                   delete-selection-mode
+                   column-number-mode
+                   savehist-mode))
 
 (my-disable-modes '(scroll-bar-mode
-		    tool-bar-mode
-		    menu-bar-mode
-		    blink-cursor-mode
-		    transient-mark-mode))
+                    tool-bar-mode
+                    menu-bar-mode
+                    blink-cursor-mode
+                    transient-mark-mode))
 
 (dolist (r `((?i . (file . ,(expand-file-name "init.el" user-emacs-directory)))
              (?s . (file . ,(expand-file-name "snippets" user-emacs-directory)))))
@@ -156,12 +160,16 @@
 (bind-key "M-%" #'query-replace-regexp)
 (bind-key "C-M-;" #'comment-or-uncomment-region)
 
+(use-package window-numbering
+  :defer 1
+  :config (my-enable-mode 'window-numbering-mode))
+
 (use-package my-editing-defuns
   :bind (("M-W" . my-copy-line-as-kill)
-	 ("s-M-k" . my-kill-sexp-backwards)
-	 ("C-;" . my-comment-or-uncomment-line)
-	 ("C-M-s" . my-isearch-forward-regexp-other-window)
-	 ("C-M-r" . my-isearch-backward-regexp-other-window)))
+         ("s-M-k" . my-kill-sexp-backwards)
+         ("C-;" . my-comment-or-uncomment-line)
+         ("C-M-s" . my-isearch-forward-regexp-other-window)
+         ("C-M-r" . my-isearch-backward-regexp-other-window)))
 
 (use-package recentf-mode
   :defer t
@@ -209,24 +217,24 @@
 (use-package compilation
   :defer t
   :config (setq compilation-ask-about-save nil
-		compilation-always-kill t
-		compilation-scroll-output 'first-error))
+                compilation-always-kill t
+                compilation-scroll-output 'first-error))
 
 (use-package ediff
   :defer t
   :config (setq ediff-window-setup-function 'ediff-setup-windows-plain
-		ediff-diff-options "-w"))
+                ediff-diff-options "-w"))
 
 (use-package bookmark
   :defer t
   :config (setq bookmark-default-file (my-savefile-dir "bookmarks")
-		bookmark-save-flag 1))
+                bookmark-save-flag 1))
 
 (use-package savehist
   :defer t
   :config (setq savehist-additional-variables '(search-ring regexp-search-ring)
-		savehist-autosave-interval 60
-		savehist-file (my-savefile-dir "savehist")))
+                savehist-autosave-interval 60
+                savehist-file (my-savefile-dir "savehist")))
 
 (use-package discover-my-major
   :bind ("C-h C-m" . discover-my-major))
@@ -234,25 +242,25 @@
 (use-package hippie-expand
   :bind ("M-/" . hippie-expand)
   :config (setq hippie-expand-try-functions-list '(try-expand-dabbrev
-						   try-expand-dabbrev-all-buffers
-						   try-expand-dabbrev-from-kill
-						   try-complete-file-name-partially
-						   try-complete-file-name
-						   try-expand-all-abbrevs
-						   try-expand-list
-						   try-expand-line
-						   try-complete-lisp-symbol-partially
-						   try-complete-lisp-symbol)))
+                                                   try-expand-dabbrev-all-buffers
+                                                   try-expand-dabbrev-from-kill
+                                                   try-complete-file-name-partially
+                                                   try-complete-file-name
+                                                   try-expand-all-abbrevs
+                                                   try-expand-list
+                                                   try-expand-line
+                                                   try-complete-lisp-symbol-partially
+                                                   try-complete-lisp-symbol)))
 
 (use-package uniquify
   :config (setq uniquify-buffer-name-style 'forward
-		uniquify-separator "/"
-		uniquify-after-kill-buffer-p t
-		uniquify-ignore-buffers-re "^\\*"))
+                uniquify-separator "/"
+                uniquify-after-kill-buffer-p t
+                uniquify-ignore-buffers-re "^\\*"))
 
 (use-package saveplace
   :config (setq save-place-file (expand-file-name "saveplace" my-savefile-dir)
-		save-place t))
+                save-place t))
 
 (use-package tramp
   :defer t
@@ -265,15 +273,13 @@
 (use-package change-inner
   :commands (change-inner change-outer)
   :bind (("M-i" . change-inner)
-	 ("M-o" . change-outer)))
+         ("M-o" . change-outer)))
 
 (use-package smart-window
   :commands (smart-window-move
-	     smart-window-file-split
-	     smart-window-buffer-split)
-  :bind (("M-0" . smart-window-move)
-	 ("M-2" . smart-window-buffer-split)
-	 ("M-3" . smart-window-file-split)))
+             smart-window-file-split
+             smart-window-buffer-split)
+  :bind (("M-RET" . smart-window-move)))
 
 (use-package yasnippet
   :defer 2
@@ -285,7 +291,8 @@
 (use-package magit
   :defer t
   :init (setq magit-last-seen-setup-instructions "1.4.0")
-  :config (setq magit-status-buffer-switch-function #'switch-to-buffer)
+  :config
+  (setq magit-status-buffer-switch-function #'switch-to-buffer)
 
   (use-package fullframe
     :config
@@ -294,8 +301,8 @@
 (use-package eshell
   :config
   (setq eshell-where-to-jump 'begin
-	eshell-review-quick-commands nil
-	eshell-smart-space-goes-to-end t))
+        eshell-review-quick-commands nil
+        eshell-smart-space-goes-to-end t))
 
 (use-package expand-region
   :bind
@@ -401,12 +408,27 @@
 	whitespace-style '(face tabs empty trailing lines-tail))
   :diminish whitespace-mode)
 
+(or (use-package mic-paren
+      :defer 2
+      :config (paren-activate))
+    (use-package paren
+      :defer 2
+      :config (my-enable-mode 'show-paren-mode)))
+
+(use-package org-mode
+  :mode "\\.org\\'"
+  :init (add-hook 'org-mode-hook (fprogn
+				  (my-enable-modes '(electric-pair-mode)))))
 
 (use-package emacs-lisp-mode
   :mode "\\.el\\'"
   :interpreter "emacs"
+  :bind (("C-x C-e" . pp-eval-last-sexp))
   :init
-  (add-hook 'emacs-lisp-mode-hook 'paredit-mode 1))
+  (fset 'my-emacs-lisp-mode-hook (fprogn
+				  (my-enable-modes '(paredit-mode
+						     eldoc-mode))))
+  (add-hook 'emacs-lisp-mode-hook #'my-emacs-lisp-mode-hook))
 
 (use-package js2-mode
   :mode "\\.js\\'"
@@ -444,6 +466,10 @@
 			     (my-enable-modes '(tagedit-mode
 						emmet-mode
 						electric-pair-mode)))))
+
+(use-package centered-window-mode
+  :load-path "lisp/centered-window-mode"
+  :commands (centered-window-mode))
 
 (dolist (hook '(prog-mode-hook conf-mode-hook))
   (add-hook hook (fprogn

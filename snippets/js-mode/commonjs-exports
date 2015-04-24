@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: commonJS exports
+# key: mx
+# --
+module.exports = ${1:{$0}};
