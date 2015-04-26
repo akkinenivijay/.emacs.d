@@ -1,0 +1,7 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: Module pattern
+# key: m
+# --
+var ${1:module} = (function(ns) {$0
+    return ns;
+})($1 || {});

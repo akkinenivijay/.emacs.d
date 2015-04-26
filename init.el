@@ -43,7 +43,7 @@
 (defun my-add-to-load-path (path)
   "Add PATH (relative to `user-emacs-directory') to `load-path'."
   (push (expand-file-name path user-emacs-directory)
-	load-path))
+        load-path))
 
 (defun my-enable-mode (mode)
   "Enable MODE."
@@ -156,9 +156,16 @@
 
 (when window-system
   (unbind-key "C-z"))
-(bind-key "M-U" (fprogn (upcase-word -1)))
-(bind-key "M-%" #'query-replace-regexp)
-(bind-key "C-M-;" #'comment-or-uncomment-region)
+
+(bind-keys ("M-U" . (fprogn (upcase-word -1)))
+           ("M-%" . query-replace-regexp)
+           ("C-M-;" . comment-or-uncomment-region)
+           ("M-<tab>" . mode-line-other-buffer)
+           ("M-<tab>" . mode-line-other-buffer)
+           ("s-<up>" . enlarge-window)
+           ("s-<down>" . shrink-window)
+           ("s-M-<up>" . enlarge-window-horizontally)
+           ("s-M-<down>" . shrink-window-horizontally))
 
 (use-package window-numbering
   :defer 1
@@ -241,16 +248,16 @@
 
 (use-package hippie-expand
   :bind ("M-/" . hippie-expand)
-  :config (setq hippie-expand-try-functions-list '(try-expand-dabbrev
-                                                   try-expand-dabbrev-all-buffers
-                                                   try-expand-dabbrev-from-kill
-                                                   try-complete-file-name-partially
-                                                   try-complete-file-name
-                                                   try-expand-all-abbrevs
-                                                   try-expand-list
-                                                   try-expand-line
-                                                   try-complete-lisp-symbol-partially
-                                                   try-complete-lisp-symbol)))
+  :init (setq hippie-expand-try-functions-list '(try-expand-dabbrev
+                                                 try-expand-dabbrev-all-buffers
+                                                 try-expand-dabbrev-from-kill
+                                                 try-complete-file-name-partially
+                                                 try-complete-file-name
+                                                 try-expand-all-abbrevs
+                                                 try-expand-list
+                                                 try-expand-line
+                                                 try-complete-lisp-symbol-partially
+                                                 try-complete-lisp-symbol)))
 
 (use-package uniquify
   :config (setq uniquify-buffer-name-style 'forward
@@ -310,18 +317,18 @@
 
 (use-package multiple-cursors
   :commands (mc/mark-next-like-this
-	     mc/mark-previous-like-this
-	     mc/skip-to-next-like-this
-	     mc/skip-to-previous-like-this
-	     mc/edit-lines
-	     mc/add-cursors-on-click)
+             mc/mark-previous-like-this
+             mc/skip-to-next-like-this
+             mc/skip-to-previous-like-this
+             mc/edit-lines
+             mc/add-cursors-on-click)
   :bind (("C->" . mc/mark-next-like-this)
-	 ("C-<" . mc/mark-previous-like-this)
-	 ("C-M->" . mc/skip-to-next-like-this)
-	 ("C-M-<" . mc/skip-to-previous-like-this)
-	 ("C-S-c C-S-c" . mc/edit-lines)
-	 ("C-M-0" . mc/mark-all-like-this)
-	 ("M-<down-mouse-1>" . mc/add-cursor-on-click)))
+         ("C-<" . mc/mark-previous-like-this)
+         ("C-M->" . mc/skip-to-next-like-this)
+         ("C-M-<" . mc/skip-to-previous-like-this)
+         ("C-S-c C-S-c" . mc/edit-lines)
+         ("C-M-0" . mc/mark-all-like-this)
+         ("M-<down-mouse-1>" . mc/add-cursor-on-click)))
 
 (use-package ace-jump-mode
   :bind ("C-." . ace-jump-mode)
@@ -349,10 +356,10 @@
 
   :config
   (setq helm-split-window-in-side-p t
-	helm-buffers-fuzzy-matching t
-	helm-move-to-line-cycle-in-source t
-	helm-ff-search-library-in-sexp t
-	helm-ff-file-name-history-use-recentf t)
+        helm-buffers-fuzzy-matching t
+        helm-move-to-line-cycle-in-source t
+        helm-ff-search-library-in-sexp t
+        helm-ff-file-name-history-use-recentf t)
 
   ;; (define-key helm-map (kbd "o") #'helm-occur)
   ;; (define-key helm-map (kbd "SPC") #'helm-all-mark-rings)
@@ -389,9 +396,9 @@
   (use-package wgrep-helm)
 
   (setq projectile-enable-caching t
-	projectile-cache-file (my-savefile-dir "projectile.cache")
-	projectile-known-projects-file (my-savefile-dir "projectile.bookmarks.eld")
-	projectile-completion-system 'helm)
+        projectile-cache-file (my-savefile-dir "projectile.cache")
+        projectile-known-projects-file (my-savefile-dir "projectile.bookmarks.eld")
+        projectile-completion-system 'helm)
 
   (projectile-load-known-projects)
   (helm-projectile-on)
@@ -401,11 +408,11 @@
   :init
   (dolist (hook '(prog-mode-hook text-mode-hook conf-mode-hook))
     (add-hook hook (fprogn
-		    (my-enable-mode 'whitespace-mode)
-		    (add-hook 'before-save-hook #'whitespace-cleanup nil :local))))
+                    (my-enable-mode 'whitespace-mode)
+                    (add-hook 'before-save-hook #'whitespace-cleanup nil :local))))
   :config
   (setq whitespace-line-column nil
-	whitespace-style '(face tabs empty trailing lines-tail))
+        whitespace-style '(face tabs empty trailing lines-tail))
   :diminish whitespace-mode)
 
 (or (use-package mic-paren
@@ -418,7 +425,7 @@
 (use-package org-mode
   :mode "\\.org\\'"
   :init (add-hook 'org-mode-hook (fprogn
-				  (my-enable-modes '(electric-pair-mode)))))
+                                  (my-enable-modes '(electric-pair-mode)))))
 
 (use-package emacs-lisp-mode
   :mode "\\.el\\'"
@@ -426,20 +433,21 @@
   :bind (("C-x C-e" . pp-eval-last-sexp))
   :init
   (fset 'my-emacs-lisp-mode-hook (fprogn
-				  (my-enable-modes '(paredit-mode
-						     eldoc-mode))))
+                                  (my-enable-modes '(paredit-mode
+                                                     eldoc-mode))))
   (add-hook 'emacs-lisp-mode-hook #'my-emacs-lisp-mode-hook))
 
 (use-package js2-mode
   :mode "\\.js\\'"
   :init (add-hook 'js2-mode-hook (fprogn
-				  (setq js2-basic-offset 2
-					js-indent-level 2
-					js2-include-node-externs t)
+                                  (setq js2-basic-offset 2
+                                        js-indent-level 2
+                                        js2-include-node-externs t)
 
-				  (my-enable-modes '(subword-mode
-						     electric-pair-mode
-						     aggressive-indent-mode))))
+                                  (my-enable-modes '(subword-mode
+                                                     hungry-delete-mode
+                                                     electric-pair-mode
+                                                     aggressive-indent-mode))))
   :config
   (use-package js2-refactor
     :config (js2r-add-keybindings-with-prefix "C-c C-m")))
@@ -447,25 +455,25 @@
 (use-package json-mode
   :mode "\\.json\\'"
   :init (add-hook 'json-mode-hook (fprogn
-				   (setq json-reformat:indent-width 2
-					 js-indent-level 2)
+                                   (setq json-reformat:indent-width 2
+                                         js-indent-level 2)
 
-				   (my-enable-modes '(subword-mode
-						      electric-pair-mode
-						      aggressive-indent-mode)))))
+                                   (my-enable-modes '(subword-mode
+                                                      electric-pair-mode
+                                                      aggressive-indent-mode)))))
 
 (use-package html-mode
   :mode "\\.html\\'"
   :init
   (add-hook 'html-mode-hook (fprogn
-			     (use-package tagedit)
-			     (use-package emmet)
-			     (tagedit-add-experimental-features)
-			     (setq emmet-indent-after-insert t
-				   emmet-indentation 2)
-			     (my-enable-modes '(tagedit-mode
-						emmet-mode
-						electric-pair-mode)))))
+                             (use-package tagedit)
+                             (use-package emmet)
+                             (tagedit-add-experimental-features)
+                             (setq emmet-indent-after-insert t
+                                   emmet-indentation 2)
+                             (my-enable-modes '(tagedit-mode
+                                                emmet-mode
+                                                electric-pair-mode)))))
 
 (use-package centered-window-mode
   :load-path "lisp/centered-window-mode"
@@ -473,8 +481,8 @@
 
 (dolist (hook '(prog-mode-hook conf-mode-hook))
   (add-hook hook (fprogn
-		  (setq fill-column 999)
-		  (my-enable-mode 'yas-minor-mode))))
+                  (setq fill-column 999)
+                  (my-enable-mode 'yas-minor-mode))))
 (add-hook 'text-mode-hook (fprogn (setq fill-column 99)))
 
 (when window-system

@@ -29,6 +29,7 @@
 (depends-on "helm-projectile")
 (depends-on "helm-swoop")
 (depends-on "helm-themes")
+(depends-on "hungry-delete")
 (depends-on "info+")
 (depends-on "ir-black-theme")
 (depends-on "json-mode")
