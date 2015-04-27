@@ -167,6 +167,10 @@
   :defer 1
   :config (my-enable-mode 'window-numbering-mode))
 
+(use-package discover
+  :defer 2
+  :config (my-enable-mode 'discover-mode))
+
 (use-package my-editing-defuns
   :bind (("M-W" . my-copy-line-as-kill)
          ("s-M-k" . my-kill-sexp-backwards)
@@ -430,8 +434,26 @@
   :init
   (fset 'my-emacs-lisp-mode-hook (fprogn
                                   (my-enable-modes '(paredit-mode
+                                                     aggressive-indent-mode
+                                                     rainbow-delimiters-mode
                                                      eldoc-mode))))
   (add-hook 'emacs-lisp-mode-hook #'my-emacs-lisp-mode-hook))
+
+(use-package clojure-mode
+  :mode "\\.clj\\'"
+  :init (add-hook 'clojure-mode-hook (fprogn
+                                      (my-enable-modes '(subword-mode
+                                                         paredit-mode
+                                                         aggressive-indent-mode
+                                                         rainbow-delimiters-mode)))))
+
+(use-package cider-mode
+  :init (add-hook 'cider-mode-hook (fprogn
+                                    (my-enable-modes '(subword-mode
+                                                       paredit-mode
+                                                       rainbow-delimiters-mode))))
+  :config (setq nrepl-log-messages t))
+
 
 (use-package js2-mode
   :mode "\\.js\\'"
