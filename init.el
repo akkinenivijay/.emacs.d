@@ -47,6 +47,7 @@
 
 (defun my-enable-mode (mode)
   "Enable MODE."
+  (my-disable-mode mode)
   (when (fboundp mode)
     (funcall mode +1)))
 
@@ -90,12 +91,7 @@
 (let ((font-and-size (format "%s-%s" my-font-family my-font-size))
       (internal-border 10))
   (add-to-list 'default-frame-alist `(font . ,font-and-size))
-  (add-to-list 'default-frame-alist `(internal-border-width . ,internal-border))
-  (add-hook 'my-after-load-theme-hook (lambda ()
-                                        (let ((frame (window-frame)))
-                                          (when frame
-                                            (set-frame-font font-and-size :keep-size `(,frame))
-                                            (set-frame-parameter frame 'internal-border-width internal-border))))))
+  (add-to-list 'default-frame-alist `(internal-border-width . ,internal-border)))
 
 (setq-default indent-tabs-mode nil
               tab-width 8)
@@ -446,6 +442,7 @@
 
                                   (my-enable-modes '(subword-mode
                                                      hungry-delete-mode
+                                                     js2-refactor-mode
                                                      electric-pair-mode
                                                      aggressive-indent-mode))))
   :config
@@ -467,12 +464,14 @@
   :init
   (add-hook 'html-mode-hook (fprogn
                              (use-package tagedit)
-                             (use-package emmet)
+                             (use-package emmet-mode)
                              (tagedit-add-experimental-features)
                              (setq emmet-indent-after-insert t
-                                   emmet-indentation 2)
+                                   emmet-indentation 2
+                                   fill-column 999)
                              (my-enable-modes '(tagedit-mode
                                                 emmet-mode
+                                                whitespace-mode
                                                 electric-pair-mode)))))
 
 (use-package centered-window-mode
