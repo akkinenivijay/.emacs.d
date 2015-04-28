@@ -44,6 +44,7 @@
 (depends-on "info+")
 (depends-on "ir-black-theme")
 (depends-on "json-mode")
+(depends-on "less-css-mode")
 (depends-on "macrostep")
 (depends-on "magit")
 (depends-on "markdown-mode+")
