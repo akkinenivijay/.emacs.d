@@ -285,8 +285,15 @@
 (use-package smart-window
   :commands (smart-window-move
              smart-window-file-split
-             smart-window-buffer-split)
-  :bind (("M-RET" . smart-window-move)))
+             smart-window-buffer-split
+             smart-window-rotate)
+
+  :bind (("C-x w" . smart-window-move)
+         ("C-x W" . smart-window-buffer-split)
+         ("C-x M-w" . smart-window-file-split)
+         ("C-x R" . smart-window-rotate))
+
+  :config (setq smart-window-remap-keys nil))
 
 (use-package yasnippet
   :defer 2
@@ -373,24 +380,8 @@
   (my-enable-mode 'helm-mode))
 
 (use-package projectile
-  :commands
-  (projectile-vc
-   projectile-switch-project
-   projectile-find-file
-   projectile-find-dir
-   projectile-ag
-   projectile-grep
-   projectile-ibuffer)
-
-  :bind
-  (("C-c p p" . projectile-switch-project)
-   ("C-c p v" . projectile-vc)
-   ("C-c p f" . projectile-find-file)
-   ("C-c p d" . projectile-find-dir)
-   ("C-c p b" . projectile-ibuffer)
-   ("C-c p s s" . projectile-ag)
-   ("C-c p s g" . projectile-grep))
-
+  :defer 1
+  :diminish projectile-mode
   :config
   (use-package helm-projectile)
   (use-package wgrep-helm)
@@ -484,7 +475,32 @@
 (use-package html-mode
   :mode "\\.html\\'"
   :init
+  (defun html-attrs-as-columns ()
+    "Align all attrs in a tag in the same column."
+    (interactive)
+    (let ((regexp " [^> ][^=>]+\\(=\"[^\">]*\"\\)?")
+          (bound (save-excursion (end-of-line)
+                                 (point))))
+      (while (search-forward-regexp regexp bound :noerror)
+        (newline nil :interactive))))
+
+  (defun html-attrs-as-line ()
+    "Align all attrs in a tag in the same line."
+    (interactive)
+    (save-excursion
+      (let ((regexp " [^> ][^=>]+\\(=\"[^\">]*\"\\)?"))
+        (while (and (search-forward-regexp regexp nil :noerror)
+                    (not (save-excursion
+                           (search-forward ">"
+                                           (save-excursion (end-of-line)
+                                                           (point))
+                                           :noerror))))
+          (delete-char 1)
+          (just-one-space)))))
+
   (add-hook 'html-mode-hook (fprogn
+                             (bind-key "s-." 'html-attrs-as-columns)
+                             (bind-key "s-," 'html-attrs-as-line)
                              (use-package tagedit)
                              (use-package emmet-mode)
                              (tagedit-add-experimental-features)
@@ -494,6 +510,7 @@
                              (my-enable-modes '(tagedit-mode
                                                 emmet-mode
                                                 whitespace-mode
+                                                hungry-delete-mode
                                                 electric-pair-mode)))))
 
 (use-package centered-window-mode
