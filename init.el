@@ -62,7 +62,7 @@
 (defalias 'my-disable-modes (apply-partially 'mapc #'my-disable-mode)
   "Disable all modes in argument.")
 
-(defmacro fprogn (&rest body)
+(defmacro command (&rest body)
   "Wrap BODY inside an interactive lambda."
   `(lambda ()
      (interactive)
@@ -153,7 +153,7 @@
 (when window-system
   (unbind-key "C-z"))
 
-(bind-keys ("M-U" . (fprogn (upcase-word -1)))
+(bind-keys ("M-U" . (command (upcase-word -1)))
            ("M-%" . query-replace-regexp)
            ("C-M-;" . comment-or-uncomment-region)
            ("M-<tab>" . mode-line-other-buffer)
@@ -337,9 +337,11 @@
          ("C-M-0" . mc/mark-all-like-this)
          ("M-<down-mouse-1>" . mc/add-cursor-on-click)))
 
-(use-package ace-jump-mode
-  :bind ("C-." . ace-jump-mode)
-  :config (ace-jump-mode-enable-mark-sync))
+(use-package avy
+  :bind (("C-." . avy-goto-char)
+         ("C-," . avy-goto-char-2)
+         ("M-g w" . avy-goto-word-0)
+         ("M-g M-g" . avy-goto-line)))
 
 (use-package helm-config
   :commands
@@ -397,10 +399,15 @@
 
 (use-package whitespace
   :init
+  (defun my-cleanup-whitespace-on-write ()
+    "Cleanup whitespace on editor writes."
+    (interactive)
+    (my-enable-mode 'whitespace-mode)
+    (add-hook 'before-save-hook #'whitespace-cleanup nil :local))
+
   (dolist (hook '(prog-mode-hook text-mode-hook conf-mode-hook))
-    (add-hook hook (fprogn
-                    (my-enable-mode 'whitespace-mode)
-                    (add-hook 'before-save-hook #'whitespace-cleanup nil :local))))
+    (add-hook hook #'my-cleanup-whitespace-on-write))
+
   :config
   (setq whitespace-line-column nil
         whitespace-style '(face tabs empty trailing lines-tail))
@@ -415,62 +422,78 @@
 
 (use-package org-mode
   :mode "\\.org\\'"
-  :init (add-hook 'org-mode-hook (fprogn
-                                  (my-enable-modes '(electric-pair-mode)))))
+  :init (add-hook 'org-mode-hook (defun my-org-setup ()
+                                   (interactive)
+                                   (my-enable-modes '(electric-pair-mode)))))
 
 (use-package emacs-lisp-mode
   :mode "\\.el\\'"
   :interpreter "emacs"
   :bind (("C-x C-e" . pp-eval-last-sexp))
   :init
-  (fset 'my-emacs-lisp-mode-hook (fprogn
-                                  (my-enable-modes '(paredit-mode
-                                                     aggressive-indent-mode
-                                                     rainbow-delimiters-mode
-                                                     eldoc-mode))))
+  (fset 'my-emacs-lisp-mode-hook (defun my-elisp-setup ()
+                                   (interactive)
+                                   (my-enable-modes '(paredit-mode
+                                                      aggressive-indent-mode
+                                                      rainbow-delimiters-mode
+                                                      eldoc-mode))))
   (add-hook 'emacs-lisp-mode-hook #'my-emacs-lisp-mode-hook))
 
 (use-package clojure-mode
   :mode "\\.clj\\'"
-  :init (add-hook 'clojure-mode-hook (fprogn
-                                      (my-enable-modes '(subword-mode
-                                                         paredit-mode
-                                                         aggressive-indent-mode
-                                                         rainbow-delimiters-mode)))))
+  :init (add-hook 'clojure-mode-hook (defun my-clojure-setup ()
+                                       (interactive)
+                                       (my-enable-modes '(subword-mode
+                                                          paredit-mode
+                                                          aggressive-indent-mode
+                                                          rainbow-delimiters-mode)))))
+
+(use-package haskell-mode
+  :mode "\\.hs\\'"
+  :init (add-hook 'haskell-mode-hook (defun my-haskell-setup ()
+                                       (interactive)
+                                       (my-enable-modes '(subword-mode
+                                                          ghc-mode
+                                                          flycheck-mode)))))
+(use-package zygospore
+  :bind (("C-x 1" . zygospore-toggle-delete-other-windows)))
 
 (use-package cider-mode
-  :init (add-hook 'cider-mode-hook (fprogn
-                                    (my-enable-modes '(subword-mode
-                                                       paredit-mode
-                                                       rainbow-delimiters-mode))))
+  :init (add-hook 'cider-mode-hook (defun my-clojure-repl-setup ()
+                                     (interactive)
+                                     (my-enable-modes '(subword-mode
+                                                        paredit-mode
+                                                        rainbow-delimiters-mode))))
   :config (setq nrepl-log-messages t))
 
 
 (use-package js2-mode
   :mode "\\.js\\'"
-  :init (add-hook 'js2-mode-hook (fprogn
-                                  (setq js2-basic-offset 2
-                                        js-indent-level 2
-                                        js2-include-node-externs t)
+  :init (add-hook 'js2-mode-hook (defun my-js-setup ()
+                                   (interactive)
+                                   (setq js2-basic-offset 2
+                                         js-indent-level 2
+                                         js2-include-node-externs t)
 
-                                  (my-enable-modes '(subword-mode
-                                                     hungry-delete-mode
-                                                     js2-refactor-mode
-                                                     electric-pair-mode
-                                                     aggressive-indent-mode))))
+                                   (my-enable-modes '(subword-mode
+                                                      hungry-delete-mode
+                                                      js2-refactor-mode
+                                                      electric-pair-mode
+                                                      aggressive-indent-mode))))
   :config
   (use-package js2-refactor
     :config (js2r-add-keybindings-with-prefix "C-c C-m")))
 
 (use-package json-mode
   :mode "\\.json\\'"
-  :init (add-hook 'json-mode-hook (fprogn
-                                   (setq json-reformat:indent-width 2
-                                         js-indent-level 2)
+  :init (add-hook 'json-mode-hook (defun my-json-setup ()
+                                    (interactive)
+                                    (setq json-reformat:indent-width 2
+                                          js-indent-level 2)
 
-                                   (my-enable-modes '(subword-mode
-                                                      electric-pair-mode
-                                                      aggressive-indent-mode)))))
+                                    (my-enable-modes '(subword-mode
+                                                       electric-pair-mode
+                                                       aggressive-indent-mode)))))
 
 (use-package html-mode
   :mode "\\.html\\'"
@@ -498,30 +521,37 @@
           (delete-char 1)
           (just-one-space)))))
 
-  (add-hook 'html-mode-hook (fprogn
-                             (bind-key "s-." 'html-attrs-as-columns)
-                             (bind-key "s-," 'html-attrs-as-line)
-                             (use-package tagedit)
-                             (use-package emmet-mode)
-                             (tagedit-add-experimental-features)
-                             (setq emmet-indent-after-insert t
-                                   emmet-indentation 2
-                                   fill-column 999)
-                             (my-enable-modes '(tagedit-mode
-                                                emmet-mode
-                                                whitespace-mode
-                                                hungry-delete-mode
-                                                electric-pair-mode)))))
+  (add-hook 'html-mode-hook (defun my-html-setup ()
+                              (interactive)
+                              (bind-key "s-." 'html-attrs-as-columns)
+                              (bind-key "s-," 'html-attrs-as-line)
+                              (use-package tagedit)
+                              (use-package emmet-mode)
+                              (tagedit-add-experimental-features)
+                              (setq emmet-indent-after-insert t
+                                    emmet-indentation 2
+                                    fill-column 999)
+                              (my-enable-modes '(tagedit-mode
+                                                 emmet-mode
+                                                 whitespace-mode
+                                                 hungry-delete-mode
+                                                 electric-pair-mode)))))
 
 (use-package centered-window-mode
   :load-path "lisp/centered-window-mode"
   :commands (centered-window-mode))
 
+(defun my-yasnippet-setup ()
+  (interactive)
+  (setq fill-column 999)
+  (my-enable-mode 'yas-minor-mode))
+
 (dolist (hook '(prog-mode-hook conf-mode-hook))
-  (add-hook hook (fprogn
-                  (setq fill-column 999)
-                  (my-enable-mode 'yas-minor-mode))))
-(add-hook 'text-mode-hook (fprogn (setq fill-column 99)))
+  (add-hook hook #'my-yasnippet-setup))
+
+(add-hook 'text-mode-hook (defun my-text-setup ()
+                            (interactive)
+                            (setq fill-column 99)))
 
 (when window-system
   (let ((elapsed-time (float-time (time-subtract (current-time) emacs-start-time))))
