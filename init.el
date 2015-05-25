@@ -16,16 +16,6 @@
   "Docs."
   :group 'personal)
 
-(defcustom my-savefile-dir
-  (expand-file-name "savefile" user-emacs-directory)
-  "Docs."
-  :group 'personal)
-
-(defcustom my-tmp-dir
-  (expand-file-name "tmp" user-emacs-directory)
-  "Docs."
-  :group 'personal)
-
 (defcustom my-font-family
   "Fantasque Sans Mono"
   "Docs."
@@ -35,10 +25,6 @@
   14
   "Docs."
   :group 'personal)
-
-(defun my-savefile-dir (path)
-  "Resolve PATH relative to `my-savefile-dir'."
-  (expand-file-name path my-savefile-dir))
 
 (defun my-add-to-load-path (path)
   "Add PATH (relative to `user-emacs-directory') to `load-path'."
@@ -71,7 +57,6 @@
 (defalias 'yes-or-no-p 'y-or-n-p)
 
 ;; Keep emacs custom variables in another file
-(setq custom-file (expand-file-name "custom.el" my-savefile-dir))
 (load custom-file 'noerror)
 
 (mapc #'my-add-to-load-path my-paths)
@@ -101,7 +86,6 @@
 
       load-prefer-newer t
       require-final-newline t
-      temporary-file-directory my-tmp-dir
 
       backup-directory-alist `(("." . ,temporary-file-directory))
       backup-by-copying t
@@ -177,16 +161,6 @@
          ("C-;" . my-comment-or-uncomment-line)
          ("C-M-s" . my-isearch-forward-regexp-other-window)
          ("C-M-r" . my-isearch-backward-regexp-other-window)))
-
-(use-package recentf-mode
-  :defer t
-  :config
-  (setq recentf-save-file (my-savefile-dir "recentf")))
-
-(use-package semantic-mode
-  :defer t
-  :config
-  (setq semanticdb-default-save-directory (my-savefile-dir "semanticdb")))
 
 (use-package man
   :defer t
@@ -266,8 +240,7 @@
                 uniquify-ignore-buffers-re "^\\*"))
 
 (use-package saveplace
-  :config (setq save-place-file (expand-file-name "saveplace" my-savefile-dir)
-                save-place t))
+  :config (setq save-place t))
 
 (use-package tramp
   :defer t
