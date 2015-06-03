@@ -22,7 +22,7 @@
   :group 'personal)
 
 (defcustom my-font-size
-  14
+  18
   "Docs."
   :group 'personal)
 
@@ -160,7 +160,8 @@
          ("s-M-k" . my-kill-sexp-backwards)
          ("C-;" . my-comment-or-uncomment-line)
          ("C-M-s" . my-isearch-forward-regexp-other-window)
-         ("C-M-r" . my-isearch-backward-regexp-other-window)))
+         ("C-M-r" . my-isearch-backward-regexp-other-window)
+         ("C-x C-e" . my-eval-last-sexp)))
 
 (use-package man
   :defer t
@@ -254,19 +255,6 @@
   :commands (change-inner change-outer)
   :bind (("M-i" . change-inner)
          ("M-o" . change-outer)))
-
-(use-package smart-window
-  :commands (smart-window-move
-             smart-window-file-split
-             smart-window-buffer-split
-             smart-window-rotate)
-
-  :bind (("C-x w" . smart-window-move)
-         ("C-x W" . smart-window-buffer-split)
-         ("C-x M-w" . smart-window-file-split)
-         ("C-x R" . smart-window-rotate))
-
-  :config (setq smart-window-remap-keys nil))
 
 (use-package yasnippet
   :defer 2

@@ -9,11 +9,11 @@
   (interactive "p")
   (save-excursion
     (let ((beg (progn
-		 (beginning-of-line)
-		 (point)))
-	  (end (progn
-		 (forward-line arg)
-		 (point))))
+                 (beginning-of-line)
+                 (point)))
+          (end (progn
+                 (forward-line arg)
+                 (point))))
       (copy-region-as-kill beg end))))
 
 (defun my-kill-sexp-backwards ()
@@ -44,6 +44,21 @@
   (save-selected-window
     (other-window 1)
     (isearch-backward-regexp)))
+
+(defun my-eval-last-sexp (arg)
+  "Extension over eval-last-sexp that replaces the last sexp with the
+result if called with the universal argument twice."
+  (interactive "P")
+  (if (= 16 (prefix-numeric-value arg))
+      (my-replace-last-sexp)
+    (eval-last-sexp arg)))
+
+(defun my-replace-last-sexp ()
+  "Eval last sexp and replaces it in the buffer with its result."
+  (interactive)
+  (let ((result (eval (preceding-sexp))))
+    (kill-sexp -1)
+    (insert (format "%s" result))))
 
 (provide 'my-editing-defuns)
 ;;; my-editing-defuns.el ends here
