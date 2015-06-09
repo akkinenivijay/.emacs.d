@@ -8,3 +8,6 @@
 /.mc-lists.el
 /eshell/
 /.sx/
+/places
+/projectile-bookmarks.eld
+/projectile.cache

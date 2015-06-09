@@ -56,9 +56,6 @@
 
 (defalias 'yes-or-no-p 'y-or-n-p)
 
-;; Keep emacs custom variables in another file
-(load custom-file 'noerror)
-
 (mapc #'my-add-to-load-path my-paths)
 
 (require 'cask "~/.cask/cask.el")
@@ -169,9 +166,8 @@
   (setq Man-width 79))
 
 (use-package isearch
-  :bind
-  (("C-s" . isearch-forward-regexp)
-   ("C-r" . isearch-backward-regexp))
+  :bind (("C-s" . isearch-forward-regexp)
+	 ("C-r" . isearch-backward-regexp))
 
   :init
   (use-package my-isearch-defuns)
@@ -194,7 +190,13 @@
 (use-package my-themes
   :bind ([f8] . my-use-next-theme)
   :config
-  (my-set-themes '(default solarized-light solarized-dark ir-black)))
+  (my-set-themes '(default
+                    basic
+                    apropospriate-light
+                    railscasts
+                    solarized-light
+                    solarized-dark
+                    ir-black)))
 
 (use-package compilation
   :defer t
@@ -209,14 +211,12 @@
 
 (use-package bookmark
   :defer t
-  :config (setq bookmark-default-file (my-savefile-dir "bookmarks")
-                bookmark-save-flag 1))
+  :config (setq bookmark-save-flag 1))
 
 (use-package savehist
   :defer t
   :config (setq savehist-additional-variables '(search-ring regexp-search-ring)
-                savehist-autosave-interval 60
-                savehist-file (my-savefile-dir "savehist")))
+                savehist-autosave-interval 60))
 
 (use-package discover-my-major
   :bind ("C-h C-m" . discover-my-major))
@@ -299,8 +299,8 @@
          ("M-<down-mouse-1>" . mc/add-cursor-on-click)))
 
 (use-package avy
-  :bind (("C-." . avy-goto-char)
-         ("C-," . avy-goto-char-2)
+  :bind (("C-." . avy-goto-char-2)
+         ("C-," . avy-goto-char)
          ("M-g w" . avy-goto-word-0)
          ("M-g M-g" . avy-goto-line)))
 
@@ -317,7 +317,7 @@
   :bind
   (("M-x" . helm-M-x)
    ("C-x C-m" . helm-M-x)
-   ("M-y" . helm-show-kill-ring)
+   ("M-Y" . helm-show-kill-ring)
    ("C-x b" . helm-mini)
    ("C-x C-f" . helm-find-files)
    ("C-h f" . helm-apropos)
@@ -350,8 +350,6 @@
   (use-package wgrep-helm)
 
   (setq projectile-enable-caching t
-        projectile-cache-file (my-savefile-dir "projectile.cache")
-        projectile-known-projects-file (my-savefile-dir "projectile.bookmarks.eld")
         projectile-completion-system 'helm)
 
   (projectile-load-known-projects)
@@ -438,6 +436,7 @@
 
                                    (my-enable-modes '(subword-mode
                                                       hungry-delete-mode
+                                                      wrap-region-mode
                                                       js2-refactor-mode
                                                       electric-pair-mode
                                                       aggressive-indent-mode))))
@@ -494,6 +493,7 @@
                                     fill-column 999)
                               (my-enable-modes '(tagedit-mode
                                                  emmet-mode
+                                                 wrap-region-mode
                                                  whitespace-mode
                                                  hungry-delete-mode
                                                  electric-pair-mode)))))
