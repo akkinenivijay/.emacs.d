@@ -193,6 +193,7 @@
   (my-set-themes '(default
                     basic
                     apropospriate-light
+                    atom-one-dark
                     railscasts
                     solarized-light
                     solarized-dark

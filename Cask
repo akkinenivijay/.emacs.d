@@ -7,6 +7,7 @@
 (depends-on "ag")
 (depends-on "aggressive-indent")
 (depends-on "apropospriate-theme")
+(depends-on "atom-one-dark-theme")
 (depends-on "avy")
 (depends-on "basic-theme")
 (depends-on "change-inner")
