@@ -503,6 +503,10 @@
   :load-path "lisp/centered-window-mode"
   :commands (centered-window-mode))
 
+(use-package js2r-conveniences
+  :bind (("s-M-<up>" . move-line-up)
+         ("s-M-<down>" . move-line-down)))
+
 (defun my-yasnippet-setup ()
   (interactive)
   (setq fill-column 999)
