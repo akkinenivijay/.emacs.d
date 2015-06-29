@@ -70,10 +70,8 @@
 (require 'pallet)
 (pallet-mode t)
 
-(let ((font-and-size (format "%s-%s" my-font-family my-font-size))
-      (internal-border 10))
-  (add-to-list 'default-frame-alist `(font . ,font-and-size))
-  (add-to-list 'default-frame-alist `(internal-border-width . ,internal-border)))
+(let ((font-and-size (format "%s-%s" my-font-family my-font-size)))
+  (add-to-list 'default-frame-alist `(font . ,font-and-size)))
 
 (setq-default indent-tabs-mode nil
               tab-width 8)
@@ -137,8 +135,7 @@
 (bind-keys ("M-U" . (command (upcase-word -1)))
            ("M-%" . query-replace-regexp)
            ("C-M-;" . comment-or-uncomment-region)
-           ("M-<tab>" . mode-line-other-buffer)
-           ("M-<tab>" . mode-line-other-buffer)
+           ("C-<tab>" . mode-line-other-buffer)
            ("s-<up>" . enlarge-window)
            ("s-<down>" . shrink-window)
            ("s-M-<up>" . enlarge-window-horizontally)
@@ -147,6 +144,10 @@
 (use-package window-numbering
   :defer 1
   :config (my-enable-mode 'window-numbering-mode))
+
+(use-package eyebrowse
+  :defer 1
+  :config (my-enable-mode 'eyebrowse-mode))
 
 (use-package discover
   :defer 2
@@ -167,7 +168,7 @@
 
 (use-package isearch
   :bind (("C-s" . isearch-forward-regexp)
-	 ("C-r" . isearch-backward-regexp))
+         ("C-r" . isearch-backward-regexp))
 
   :init
   (use-package my-isearch-defuns)
@@ -188,16 +189,14 @@
 
 
 (use-package my-themes
-  :bind ([f8] . my-use-next-theme)
+  :bind (([f8] . my-use-next-theme))
   :config
-  (my-set-themes '(default
-                    basic
-                    apropospriate-light
-                    atom-one-dark
-                    railscasts
-                    solarized-light
-                    solarized-dark
-                    ir-black)))
+  (my-set-themes '(greymatters
+                   atom-one-dark
+                   fogus
+                   railscasts
+                   graham
+                   default)))
 
 (use-package compilation
   :defer t
@@ -328,6 +327,8 @@
   :config
   (setq helm-split-window-in-side-p t
         helm-buffers-fuzzy-matching t
+        helm-recentf-fuzzy-match t
+        helm-apropos-fuzzy-match t
         helm-move-to-line-cycle-in-source t
         helm-ff-search-library-in-sexp t
         helm-ff-file-name-history-use-recentf t)
@@ -338,10 +339,11 @@
 
   ;; (define-key minibuffer-local-map (kbd "C-c C-l") #'helm-minibuffer-history)
   ;; (substitute-key-definition 'find-tag 'helm-etags-select global-map)
-  ;; (add-to-list 'helm-sources-using-default-as-input #'helm-source-man-pages)
+  (add-to-list 'helm-sources-using-default-as-input #'helm-source-man-pages)
 
   (helm-descbinds-mode)
-  (my-enable-mode 'helm-mode))
+  (my-enable-mode 'helm-mode
+                  'helm-autoresize-mode))
 
 (use-package projectile
   :defer 1
@@ -414,7 +416,9 @@
                                        (interactive)
                                        (my-enable-modes '(subword-mode
                                                           ghc-mode
-                                                          flycheck-mode)))))
+                                                          flycheck-mode
+                                                          haskell-doc-mode
+                                                          haskell-indent-mode)))))
 (use-package zygospore
   :bind (("C-x 1" . zygospore-toggle-delete-other-windows)))
 

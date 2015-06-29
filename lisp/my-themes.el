@@ -25,7 +25,7 @@
   (interactive
    (list
     (intern (completing-read "Load custom theme: "
-			     (mapcar #'symbol-name (custom-available-themes))))))
+                             (mapcar #'symbol-name (custom-available-themes))))))
   (my/disable-themes)
   (my/load-theme theme))
 
