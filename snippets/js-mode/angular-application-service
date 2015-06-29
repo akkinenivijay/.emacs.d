@@ -1,0 +1,12 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: Angular application service
+# key: aas
+# --
+(function() {
+            angular
+                .module('$1')
+                .service('$2', $3)
+            ;
+
+            function $3($4) {$0}
+})();

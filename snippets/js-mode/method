@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: Class function method
+# key: mn
+# --
+${1:funcName}($2) {$0}

@@ -1,0 +1,12 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: Angular application directive
+# key: aad
+# --
+(function() {
+            angular
+                .module('$1')
+                .directive('$2', $3)
+            ;
+
+            function $3() {$0}
+})();
