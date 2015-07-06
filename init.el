@@ -189,14 +189,12 @@
 
 
 (use-package my-themes
-  :bind (([f8] . my-use-next-theme))
+  :bind (([f8] . my-use-next-theme)
+         ([f7] . my-use-prev-theme))
   :config
-  (my-set-themes '(greymatters
-                   atom-one-dark
-                   fogus
-                   railscasts
-                   graham
-                   default)))
+  (my-set-themes '(oldlace
+                   spacemacs-light
+                   spacemacs-dark)))
 
 (use-package compilation
   :defer t
@@ -321,6 +319,7 @@
    ("C-x b" . helm-mini)
    ("C-x C-f" . helm-find-files)
    ("C-h f" . helm-apropos)
+   ("C-h b" . helm-descbinds)
    ("C-h C-l" . helm-locate-library)
    ("C-c h" . helm-command-prefix))
 
@@ -339,8 +338,8 @@
 
   ;; (define-key minibuffer-local-map (kbd "C-c C-l") #'helm-minibuffer-history)
   ;; (substitute-key-definition 'find-tag 'helm-etags-select global-map)
-  (add-to-list 'helm-sources-using-default-as-input #'helm-source-man-pages)
 
+  (add-to-list 'helm-sources-using-default-as-input #'helm-source-man-pages)
   (helm-descbinds-mode)
   (my-enable-mode 'helm-mode
                   'helm-autoresize-mode))
@@ -444,6 +443,7 @@
                                                       wrap-region-mode
                                                       js2-refactor-mode
                                                       electric-pair-mode
+                                                      tern-mode
                                                       aggressive-indent-mode))))
   :config
   (use-package js2-refactor
@@ -522,6 +522,9 @@
 (add-hook 'text-mode-hook (defun my-text-setup ()
                             (interactive)
                             (setq fill-column 99)))
+
+(use-package gfm-mode
+  :mode "\\.md\\'")
 
 (when window-system
   (let ((elapsed-time (float-time (time-subtract (current-time) emacs-start-time))))
