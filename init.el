@@ -192,8 +192,8 @@
   :bind (([f8] . my-use-next-theme)
          ([f7] . my-use-prev-theme))
   :config
-  (my-set-themes '(oldlace
-                   spacemacs-light
+  (my-set-themes '(spacemacs-light
+                   oldlace
                    spacemacs-dark)))
 
 (use-package compilation
@@ -525,6 +525,9 @@
 
 (use-package gfm-mode
   :mode "\\.md\\'")
+
+(when (fboundp 'my-use-next-theme)
+  (my-use-next-theme))
 
 (when window-system
   (let ((elapsed-time (float-time (time-subtract (current-time) emacs-start-time))))
