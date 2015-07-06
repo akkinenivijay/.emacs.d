@@ -10,15 +10,38 @@
   '(default)
   "Use next theme.")
 
+(defvar my-themes-delta
+  1
+  "Number of themes.")
+
 (defun my-set-themes (themes)
   "Set THEMES as the themes to use."
-  (setq my-themes (my-cycle themes)))
+  (setq my-themes (my-cycle themes)
+        my-themes-delta (length themes)))
 
 (defun my-use-next-theme ()
   "Use next theme in `my-themes'."
   (interactive)
   (my/disable-themes)
-  (my/load-theme (pop my-themes)))
+  (let ((theme (pop my-themes)))
+    (my/load-theme theme)
+    (message "Theme '%s' loaded" theme)))
+
+(defun my-use-prev-theme ()
+  "Use previous theme in `my-themes'."
+  (interactive)
+  (my/disable-themes)
+  (let ((n (1+ my-themes-delta)))
+    (while (> n 0)
+      (pop my-themes)
+      (setq n (1- n)))
+    (my-use-next-theme)))
+
+(defun popn (n list)
+  "Pop the N-element of LIST."
+  (cond ((> n 0) (let ((_ (pop list)))
+                   (popn (1- n) list)))
+        (t (pop list))))
 
 (defun my-load-theme (theme)
   "Use THEME."
