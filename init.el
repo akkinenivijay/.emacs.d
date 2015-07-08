@@ -190,11 +190,15 @@
 
 (use-package my-themes
   :bind (([f8] . my-use-next-theme)
-         ([f7] . my-use-prev-theme))
+         ([f9] . my-use-prev-theme))
   :config
   (my-set-themes '(spacemacs-light
                    oldlace
                    spacemacs-dark)))
+
+(use-package hl-line
+  :bind ([f10] . global-hl-line-mode)
+  :init (my-enable-modes '(global-hl-line-mode)))
 
 (use-package compilation
   :defer t
@@ -490,14 +494,12 @@
                               (interactive)
                               (bind-key "s-." 'html-attrs-as-columns)
                               (bind-key "s-," 'html-attrs-as-line)
-                              (use-package tagedit)
                               (use-package emmet-mode)
                               (tagedit-add-experimental-features)
                               (setq emmet-indent-after-insert t
                                     emmet-indentation 2
                                     fill-column 999)
-                              (my-enable-modes '(tagedit-mode
-                                                 emmet-mode
+                              (my-enable-modes '(emmet-mode
                                                  wrap-region-mode
                                                  whitespace-mode
                                                  hungry-delete-mode
