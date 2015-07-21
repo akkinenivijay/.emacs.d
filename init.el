@@ -60,11 +60,6 @@
 
 (require 'cask "~/.cask/cask.el")
 (cask-initialize)
-;; (let ((bundle (cask-initialize)))
-;;   when hashed bundle != bundle do:
-;;   (when window-system
-;;     (cask-install bundle)
-;;     (cask-update bundle)))
 
 (require 'use-package)
 (require 'pallet)
@@ -132,18 +127,57 @@
 (when window-system
   (unbind-key "C-z"))
 
-(bind-keys ("M-U" . (command (upcase-word -1)))
-           ("M-%" . query-replace-regexp)
-           ("C-M-;" . comment-or-uncomment-region)
-           ("C-<tab>" . mode-line-other-buffer)
-           ("s-<up>" . enlarge-window)
-           ("s-<down>" . shrink-window)
-           ("s-M-<up>" . enlarge-window-horizontally)
-           ("s-M-<down>" . shrink-window-horizontally))
+(defun my-switch-to-next-buffer ()
+  "Switch to the next buffer associated to a file."
+  (interactive)
+  (cl-labels ((next-non-special-buffer
+               ()
+               (let ((buffer (next-buffer)))
+                 (if (buffer-file-name buffer)
+                     buffer
+                   (next-non-special-buffer)))))
+    (next-non-special-buffer)))
+
+(defun my-switch-to-previous-buffer ()
+  "Switch to the previous buffer associated to a file."
+  (interactive)
+  (cl-labels ((previous-non-special-buffer
+               ()
+               (let ((buffer (previous-buffer)))
+                 (if (buffer-file-name buffer)
+                     buffer
+                   (previous-non-special-buffer)))))
+    (previous-non-special-buffer)))
+
+(bind-keys ("M-U"        . (command (upcase-word -1)))
+           ("M-%"        . query-replace-regexp)
+           ("C-M-;"      . comment-or-uncomment-region)
+           ("C-<tab>"    . mode-line-other-buffer)
+           ("C-<up>"     . my-switch-to-next-buffer)
+           ("C-<down>"   . my-switch-to-previous-buffer)
+           ("s-<down>"   . shrink-window)
+           ("s-M-<up>"   . enlarge-window-horizontally)
+           ("s-M-<down>" . shrink-window-horizontally)
+           ("C-x a a"    . align)
+           ("C-x a r"    . align-regexp))
 
 (use-package window-numbering
   :defer 1
   :config (my-enable-mode 'window-numbering-mode))
+
+(use-package align)
+
+(use-package nvm
+  :init
+  :config
+  (defun nvm--installed-versions ()
+    (let ((match-fn (lambda (directory)
+                      (s-matches? (concat "^" nvm-version-re "$") (f-filename directory)))))
+      (--map (f-filename it)
+             (append
+              (f-directories nvm-dir match-fn)
+              (f-directories (f-join nvm-dir "versions" "node") match-fn)))))
+  (nvm-use "v0.12.7"))
 
 (use-package eyebrowse
   :defer 1
@@ -193,8 +227,10 @@
          ([f9] . my-use-prev-theme))
   :config
   (my-set-themes '(spacemacs-light
-                   oldlace
-                   spacemacs-dark)))
+                   spacemacs-dark
+                   solarized-light
+                   solarized-dark
+                   oldlace)))
 
 (use-package hl-line
   :bind ([f10] . global-hl-line-mode)
@@ -253,11 +289,6 @@
   :defer t
   :config (setq server-use-tcp t))
 
-(use-package change-inner
-  :commands (change-inner change-outer)
-  :bind (("M-i" . change-inner)
-         ("M-o" . change-outer)))
-
 (use-package yasnippet
   :defer 2
   :config
@@ -307,59 +338,56 @@
          ("M-g M-g" . avy-goto-line)))
 
 (use-package helm-config
-  :commands
-  (helm-M-x
-   helm-show-kill-ring
-   helm-mini
-   helm-find-files
-   helm-apropos
-   helm-info-emacs
-   helm-locate-library)
-
   :bind
   (("M-x" . helm-M-x)
    ("C-x C-m" . helm-M-x)
    ("M-Y" . helm-show-kill-ring)
    ("C-x b" . helm-mini)
    ("C-x C-f" . helm-find-files)
-   ("C-h f" . helm-apropos)
+   ("C-x C-r" . helm-recentf)
+
+   ("C-x C-o" . helm-swoop)
+   ("C-x C-M-o" . helm-multi-swoop)
+
+   ("C-x c !" . helm-calcul-expression)
+   ("M-:" . helm-eval-expression-with-eldoc)
+
+   ("C-h a" . helm-apropos)
+   ("C-h i" . helm-info-emacs)
    ("C-h b" . helm-descbinds)
    ("C-h C-l" . helm-locate-library)
    ("C-c h" . helm-command-prefix))
 
-  :config
+  :init
   (setq helm-split-window-in-side-p t
         helm-buffers-fuzzy-matching t
         helm-recentf-fuzzy-match t
         helm-apropos-fuzzy-match t
         helm-move-to-line-cycle-in-source t
         helm-ff-search-library-in-sexp t
-        helm-ff-file-name-history-use-recentf t)
+        helm-ff-file-name-history-use-recentf t
+        helm-ff-auto-update-initial-value t)
 
-  ;; (define-key helm-map (kbd "o") #'helm-occur)
-  ;; (define-key helm-map (kbd "SPC") #'helm-all-mark-rings)
-  ;; (define-key helm-map (kbd "r") #'helm-recentf)
-
-  ;; (define-key minibuffer-local-map (kbd "C-c C-l") #'helm-minibuffer-history)
-  ;; (substitute-key-definition 'find-tag 'helm-etags-select global-map)
-
+  :config
   (add-to-list 'helm-sources-using-default-as-input #'helm-source-man-pages)
-  (helm-descbinds-mode)
-  (my-enable-mode 'helm-mode
-                  'helm-autoresize-mode))
+  (my-enable-modes '(helm-mode
+                     helm-descbinds-mode
+                     helm-autoresize-mode)))
 
 (use-package projectile
-  :defer 1
   :diminish projectile-mode
+  :init
+  (setq projectile-enable-caching t)
+  (add-hook 'projectile-mode-hook (defun my-helm-projectile-setup ()
+                                    (interactive)
+                                    (when (fboundp 'helm)
+                                      (setq projectile-completion-system 'helm)
+                                      (use-package helm-projectile
+                                        :config (helm-projectile-on))
+                                      (use-package wgrep-helm))
+                                    ))
   :config
-  (use-package helm-projectile)
-  (use-package wgrep-helm)
-
-  (setq projectile-enable-caching t
-        projectile-completion-system 'helm)
-
   (projectile-load-known-projects)
-  (helm-projectile-on)
   (my-enable-mode 'projectile-global-mode))
 
 (use-package whitespace
@@ -387,11 +415,28 @@
 
 (use-package org-mode
   :mode "\\.org\\'"
-  :init (add-hook 'org-mode-hook (defun my-org-setup ()
-                                   (interactive)
-                                   (my-enable-modes '(electric-pair-mode)))))
+  :bind (("C-c o l" . org-store-link)
+         ("C-c o a" . org-agenda)
+         ("C-c o h" . helm-info-org))
+  :init
+  (setq org-log-done t
+        org-agenda-files '("~/Dropbox/todo.org")
+        org-default-notes-file "~/Dropbox/notes.org"
+        org-agenda-ndays 7
+        org-deadline-warning-days 14
+        org-agenda-show-all-dates t
+        org-agenda-skip-deadline-if-done t
+        org-agenda-skip-scheduled-if-done t
+        org-agenda-start-on-weekday nil
+        org-reverse-note-order t
+        org-fast-tag-selection-single-key 'expert)
+  (add-hook 'org-mode-hook (defun my-org-setup ()
+                             (interactive)
+                             (my-enable-modes '(electric-pair-mode
+                                                auto-fill-mode)))))
 
 (use-package emacs-lisp-mode
+
   :mode "\\.el\\'"
   :interpreter "emacs"
   :bind (("C-x C-e" . pp-eval-last-sexp))
@@ -405,6 +450,7 @@
   (add-hook 'emacs-lisp-mode-hook #'my-emacs-lisp-mode-hook))
 
 (use-package clojure-mode
+
   :mode "\\.clj\\'"
   :init (add-hook 'clojure-mode-hook (defun my-clojure-setup ()
                                        (interactive)
@@ -415,15 +461,65 @@
 
 (use-package haskell-mode
   :mode "\\.hs\\'"
+  :bind (("C-,"     . haskell-move-nested-left)
+         ("C-."     . haskell-move-nested-right)
+         ("C-c C-." . haskell-mode-format-imports)
+
+         ("s-i"     . haskell-navigate-imports)
+
+         ("C-c C-l" . haskell-process-load-or-reload)
+         ("C-`"     . haskell-interactive-bring)
+         ("C-c C-t" . haskell-process-do-type)
+         ("C-c C-i" . haskell-process-do-info)
+         ("C-c C-c" . haskell-process-cabal-build)
+         ("C-c C-k" . haskell-interactive-mode-clear)
+         ("C-c c"   . haskell-process-cabal)
+         ("SPC"     . haskell-mode-contextual-space))
+
   :init (add-hook 'haskell-mode-hook (defun my-haskell-setup ()
                                        (interactive)
+                                       (use-package haskell-interactive-mode)
+                                       (use-package haskell-process)
                                        (my-enable-modes '(subword-mode
-                                                          ghc-mode
                                                           flycheck-mode
+                                                          wrap-region-mode
+                                                          electric-pair-mode
                                                           haskell-doc-mode
-                                                          haskell-indent-mode)))))
+                                                          interactive-haskell-mode
+                                                          haskell-indentation-mode))))
+
+  :config
+  (setq haskell-process-suggest-remove-import-lines  t
+        haskell-process-auto-import-loaded-modules   t
+        haskell-process-log                          t)
+
+  (add-to-list 'align-rules-list
+               '(haskell-types
+                 (regexp . "\\(\\s-+\\)\\(::\\|∷\\)\\s-+")))
+  (add-to-list 'align-rules-list
+               '(haskell-assignment
+                 (regexp . "\\(\\s-+\\)=\\s-+")
+                 (modes quote (haskell-mode literate-haskell-mode))))
+  (add-to-list 'align-rules-list
+               '(haskell-arrows
+                 (regexp . "\\(\\s-+\\)\\(->\\|→\\)\\s-+")
+                 (modes quote (haskell-mode literate-haskell-mode))))
+  (add-to-list 'align-rules-list
+               '(haskell-left-arrows
+                 (regexp . "\\(\\s-+\\)\\(<-\\|←\\)\\s-+")
+                 (modes quote (haskell-mode literate-haskell-mode)))))
+
+
 (use-package zygospore
   :bind (("C-x 1" . zygospore-toggle-delete-other-windows)))
+
+(use-package elm-mode
+  :mode "\\.elm\\'"
+  :init (add-hook 'elm-mode-hook (defun my-elm-setup ()
+                                   (interactive)
+                                   (my-enable-modes '(subword-mode
+                                                      wrap-region-mode
+                                                      electric-pair-mode)))))
 
 (use-package cider-mode
   :init (add-hook 'cider-mode-hook (defun my-clojure-repl-setup ()
@@ -536,3 +632,4 @@
     (message "Loading %s... done (%.3fs)" load-file-name elapsed-time)))
 
 ;;; init.el ends here
+(put 'dired-find-alternate-file 'disabled nil)

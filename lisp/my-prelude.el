@@ -9,7 +9,7 @@
   "Return copy of LIST turned into an infinite list."
   (let ((newlist (copy-list list)))
     (setf (cdr (last newlist))
-	  newlist)
+          newlist)
     newlist))
 
 (provide 'my-prelude)

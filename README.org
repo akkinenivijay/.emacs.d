@@ -1,0 +1,3 @@
+Personal configuration for the [[http://scienceblogs.com/gregladen/2009/03/03/the-one-true-editor/][The One True Editor]].
+
+I use [[http://cask.readthedocs.org/en/latest/][Cask]] as my dependencies management tool and [[https://github.com/jwiegley/use-package][use-package]] for lazy loading packages.
