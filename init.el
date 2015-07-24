@@ -18,12 +18,12 @@
 
 (defcustom my-font-family
   "Fantasque Sans Mono"
-  "Docs."
+  "My preferred font family."
   :group 'personal)
 
 (defcustom my-font-size
-  18
-  "Docs."
+  15
+  "My preferred font size."
   :group 'personal)
 
 (defun my-add-to-load-path (path)
@@ -192,7 +192,6 @@
 (use-package align)
 
 (use-package nvm
-  :init
   :config
   (defun nvm--installed-versions ()
     (let ((match-fn (lambda (directory)
