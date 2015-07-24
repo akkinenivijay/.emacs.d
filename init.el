@@ -186,6 +186,7 @@
   :config (my-enable-mode 'window-numbering-mode))
 
 (use-package smooth-scroll
+  :diminish smooth-scroll-mode
   :config (my-enable-mode 'smooth-scroll-mode))
 
 (use-package align)
