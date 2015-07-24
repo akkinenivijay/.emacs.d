@@ -12,5 +12,10 @@
           newlist)
     newlist))
 
+(defun my-inside-project-p ()
+  "Check if we are inside a project."
+  (and (fboundp 'projectile-project-p)
+       (projectile-project-p)))
+
 (provide 'my-prelude)
 ;;; my-prelude.el ends here

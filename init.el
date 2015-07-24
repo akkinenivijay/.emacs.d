@@ -161,9 +161,32 @@
            ("C-x a a"    . align)
            ("C-x a r"    . align-regexp))
 
+(use-package my-prelude)
+(use-package my-editing-defuns
+  :bind (("M-W" . my-copy-line-as-kill)
+         ("s-M-k" . my-kill-sexp-backwards)
+         ("C-;" . my-comment-or-uncomment-line)
+         ("C-M-s" . my-isearch-forward-regexp-other-window)
+         ("C-M-r" . my-isearch-backward-regexp-other-window)
+         ("C-x C-e" . my-eval-last-sexp)))
+
+(add-hook 'find-file-hook (defun my-git-gutter-setup ()
+                            (interactive)
+                            (when (my-inside-project-p)
+                              (use-package git-gutter-fringe+
+                                :demand t
+                                :bind (("C-c g s" . git-gutter+-show-hunk)
+                                       ("C-c g p" . git-gutter+-previous-hunk)
+                                       ("C-c g n" . git-gutter+-next-hunk))
+                                :config
+                                (git-gutter-fr+-minimal)
+                                (git-gutter+-mode)))))
+
 (use-package window-numbering
-  :defer 1
   :config (my-enable-mode 'window-numbering-mode))
+
+(use-package smooth-scroll
+  :config (my-enable-mode 'smooth-scroll-mode))
 
 (use-package align)
 
@@ -180,20 +203,10 @@
   (nvm-use "v0.12.7"))
 
 (use-package eyebrowse
-  :defer 1
   :config (my-enable-mode 'eyebrowse-mode))
 
 (use-package discover
-  :defer 2
   :config (my-enable-mode 'discover-mode))
-
-(use-package my-editing-defuns
-  :bind (("M-W" . my-copy-line-as-kill)
-         ("s-M-k" . my-kill-sexp-backwards)
-         ("C-;" . my-comment-or-uncomment-line)
-         ("C-M-s" . my-isearch-forward-regexp-other-window)
-         ("C-M-r" . my-isearch-backward-regexp-other-window)
-         ("C-x C-e" . my-eval-last-sexp)))
 
 (use-package man
   :defer t
