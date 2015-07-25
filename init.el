@@ -159,7 +159,8 @@
            ("s-M-<up>"   . enlarge-window-horizontally)
            ("s-M-<down>" . shrink-window-horizontally)
            ("C-x a a"    . align)
-           ("C-x a r"    . align-regexp))
+           ("C-x a r"    . align-regexp)
+           ("C-c w"      . delete-region))
 
 (use-package my-prelude)
 (use-package my-editing-defuns
@@ -181,6 +182,19 @@
                                 :config
                                 (git-gutter-fr+-minimal)
                                 (git-gutter+-mode)))))
+
+(use-package mykie
+  :config
+  (setq mykie:use-major-mode-key-override t)
+  (mykie:initialize)
+
+  (mykie:global-set-key "C-x k"
+    :default kill-buffer
+    :C-u     my-kill-buffer-and-file)
+
+  (mykie:global-set-key "C-c r"
+    :default rename-buffer
+    :C-u     my-rename-buffer-and-file))
 
 (use-package window-numbering
   :config (my-enable-mode 'window-numbering-mode))
@@ -345,8 +359,7 @@
          ("M-<down-mouse-1>" . mc/add-cursor-on-click)))
 
 (use-package avy
-  :bind (("C-." . avy-goto-char-2)
-         ("C-," . avy-goto-char)
+  :bind (("C-:" . avy-goto-char)
          ("M-g w" . avy-goto-word-0)
          ("M-g M-g" . avy-goto-line)))
 
@@ -632,7 +645,8 @@
 
 (add-hook 'text-mode-hook (defun my-text-setup ()
                             (interactive)
-                            (setq fill-column 99)))
+                            (setq fill-column 999
+                                  whitespace-line-column 999)))
 
 (use-package gfm-mode
   :mode "\\.md\\'")

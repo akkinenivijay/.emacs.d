@@ -17,5 +17,28 @@
   (and (fboundp 'projectile-project-p)
        (projectile-project-p)))
 
+(defun my-kill-buffer-and-file (&optional buffer-or-name)
+  "Kill BUFFER-OR-NAME and its associated file.
+If BUFFER-OR-NAME is not specified the current buffer is used."
+  (interactive
+   (list (read-buffer (format "Kill buffer and its file (default %s): "
+                              (buffer-name (current-buffer))))))
+  (let* ((buffer (get-buffer buffer-or-name))
+         (filename (buffer-file-name buffer)))
+    (kill-buffer buffer)
+    (delete-file filename)))
+
+(defun my-rename-buffer-and-file (newname newfilename)
+  "Rename current buffer to NEWNAME and its file to NEWFILENAME."
+  (interactive
+   (let* ((newname (read-string "Rename buffer (to new name): "))
+          (newfilename (read-string "Rename file (to new name): " newname)))
+     (list newname newfilename)))
+  (let ((ask-if-exists 1))
+    (rename-file (buffer-file-name (current-buffer))
+                 newfilename
+                 ask-if-exists)
+    (rename-buffer newname :unique)))
+
 (provide 'my-prelude)
 ;;; my-prelude.el ends here

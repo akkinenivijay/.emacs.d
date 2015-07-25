@@ -71,6 +71,7 @@
 (depends-on "markdown-toc")
 (depends-on "mic-paren")
 (depends-on "multiple-cursors")
+(depends-on "mykie")
 (depends-on "names")
 (depends-on "nvm")
 (depends-on "oldlace-theme")
