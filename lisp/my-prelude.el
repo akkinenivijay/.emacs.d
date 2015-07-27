@@ -35,10 +35,8 @@ If BUFFER-OR-NAME is not specified the current buffer is used."
           (newfilename (read-string "Rename file (to new name): " newname)))
      (list newname newfilename)))
   (let ((ask-if-exists 1))
-    (rename-file (buffer-file-name (current-buffer))
-                 newfilename
-                 ask-if-exists)
-    (rename-buffer newname :unique)))
+    (rename-file (buffer-file-name) newfilename ask-if-exists)
+    (set-visited-file-name newfilename :no-query :along-with-file)))
 
 (provide 'my-prelude)
 ;;; my-prelude.el ends here

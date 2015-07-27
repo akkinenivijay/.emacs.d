@@ -257,7 +257,8 @@
                    spacemacs-dark
                    solarized-light
                    solarized-dark
-                   oldlace)))
+                   oldlace
+                   atom-one-dark)))
 
 (use-package hl-line
   :bind ([f10] . global-hl-line-mode)
@@ -459,7 +460,8 @@
   (add-hook 'org-mode-hook (defun my-org-setup ()
                              (interactive)
                              (my-enable-modes '(electric-pair-mode
-                                                auto-fill-mode)))))
+                                                auto-fill-mode
+                                                visual-line-mode)))))
 
 (use-package emacs-lisp-mode
 
@@ -646,7 +648,8 @@
 (add-hook 'text-mode-hook (defun my-text-setup ()
                             (interactive)
                             (setq fill-column 999
-                                  whitespace-line-column 999)))
+                                  whitespace-line-column 999)
+                            (my-enable-modes '(visual-line-mode))))
 
 (use-package gfm-mode
   :mode "\\.md\\'")
