@@ -6,6 +6,10 @@
 (require 'cl)
 (require 'my-prelude)
 
+(defvar my-load-theme-hook
+  nil
+  "Hooks to run after loading a theme.")
+
 (defvar my-themes
   '(default)
   "Use next theme.")
@@ -25,6 +29,7 @@
   (my/disable-themes)
   (let ((theme (pop my-themes)))
     (my/load-theme theme)
+    (run-hooks 'my-load-theme-hook)
     (message "Theme '%s' loaded" theme)))
 
 (defun my-use-prev-theme ()

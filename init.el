@@ -65,9 +65,6 @@
 (require 'pallet)
 (pallet-mode t)
 
-(let ((font-and-size (format "%s-%s" my-font-family my-font-size)))
-  (add-to-list 'default-frame-alist `(font . ,font-and-size)))
-
 (setq-default indent-tabs-mode nil
               tab-width 8)
 
@@ -199,6 +196,15 @@
 (use-package window-numbering
   :config (my-enable-mode 'window-numbering-mode))
 
+(use-package smart-window
+  :init (setq smart-window-remap-keys nil)
+  :bind (("C-x w" . smart-window-move)
+         ("C-x W" . smart-window-buffer-split)
+         ("C-x M-W" . smart-window-file-split)
+         ("C-x R" . smart-window-rotate)
+         ("C-M-2" . sw-below)
+         ("C-M-3" . sw-right)))
+
 (use-package smooth-scroll
   :diminish smooth-scroll-mode
   :config (my-enable-mode 'smooth-scroll-mode))
@@ -216,8 +222,8 @@
               (f-directories (f-join nvm-dir "versions" "node") match-fn)))))
   (nvm-use "v0.12.7"))
 
-(use-package eyebrowse
-  :config (my-enable-mode 'eyebrowse-mode))
+(use-package 0blayout
+  :config (my-enable-mode '0blayout-mode))
 
 (use-package discover
   :config (my-enable-mode 'discover-mode))
@@ -253,12 +259,18 @@
   :bind (([f8] . my-use-next-theme)
          ([f9] . my-use-prev-theme))
   :config
-  (my-set-themes '(spacemacs-light
+  (my-set-themes '(quasi-monochrome
                    spacemacs-dark
-                   solarized-light
+                   spacemacs-light
                    solarized-dark
-                   oldlace
-                   atom-one-dark)))
+                   solarized-light
+                   atom-one-dark
+                   ))
+  (add-hook 'my-load-theme-hook (defun my-load-theme-setup ()
+                                  (interactive)
+                                  (let ((font-and-size (format "%s-%s" my-font-family my-font-size)))
+                                    (add-to-list 'default-frame-alist `(font . ,font-and-size))
+                                    (set-default-font font-and-size)))))
 
 (use-package hl-line
   :bind ([f10] . global-hl-line-mode)
@@ -365,6 +377,8 @@
          ("M-g M-g" . avy-goto-line)))
 
 (use-package helm-config
+  :demand t
+  :diminish helm-mode
   :bind
   (("M-x" . helm-M-x)
    ("C-x C-m" . helm-M-x)
@@ -571,7 +585,7 @@
                                                       wrap-region-mode
                                                       js2-refactor-mode
                                                       electric-pair-mode
-                                                      tern-mode
+                                                      ;; tern-mode
                                                       aggressive-indent-mode))))
   :config
   (use-package js2-refactor
