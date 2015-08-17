@@ -222,8 +222,8 @@
               (f-directories (f-join nvm-dir "versions" "node") match-fn)))))
   (nvm-use "v0.12.7"))
 
-(use-package 0blayout
-  :config (my-enable-mode '0blayout-mode))
+;; (use-package 0blayout
+;; :config (my-enable-mode '0blayout-mode))
 
 (use-package discover
   :config (my-enable-mode 'discover-mode))
@@ -256,14 +256,15 @@
 
 
 (use-package my-themes
-  :bind (([f8] . my-use-next-theme)
-         ([f9] . my-use-prev-theme))
+  :bind (([f8] . my-use-prev-theme)
+         ([f9] . my-use-next-theme))
   :config
-  (my-set-themes '(quasi-monochrome
-                   spacemacs-dark
-                   spacemacs-light
+  (my-set-themes '(aurora
                    solarized-dark
                    solarized-light
+                   quasi-monochrome
+                   spacemacs-dark
+                   spacemacs-light
                    atom-one-dark
                    ))
   (add-hook 'my-load-theme-hook (defun my-load-theme-setup ()
