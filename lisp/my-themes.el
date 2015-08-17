@@ -15,7 +15,7 @@
   "Use next theme.")
 
 (defvar my-themes-delta
-  1
+  0
   "Number of themes.")
 
 (defun my-set-themes (themes)
@@ -36,8 +36,8 @@
   "Use previous theme in `my-themes'."
   (interactive)
   (my/disable-themes)
-  (let ((n (1+ my-themes-delta)))
-    (while (> n 0)
+  (let ((n my-themes-delta))
+    (while (> n 2)
       (pop my-themes)
       (setq n (1- n)))
     (my-use-next-theme)))
