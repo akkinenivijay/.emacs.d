@@ -260,9 +260,7 @@
          ([f9] . my-use-next-theme))
   :config
   (my-set-themes '(plan9
-                   solarized-dark
-                   solarized-light
-                   default
+                   zenburn
                    basic
                    ))
   (add-hook 'my-load-theme-hook (defun my-load-theme-setup ()
