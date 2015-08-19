@@ -259,13 +259,11 @@
   :bind (([f8] . my-use-prev-theme)
          ([f9] . my-use-next-theme))
   :config
-  (my-set-themes '(aurora
+  (my-set-themes '(plan9
                    solarized-dark
                    solarized-light
-                   quasi-monochrome
-                   spacemacs-dark
-                   spacemacs-light
-                   atom-one-dark
+                   default
+                   basic
                    ))
   (add-hook 'my-load-theme-hook (defun my-load-theme-setup ()
                                   (interactive)
