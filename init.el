@@ -22,7 +22,7 @@
   :group 'personal)
 
 (defcustom my-font-size
-  15
+  18
   "My preferred font size."
   :group 'personal)
 
@@ -219,11 +219,11 @@
       (--map (f-filename it)
              (append
               (f-directories nvm-dir match-fn)
-              (f-directories (f-join nvm-dir "versions" "node") match-fn)))))
-  (nvm-use "v0.12.7"))
+              (f-directories (f-join nvm-dir "versions" "io.js") match-fn)))))
+  (nvm-use "v2.5.0"))
 
-;; (use-package 0blayout
-;; :config (my-enable-mode '0blayout-mode))
+(use-package 0blayout
+  :config (my-enable-mode '0blayout-mode))
 
 (use-package discover
   :config (my-enable-mode 'discover-mode))
@@ -256,12 +256,13 @@
 
 
 (use-package my-themes
+  :init (use-package default-black-theme)
   :bind (([f8] . my-use-prev-theme)
          ([f9] . my-use-next-theme))
   :config
-  (my-set-themes '(plan9
-                   zenburn
-                   basic
+  (my-set-themes '(
+                   default-black
+                   default
                    ))
   (add-hook 'my-load-theme-hook (defun my-load-theme-setup ()
                                   (interactive)
@@ -350,8 +351,7 @@
         eshell-smart-space-goes-to-end t))
 
 (use-package expand-region
-  :bind
-  ("C-@" . er/expand-region))
+  :bind ("C-@" . er/expand-region))
 
 (use-package multiple-cursors
   :commands (mc/mark-next-like-this
@@ -376,25 +376,24 @@
 (use-package helm-config
   :demand t
   :diminish helm-mode
-  :bind
-  (("M-x" . helm-M-x)
-   ("C-x C-m" . helm-M-x)
-   ("M-Y" . helm-show-kill-ring)
-   ("C-x b" . helm-mini)
-   ("C-x C-f" . helm-find-files)
-   ("C-x C-r" . helm-recentf)
+  :bind (("M-x" . helm-M-x)
+         ("C-x C-m" . helm-M-x)
+         ("M-Y" . helm-show-kill-ring)
+         ("C-x b" . helm-mini)
+         ("C-x C-f" . helm-find-files)
+         ("C-x C-r" . helm-recentf)
 
-   ("C-x C-o" . helm-swoop)
-   ("C-x C-M-o" . helm-multi-swoop)
+         ("C-x C-o" . helm-swoop)
+         ("C-x C-M-o" . helm-multi-swoop)
 
-   ("C-x c !" . helm-calcul-expression)
-   ("M-:" . helm-eval-expression-with-eldoc)
+         ("C-x c !" . helm-calcul-expression)
+         ("M-:" . helm-eval-expression-with-eldoc)
 
-   ("C-h a" . helm-apropos)
-   ("C-h i" . helm-info-emacs)
-   ("C-h b" . helm-descbinds)
-   ("C-h C-l" . helm-locate-library)
-   ("C-c h" . helm-command-prefix))
+         ("C-h a" . helm-apropos)
+         ("C-h i" . helm-info-emacs)
+         ("C-h b" . helm-descbinds)
+         ("C-h C-l" . helm-locate-library)
+         ("C-c h" . helm-command-prefix))
 
   :init
   (setq helm-split-window-in-side-p t
@@ -470,6 +469,13 @@
         org-fast-tag-selection-single-key 'expert)
   (add-hook 'org-mode-hook (defun my-org-setup ()
                              (interactive)
+                             (org-babel-do-load-languages
+                              'org-babel-load-languages
+                              '((emacs-lisp . t)
+                                (sh . t)
+                                (python . t)
+                                (ruby . t)
+                                (perl . t)))
                              (my-enable-modes '(electric-pair-mode
                                                 auto-fill-mode
                                                 visual-line-mode)))))
@@ -495,42 +501,57 @@
                                        (interactive)
                                        (my-enable-modes '(subword-mode
                                                           paredit-mode
+                                                          clj-refactor-mode
                                                           aggressive-indent-mode
-                                                          rainbow-delimiters-mode)))))
+                                                          rainbow-delimiters-mode))))
+  :config
+  (use-package cljr-refactor
+    :config (cljr-add-keybindings-with-prefix "C-c C-j")))
 
 (use-package haskell-mode
   :mode "\\.hs\\'"
-  :bind (("C-,"     . haskell-move-nested-left)
-         ("C-."     . haskell-move-nested-right)
-         ("C-c C-." . haskell-mode-format-imports)
+  :init
 
-         ("s-i"     . haskell-navigate-imports)
+  (setq haskell-process-suggest-remove-import-lines  t
+        haskell-process-auto-import-loaded-modules t
+        haskell-process-log t
+        haskell-stylish-on-save t)
 
-         ("C-c C-l" . haskell-process-load-or-reload)
-         ("C-`"     . haskell-interactive-bring)
-         ("C-c C-t" . haskell-process-do-type)
-         ("C-c C-i" . haskell-process-do-info)
-         ("C-c C-c" . haskell-process-cabal-build)
-         ("C-c C-k" . haskell-interactive-mode-clear)
-         ("C-c c"   . haskell-process-cabal)
-         ("SPC"     . haskell-mode-contextual-space))
+  (add-hook 'haskell-mode-hook (defun my-haskell-setup ()
+                                 (interactive)
+                                 (use-package haskell-interactive-mode)
+                                 (use-package haskell-process)
 
-  :init (add-hook 'haskell-mode-hook (defun my-haskell-setup ()
-                                       (interactive)
-                                       (use-package haskell-interactive-mode)
-                                       (use-package haskell-process)
-                                       (my-enable-modes '(subword-mode
-                                                          flycheck-mode
-                                                          wrap-region-mode
-                                                          electric-pair-mode
-                                                          haskell-doc-mode
-                                                          interactive-haskell-mode
-                                                          haskell-indentation-mode))))
+                                 (my-enable-modes '(subword-mode
+                                                    flycheck-mode
+                                                    wrap-region-mode
+                                                    electric-pair-mode
+                                                    haskell-doc-mode
+                                                    interactive-haskell-mode
+                                                    haskell-indentation-mode))
+
+                                 (bind-keys :map haskell-mode-map
+                                            ("C-,"     . haskell-move-nested-left)
+                                            ("C-."     . haskell-move-nested-right)
+                                            ("C-c C-." . haskell-mode-format-imports)
+
+                                            ("s-i"     . haskell-navigate-imports)
+
+                                            ("C-c C-l" . haskell-process-load-or-reload)
+                                            ("C-`"     . haskell-interactive-bring)
+                                            ("C-c C-t" . haskell-process-do-type)
+                                            ("C-c C-i" . haskell-process-do-info)
+                                            ("C-c C-c" . haskell-process-cabal-build)
+                                            ("C-c C-k" . haskell-interactive-mode-clear)
+                                            ("C-c c"   . haskell-process-cabal)
+                                            ("SPC"     . haskell-mode-contextual-space))))
 
   :config
-  (setq haskell-process-suggest-remove-import-lines  t
-        haskell-process-auto-import-loaded-modules   t
-        haskell-process-log                          t)
+
+  (use-package haskell-font-lock
+    :config (setq haskell-font-lock-keywords
+                  (haskell-font-lock-keywords-create nil)))
+
 
   (add-to-list 'align-rules-list
                '(haskell-types
@@ -546,7 +567,8 @@
   (add-to-list 'align-rules-list
                '(haskell-left-arrows
                  (regexp . "\\(\\s-+\\)\\(<-\\|←\\)\\s-+")
-                 (modes quote (haskell-mode literate-haskell-mode)))))
+                 (modes quote (haskell-mode literate-haskell-mode))))
+  )
 
 
 (use-package zygospore
@@ -582,11 +604,12 @@
                                                       wrap-region-mode
                                                       js2-refactor-mode
                                                       electric-pair-mode
+                                                      pretty-mode
                                                       ;; tern-mode
                                                       aggressive-indent-mode))))
   :config
   (use-package js2-refactor
-    :config (js2r-add-keybindings-with-prefix "C-c C-m")))
+    :config (js2r-add-keybindings-with-prefix "C-c C-j")))
 
 (use-package json-mode
   :mode "\\.json\\'"
@@ -664,6 +687,44 @@
 
 (use-package gfm-mode
   :mode "\\.md\\'")
+
+(use-package erc
+  :bind (([f6] . my-erc-start-or-switch))
+  :init (defun my-erc-start-or-switch ()
+          "Connect to ERC or switch to last active buffer."
+          (interactive)
+          (if (get-buffer "irc.freenode.net:6667")
+              (erc-track-switch-buffer 1)
+            (when (y-or-n-p "Start ERC? ")
+              (erc :server    "irc.freenode.net"
+                   :port      6667
+                   :nick      "anler"
+                   :full-name "Anler Hernandez Peral"))))
+  :config
+  (setq erc-autojoin-channels-alist '((".*\\.freenode.net"
+                                       "#emacs"
+                                       "#haskell"
+                                       "#haskell.es"
+                                       "#purescript"
+                                       ))
+        erc-track-exclude-types '("JOIN" "NICK" "PART" "QUIT" "MODE"
+                                  "324" "329" "332" "333" "353" "477")
+        erc-hide-list '("JOIN" "NICK" "PART" "QUIT"))
+
+  (my-enable-modes '(erc-autojoin-mode
+                     erc-track-mode)))
+
+(use-package twittering-mode
+  :config
+  (setq twittering-icon-mode t
+        twittering-use-icon-storage t))
+
+(use-package elfeed
+  :config
+  (setq elfeed-feeds
+        '("http://emacshorrors.com/feed.atom"))
+
+  )
 
 (when (fboundp 'my-use-next-theme)
   (my-use-next-theme))

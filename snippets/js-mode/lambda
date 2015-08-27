@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: Anonymous function
+# key: fl
+# --
+function($1) {$0}$2
