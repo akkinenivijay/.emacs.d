@@ -22,7 +22,7 @@
   :group 'personal)
 
 (defcustom my-font-size
-  18
+  16
   "My preferred font size."
   :group 'personal)
 
@@ -101,6 +101,7 @@
                downcase-region
                erase-buffer
                eval-expression
+               dired-find-alternate-file
                set-goal-column))
   (put cmd 'disabled nil))
 
@@ -159,7 +160,10 @@
            ("C-x a r"    . align-regexp)
            ("C-c w"      . delete-region))
 
-(use-package my-prelude)
+(use-package my-prelude
+  :config (dolist (hook '(css-mode-hook html-mode-hook))
+            (add-hook hook 'xah-syntax-color-hex)))
+
 (use-package my-editing-defuns
   :bind (("M-W" . my-copy-line-as-kill)
          ("s-M-k" . my-kill-sexp-backwards)
@@ -167,6 +171,8 @@
          ("C-M-s" . my-isearch-forward-regexp-other-window)
          ("C-M-r" . my-isearch-backward-regexp-other-window)
          ("C-x C-e" . my-eval-last-sexp)))
+
+(use-package centered-window-mode)
 
 (add-hook 'find-file-hook (defun my-git-gutter-setup ()
                             (interactive)
@@ -179,6 +185,9 @@
                                 :config
                                 (git-gutter-fr+-minimal)
                                 (git-gutter+-mode)))))
+
+(use-package iedit
+  :init (setq iedit-toggle-key-default (kbd "M-s-;")))
 
 (use-package mykie
   :config
@@ -195,6 +204,10 @@
 
 (use-package window-numbering
   :config (my-enable-mode 'window-numbering-mode))
+
+(use-package zygospore
+  :bind (("C-x 1" . zygospore-toggle-delete-other-windows)
+         ("C-M-1" . zygospore-toggle-delete-other-windows)))
 
 (use-package smart-window
   :init (setq smart-window-remap-keys nil)
@@ -223,7 +236,7 @@
   (nvm-use "v2.5.0"))
 
 (use-package 0blayout
-  :config (my-enable-mode '0blayout-mode))
+  :config (my-disable-mode '0blayout-mode))
 
 (use-package discover
   :config (my-enable-mode 'discover-mode))
@@ -260,9 +273,11 @@
   :bind (([f8] . my-use-prev-theme)
          ([f9] . my-use-next-theme))
   :config
-  (my-set-themes '(
+  (my-set-themes '(purple-haze
+                   jazz
                    default-black
                    default
+                   greymatters
                    ))
   (add-hook 'my-load-theme-hook (defun my-load-theme-setup ()
                                   (interactive)
@@ -317,7 +332,7 @@
                 uniquify-ignore-buffers-re "^\\*"))
 
 (use-package saveplace
-  :config (setq save-place t))
+  :init (setq-default save-place t))
 
 (use-package tramp
   :defer t
@@ -380,6 +395,8 @@
          ("C-x C-m" . helm-M-x)
          ("M-Y" . helm-show-kill-ring)
          ("C-x b" . helm-mini)
+         ("C-x C-b" . helm-buffers-list)
+         ("C-x C-S-b" . ibuffer)
          ("C-x C-f" . helm-find-files)
          ("C-x C-r" . helm-recentf)
 
@@ -466,7 +483,9 @@
         org-agenda-skip-scheduled-if-done t
         org-agenda-start-on-weekday nil
         org-reverse-note-order t
-        org-fast-tag-selection-single-key 'expert)
+        org-fast-tag-selection-single-key 'expert
+        org-src-fontify-natively t)
+  (add-hook 'org-mode-hook 'org-hide-block-all)
   (add-hook 'org-mode-hook (defun my-org-setup ()
                              (interactive)
                              (org-babel-do-load-languages
@@ -495,7 +514,6 @@
   (add-hook 'emacs-lisp-mode-hook #'my-emacs-lisp-mode-hook))
 
 (use-package clojure-mode
-
   :mode "\\.clj\\'"
   :init (add-hook 'clojure-mode-hook (defun my-clojure-setup ()
                                        (interactive)
@@ -511,68 +529,36 @@
 (use-package haskell-mode
   :mode "\\.hs\\'"
   :init
-
-  (setq haskell-process-suggest-remove-import-lines  t
-        haskell-process-auto-import-loaded-modules t
-        haskell-process-log t
-        haskell-stylish-on-save t)
-
   (add-hook 'haskell-mode-hook (defun my-haskell-setup ()
                                  (interactive)
-                                 (use-package haskell-interactive-mode)
-                                 (use-package haskell-process)
-
                                  (my-enable-modes '(subword-mode
                                                     flycheck-mode
                                                     wrap-region-mode
                                                     electric-pair-mode
                                                     haskell-doc-mode
                                                     interactive-haskell-mode
-                                                    haskell-indentation-mode))
-
-                                 (bind-keys :map haskell-mode-map
-                                            ("C-,"     . haskell-move-nested-left)
-                                            ("C-."     . haskell-move-nested-right)
-                                            ("C-c C-." . haskell-mode-format-imports)
-
-                                            ("s-i"     . haskell-navigate-imports)
-
-                                            ("C-c C-l" . haskell-process-load-or-reload)
-                                            ("C-`"     . haskell-interactive-bring)
-                                            ("C-c C-t" . haskell-process-do-type)
-                                            ("C-c C-i" . haskell-process-do-info)
-                                            ("C-c C-c" . haskell-process-cabal-build)
-                                            ("C-c C-k" . haskell-interactive-mode-clear)
-                                            ("C-c c"   . haskell-process-cabal)
-                                            ("SPC"     . haskell-mode-contextual-space))))
+                                                    haskell-indentation-mode))))
 
   :config
+  (setq haskell-process-suggest-remove-import-lines  t
+        haskell-process-auto-import-loaded-modules t
+        haskell-process-log t
+        haskell-stylish-on-save t)
+  (bind-keys :map haskell-mode-map
+             ("C-,"     . haskell-move-nested-left)
+             ("C-."     . haskell-move-nested-right)
+             ("C-c C-." . haskell-mode-format-imports)
 
-  (use-package haskell-font-lock
-    :config (setq haskell-font-lock-keywords
-                  (haskell-font-lock-keywords-create nil)))
+             ("s-i"     . haskell-navigate-imports)
 
-
-  (add-to-list 'align-rules-list
-               '(haskell-types
-                 (regexp . "\\(\\s-+\\)\\(::\\|∷\\)\\s-+")))
-  (add-to-list 'align-rules-list
-               '(haskell-assignment
-                 (regexp . "\\(\\s-+\\)=\\s-+")
-                 (modes quote (haskell-mode literate-haskell-mode))))
-  (add-to-list 'align-rules-list
-               '(haskell-arrows
-                 (regexp . "\\(\\s-+\\)\\(->\\|→\\)\\s-+")
-                 (modes quote (haskell-mode literate-haskell-mode))))
-  (add-to-list 'align-rules-list
-               '(haskell-left-arrows
-                 (regexp . "\\(\\s-+\\)\\(<-\\|←\\)\\s-+")
-                 (modes quote (haskell-mode literate-haskell-mode))))
-  )
-
-
-(use-package zygospore
-  :bind (("C-x 1" . zygospore-toggle-delete-other-windows)))
+             ("C-c C-l" . haskell-process-load-or-reload)
+             ("C-`"     . haskell-interactive-bring)
+             ("C-c C-t" . haskell-process-do-type)
+             ("C-c C-i" . haskell-process-do-info)
+             ("C-c C-c" . haskell-process-cabal-build)
+             ("C-c C-k" . haskell-interactive-mode-clear)
+             ("C-c c"   . haskell-process-cabal)
+             ("SPC"     . haskell-mode-contextual-space)))
 
 (use-package elm-mode
   :mode "\\.elm\\'"
@@ -604,6 +590,7 @@
                                                       wrap-region-mode
                                                       js2-refactor-mode
                                                       electric-pair-mode
+                                                      hl-todo-mode
                                                       pretty-mode
                                                       ;; tern-mode
                                                       aggressive-indent-mode))))
@@ -619,8 +606,11 @@
                                           js-indent-level 2)
 
                                     (my-enable-modes '(subword-mode
-                                                       electric-pair-mode
-                                                       aggressive-indent-mode)))))
+                                                       electric-pair-mode)))))
+
+(use-package css-mode
+  :mode "\\.css\\'"
+  :config (setq css-indent-offset 2))
 
 (use-package html-mode
   :mode "\\.html\\'"
@@ -656,6 +646,7 @@
                               (tagedit-add-experimental-features)
                               (setq emmet-indent-after-insert t
                                     emmet-indentation 2
+                                    sgml-basic-offset 2
                                     fill-column 999)
                               (my-enable-modes '(emmet-mode
                                                  wrap-region-mode
@@ -706,6 +697,7 @@
                                        "#haskell"
                                        "#haskell.es"
                                        "#purescript"
+                                       "#hackerrank"
                                        ))
         erc-track-exclude-types '("JOIN" "NICK" "PART" "QUIT" "MODE"
                                   "324" "329" "332" "333" "353" "477")
@@ -720,11 +712,48 @@
         twittering-use-icon-storage t))
 
 (use-package elfeed
+  :bind (([f1] . elfeed))
+  :init
+  (add-hook 'elfeed-show-mode-hook (defun my-elfeed-setup ()
+                                     (interactive)
+                                     (my-enable-modes '(visual-line-mode))))
   :config
   (setq elfeed-feeds
-        '("http://emacshorrors.com/feed.atom"))
-
+        '("http://emacshorrors.com/feed.atom"
+          "http://eli.thegreenplace.net/feeds/articles.atom.xml"
+          "http://emacsninja.com/feed.atom")
+        )
   )
+
+(use-package scheme
+  :init (setq scheme-program-name "racket"))
+
+(use-package libmpdee
+  :config (setq mpd-db-root "~/.mpd"))
+
+;; (use-package emms-setup
+;;   :config
+;;   (bind-key [f2] (defun my-emms ()
+;;                    (interactive)
+;;                    (emms-player-mpd-connect)
+;;                    (emms)))
+;;   (setq emms-source-file-default-directory "~/Music/"
+;;         emms-info-asynchronously t
+;;         emms-show-format "♪ %s")
+
+;;   (use-package emms-player-mpd
+;;     :config (setq emms-player-mpd-server-name "localhost"
+;;                   emms-player-mpd-server-port "6600"
+;;                   emms-player-mpd-music-directory "~/Music")
+;;     (add-to-list 'emms-info-functions 'emms-info-mpd)
+;;     (add-to-list 'emms-player-list 'emms-player-mpd)
+
+;;     (use-package emms-volume
+;;       :config (setq emms-volume-change-function 'emms-volume-mpd-change)))
+
+;;   (use-package emms-playlist-mode
+;;     :config (setq emms-playlist-buffer-name "*Music*"
+;;                   emms-playlist-default-major-mode 'emms-playlist-mode)))
 
 (when (fboundp 'my-use-next-theme)
   (my-use-next-theme))
@@ -734,4 +763,3 @@
     (message "Loading %s... done (%.3fs)" load-file-name elapsed-time)))
 
 ;;; init.el ends here
-(put 'dired-find-alternate-file 'disabled nil)

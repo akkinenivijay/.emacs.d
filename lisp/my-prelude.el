@@ -38,5 +38,19 @@ If BUFFER-OR-NAME is not specified the current buffer is used."
     (rename-file (buffer-file-name) newfilename ask-if-exists)
     (set-visited-file-name newfilename :no-query :along-with-file)))
 
+(defun xah-syntax-color-hex ()
+  "Syntax color text of the form 「#ff1100」 in current buffer.
+URL `http://ergoemacs.org/emacs/emacs_CSS_colors.html'
+Version 2015-06-11"
+  (interactive)
+  (font-lock-add-keywords
+   nil
+   '(("#[abcdef[:digit:]]\\{6\\}"
+      (0 (put-text-property
+          (match-beginning 0)
+          (match-end 0)
+          'face (list :background (match-string-no-properties 0)))))))
+  (font-lock-fontify-buffer))
+
 (provide 'my-prelude)
 ;;; my-prelude.el ends here

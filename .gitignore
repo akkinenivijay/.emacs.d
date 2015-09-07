@@ -16,3 +16,6 @@ session.*
 /tramp
 /#recentf#
 /url/cookies
+emms/
+request/
+url/
