@@ -17,12 +17,12 @@
   :group 'personal)
 
 (defcustom my-font-family
-  "Fantasque Sans Mono"
+  "Monoid"
   "My preferred font family."
   :group 'personal)
 
 (defcustom my-font-size
-  16
+  15
   "My preferred font size."
   :group 'personal)
 
@@ -161,7 +161,7 @@
            ("C-c w"      . delete-region))
 
 (use-package my-prelude
-  :config (dolist (hook '(css-mode-hook html-mode-hook))
+  :config (dolist (hook '(css-mode-hook html-mode-hook conf-mode-hook))
             (add-hook hook 'xah-syntax-color-hex)))
 
 (use-package my-editing-defuns
@@ -174,20 +174,11 @@
 
 (use-package centered-window-mode)
 
-(add-hook 'find-file-hook (defun my-git-gutter-setup ()
-                            (interactive)
-                            (when (my-inside-project-p)
-                              (use-package git-gutter-fringe+
-                                :demand t
-                                :bind (("C-c g s" . git-gutter+-show-hunk)
-                                       ("C-c g p" . git-gutter+-previous-hunk)
-                                       ("C-c g n" . git-gutter+-next-hunk))
-                                :config
-                                (git-gutter-fr+-minimal)
-                                (git-gutter+-mode)))))
-
 (use-package iedit
   :init (setq iedit-toggle-key-default (kbd "M-s-;")))
+
+(use-package volatile-highlights
+  :config (my-enable-mode 'volatile-highlights-mode))
 
 (use-package mykie
   :config
@@ -269,16 +260,11 @@
 
 
 (use-package my-themes
-  :init (use-package default-black-theme)
+  :init (use-package anler-theme)
   :bind (([f8] . my-use-prev-theme)
          ([f9] . my-use-next-theme))
   :config
-  (my-set-themes '(purple-haze
-                   jazz
-                   default-black
-                   default
-                   greymatters
-                   ))
+  (my-set-themes '( anler ))
   (add-hook 'my-load-theme-hook (defun my-load-theme-setup ()
                                   (interactive)
                                   (let ((font-and-size (format "%s-%s" my-font-family my-font-size)))
@@ -287,7 +273,7 @@
 
 (use-package hl-line
   :bind ([f10] . global-hl-line-mode)
-  :init (my-enable-modes '(global-hl-line-mode)))
+  :config (my-enable-mode 'global-hl-line-mode))
 
 (use-package compilation
   :defer t
@@ -607,6 +593,12 @@
 
                                     (my-enable-modes '(subword-mode
                                                        electric-pair-mode)))))
+
+(use-package graphviz-dot-mode
+  :mode "\\.gv\\'"
+  :config (setq graphviz-dot-auto-indent-on-braces t
+                graphviz-dot-auto-indent-on-newline t
+                graphviz-dot-indent-width 2))
 
 (use-package css-mode
   :mode "\\.css\\'"
