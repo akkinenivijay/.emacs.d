@@ -56,7 +56,7 @@
     ("green" . "#a1b56c")
     ("turquoise" . "#86c1b9")
     ("blue" . "#7cafc2")
-    ("purple" . "#ba8baf")
+    ("purple" . "#8331b7")
     ("brown" . "#a16046"))
   "List of base16 colors.")
 
@@ -97,9 +97,9 @@
    `(linum  ((t (:foreground ,gray5 :background ,white))))
    `(match ((t (:foreground nil :background ,gray6))))
    `(minibuffer-prompt ((t (:foreground ,red :background nil))))
-   `(mode-line ((t (:foreground ,white :background ,white :box nil))))
-   `(mode-line-buffer-id ((t (:weight bold :foreground ,red))))
-   `(mode-line-inactive ((t (:inherit mode-line :box nil))))
+   `(mode-line ((t (:foreground ,purple :background nil :box nil))))
+   `(mode-line-buffer-id ((t (:weight bold :foreground nil))))
+   `(mode-line-inactive ((t (:foreground ,gray4 :background nil :box nil))))
    `(region ((t (:foreground nil :background ,green))))
    `(secondary-selection ((t (:foreground nil :background ,gray6))))
    `(trailing-whitespace ((t (:foreground nil :background ,red))))
@@ -163,18 +163,18 @@
 
    `(font-lock-builtin-face ((t :foreground nil :background nil :weight bold)))
    `(font-lock-comment-delimiter-face ((t :foreground nil :background ,gray7 :slant italic)))
-   `(font-lock-comment-face ((t :foreground nil :background nil)))
+   `(font-lock-comment-face ((t :foreground nil :background ,gray7 :slant italic)))
    `(font-lock-constant-face ((t :foreground nil :background nil :weight bold)))
    `(font-lock-doc-face ((t :foreground nil :background ,gray7 :slant italic)))
-   `(font-lock-function-name-face ((t :foreground nil :background nil)))
+   `(font-lock-function-name-face ((t :foreground nil :background nil :weight bold)))
    `(font-lock-keyword-face ((t :foreground nil :background nil :weight bold)))
    `(font-lock-negation-char-face ((t :foreground nil :background nil)))
-   `(font-lock-preprocessor-face ((t :foreground nil :background nil)))
+   `(font-lock-preprocessor-face ((t :foreground nil :background nil :slant italic)))
    `(font-lock-regexp-grouping-backslash ((t :foreground nil :background nil)))
    `(font-lock-regexp-grouping-construct ((t :foreground nil :background nil)))
    `(font-lock-string-face ((t :foreground nil :background ,gray7)))
-   `(font-lock-type-face ((t :foreground nil :background nil)))
-   `(font-lock-variable-name-face ((t :foreground nil :background nil)))
+   `(font-lock-type-face ((t :foreground nil :background nil :weight bold)))
+   `(font-lock-variable-name-face ((t :foreground nil :background ,gray7)))
    `(font-lock-warning-face ((t :foreground nil :background ,orange)))
 
    `(helm-action ((t (:foreground ,black :background nil :underline nil))))
@@ -431,6 +431,9 @@
 
    `(wgrep-face ((t (:foreground ,green :background nil))))
    `(wgrep-done-face ((t (:foreground ,black :background nil))))
+
+   `(racket-keyword-argument-face ((t (:inherit font-lock-constant-face))))
+   `(racket-selfeval-face ((t (:inherit font-lock-type-face))))
    ))
 
 (basic-with-color-variables

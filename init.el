@@ -161,7 +161,10 @@
            ("C-c w"      . delete-region))
 
 (use-package my-prelude
-  :config (dolist (hook '(css-mode-hook html-mode-hook conf-mode-hook))
+  :config (dolist (hook '(css-mode-hook
+                          html-mode-hook
+                          conf-mode-hook
+                          emacs-lisp-mode))
             (add-hook hook 'xah-syntax-color-hex)))
 
 (use-package my-editing-defuns
@@ -216,21 +219,16 @@
 (use-package align)
 
 (use-package nvm
-  :config
-  (defun nvm--installed-versions ()
-    (let ((match-fn (lambda (directory)
-                      (s-matches? (concat "^" nvm-version-re "$") (f-filename directory)))))
-      (--map (f-filename it)
-             (append
-              (f-directories nvm-dir match-fn)
-              (f-directories (f-join nvm-dir "versions" "io.js") match-fn)))))
-  (nvm-use "v2.5.0"))
+  :config (nvm-use "v2.5.0"))
 
 (use-package 0blayout
-  :config (my-disable-mode '0blayout-mode))
+  :config
+  (my-enable-mode '0blayout-mode)
+  (0blayout-add-keybindings-with-prefix "C-x ,"))
 
 (use-package discover
-  :config (my-enable-mode 'discover-mode))
+  :config
+  (my-enable-mode 'discover-mode))
 
 (use-package man
   :defer t
@@ -272,8 +270,7 @@
                                     (set-default-font font-and-size)))))
 
 (use-package hl-line
-  :bind ([f10] . global-hl-line-mode)
-  :config (my-enable-mode 'global-hl-line-mode))
+  :bind ([f10] . global-hl-line-mode))
 
 (use-package compilation
   :defer t
@@ -494,7 +491,7 @@
   (fset 'my-emacs-lisp-mode-hook (defun my-elisp-setup ()
                                    (interactive)
                                    (my-enable-modes '(paredit-mode
-                                                      aggressive-indent-mode
+                                                      ;; aggressive-indent-mode
                                                       rainbow-delimiters-mode
                                                       eldoc-mode))))
   (add-hook 'emacs-lisp-mode-hook #'my-emacs-lisp-mode-hook))
@@ -506,7 +503,7 @@
                                        (my-enable-modes '(subword-mode
                                                           paredit-mode
                                                           clj-refactor-mode
-                                                          aggressive-indent-mode
+                                                          ;; aggressive-indent-mode
                                                           rainbow-delimiters-mode))))
   :config
   (use-package cljr-refactor
@@ -717,8 +714,30 @@
         )
   )
 
-(use-package scheme
-  :init (setq scheme-program-name "racket"))
+(use-package scheme-mode
+  :mode "\\.scm\\'"
+  :init
+  (setq scheme-program-name "racket")
+  (add-hook 'scheme-mode-hook (defun my-scheme-setup ()
+                                (interactive)
+                                (my-enable-modes '(electric-pair-mode
+                                                   aggressive-indent-mode
+                                                   rainbow-delimiters-mode
+                                                   paredit-mode
+                                                   eldoc-mode
+                                                   pretty-mode)))))
+
+(use-package racket-mode
+  :mode "\\.rkt\\'"
+  :init
+  (add-hook 'racket-mode-hook (defun my-racket-setup ()
+                                (interactive)
+                                (my-enable-modes '(electric-pair-mode
+                                                   aggressive-indent-mode
+                                                   rainbow-delimiters-mode
+                                                   paredit-mode
+                                                   eldoc-mode
+                                                   pretty-mode)))))
 
 (use-package libmpdee
   :config (setq mpd-db-root "~/.mpd"))
