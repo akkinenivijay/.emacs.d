@@ -1,0 +1,14 @@
+# -*- mode: snippet -*-
+# name: Html Page
+# key: html
+# --
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>`(buffer-name)`</title>
+
+    <body>
+      $0
+    </body>
+  </head>
+</html>

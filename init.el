@@ -17,12 +17,12 @@
   :group 'personal)
 
 (defcustom my-font-family
-  "Monoid"
+  "Hack"
   "My preferred font family."
   :group 'personal)
 
 (defcustom my-font-size
-  15
+  17
   "My preferred font size."
   :group 'personal)
 
@@ -212,14 +212,12 @@
          ("C-M-2" . sw-below)
          ("C-M-3" . sw-right)))
 
-(use-package smooth-scroll
-  :diminish smooth-scroll-mode
-  :config (my-enable-mode 'smooth-scroll-mode))
-
 (use-package align)
 
 (use-package nvm
-  :config (nvm-use "v2.5.0"))
+  :config
+  (nvm-use "v0.12.7")
+  (add-to-list 'exec-path (getenv "NVM_BIN")))
 
 (use-package 0blayout
   :config
@@ -258,11 +256,11 @@
 
 
 (use-package my-themes
-  :init (use-package anler-theme)
+  :init (use-package default-black-theme)
   :bind (([f8] . my-use-prev-theme)
          ([f9] . my-use-next-theme))
   :config
-  (my-set-themes '( anler ))
+  (my-set-themes '( default-black default ))
   (add-hook 'my-load-theme-hook (defun my-load-theme-setup ()
                                   (interactive)
                                   (let ((font-and-size (format "%s-%s" my-font-family my-font-size)))
@@ -270,7 +268,9 @@
                                     (set-default-font font-and-size)))))
 
 (use-package hl-line
-  :bind ([f10] . global-hl-line-mode))
+  :bind ([f10] . global-hl-line-mode)
+  :demand t
+  :config (global-hl-line-mode))
 
 (use-package compilation
   :defer t
@@ -427,6 +427,11 @@
   (projectile-load-known-projects)
   (my-enable-mode 'projectile-global-mode))
 
+(use-package recursive-narrow
+  :bind (("C-x n n" . recursive-narrow-or-widen-dwim)
+         ("C-x n w" . recursive-widen-dwim)))
+
+
 (use-package whitespace
   :init
   (defun my-cleanup-whitespace-on-write ()
@@ -480,6 +485,7 @@
                                 (perl . t)))
                              (my-enable-modes '(electric-pair-mode
                                                 auto-fill-mode
+                                                org-indent-mode
                                                 visual-line-mode)))))
 
 (use-package emacs-lisp-mode
@@ -503,7 +509,6 @@
                                        (my-enable-modes '(subword-mode
                                                           paredit-mode
                                                           clj-refactor-mode
-                                                          ;; aggressive-indent-mode
                                                           rainbow-delimiters-mode))))
   :config
   (use-package cljr-refactor
@@ -574,12 +579,35 @@
                                                       js2-refactor-mode
                                                       electric-pair-mode
                                                       hl-todo-mode
-                                                      pretty-mode
-                                                      ;; tern-mode
-                                                      aggressive-indent-mode))))
-  :config
+                                                      tern-mode
+                                                      skewer-mode
+                                                      aggressive-indent-mode)))
+                  :config)
   (use-package js2-refactor
     :config (js2r-add-keybindings-with-prefix "C-c C-j")))
+
+(add-to-list 'auto-mode-alist '("\\.jsx$" . web-mode))
+(defadvice web-mode-highlight-part (around tweak-jsx activate)
+  (if (equal web-mode-content-type "jsx")
+      (let ((web-mode-enable-part-face nil))
+        ad-do-it)
+    ad-do-it))
+
+(use-package flycheck
+  :config
+  (flycheck-define-checker jsxhint-checker
+    "A JSX syntax and style checker based on JSXHint."
+    :command ("jsxhint" "--babel" source)
+    :error-patterns
+    ((error line-start (1+ nonl) ": line " line ", col " column ", " (message) line-end))
+    :modes (web-mode))
+
+  (add-hook 'web-mode-hook (defun web-mode-jsx-flycheck-setup ()
+                             (setq web-mode-code-indent-offset 2
+                                   web-mode-markup-indent-offset 2)
+                             (when (equal web-mode-content-type "jsx")
+                               (flycheck-select-checker 'jsxhint-checker)
+                               (my-enable-mode 'flycheck-mode)))))
 
 (use-package json-mode
   :mode "\\.json\\'"
@@ -640,6 +668,7 @@
                               (my-enable-modes '(emmet-mode
                                                  wrap-region-mode
                                                  whitespace-mode
+                                                 yas-minor-mode
                                                  hungry-delete-mode
                                                  electric-pair-mode)))))
 
@@ -725,7 +754,7 @@
                                                    rainbow-delimiters-mode
                                                    paredit-mode
                                                    eldoc-mode
-                                                   pretty-mode)))))
+                                                   )))))
 
 (use-package racket-mode
   :mode "\\.rkt\\'"
@@ -737,7 +766,7 @@
                                                    rainbow-delimiters-mode
                                                    paredit-mode
                                                    eldoc-mode
-                                                   pretty-mode)))))
+                                                   )))))
 
 (use-package libmpdee
   :config (setq mpd-db-root "~/.mpd"))
