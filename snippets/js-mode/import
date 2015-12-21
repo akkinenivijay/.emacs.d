@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: ES6 import
+# key: imp
+# --
+import ${1:{ $2 }} from '$3';$0

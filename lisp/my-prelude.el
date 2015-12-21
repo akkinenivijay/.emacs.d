@@ -5,6 +5,39 @@
 ;;; Code:
 (require 'cl)
 
+(defcustom my-font-family
+  "Fantasque Sans Mono"
+  "My preferred font family."
+  :group 'personal)
+
+(defcustom my-font-size
+  14
+  "My preferred font size."
+  :group 'personal)
+
+(defun my-enable-mode (mode)
+  "Enable MODE."
+  (my-disable-mode mode)
+  (when (fboundp mode)
+    (funcall mode +1)))
+
+(defun my-disable-mode (mode)
+  "Disable MODE."
+  (when (boundp mode)
+    (funcall mode -1)))
+
+(defalias 'my-enable-modes (apply-partially 'mapc #'my-enable-mode)
+  "Enable all modes in argument.")
+
+(defalias 'my-disable-modes (apply-partially 'mapc #'my-disable-mode)
+  "Disable all modes in argument.")
+
+(defmacro command (&rest body)
+  "Wrap BODY inside an interactive lambda."
+  `(lambda ()
+     (interactive)
+     ,@body))
+
 (defun my-cycle (list)
   "Return copy of LIST turned into an infinite list."
   (let ((newlist (copy-list list)))
@@ -37,6 +70,28 @@ If BUFFER-OR-NAME is not specified the current buffer is used."
   (let ((ask-if-exists 1))
     (rename-file (buffer-file-name) newfilename ask-if-exists)
     (set-visited-file-name newfilename :no-query :along-with-file)))
+
+(defun my-switch-to-next-buffer ()
+  "Switch to the next buffer associated to a file."
+  (interactive)
+  (cl-labels ((next-non-special-buffer
+               ()
+               (let ((buffer (next-buffer)))
+                 (if (buffer-file-name buffer)
+                     buffer
+                   (next-non-special-buffer)))))
+    (next-non-special-buffer)))
+
+(defun my-switch-to-previous-buffer ()
+  "Switch to the previous buffer associated to a file."
+  (interactive)
+  (cl-labels ((previous-non-special-buffer
+               ()
+               (let ((buffer (previous-buffer)))
+                 (if (buffer-file-name buffer)
+                     buffer
+                   (previous-non-special-buffer)))))
+    (previous-non-special-buffer)))
 
 (defun xah-syntax-color-hex ()
   "Syntax color text of the form 「#ff1100」 in current buffer.

@@ -25,11 +25,10 @@
   "Comment current line or, if at EOL, call `comment-dwim' with ARG."
   (interactive "*P")
   (comment-normalize-vars)
-  (if (and (not (region-active-p))
+  (when (and (not (region-active-p))
            (not (looking-at "[ \t]*$")))
       (comment-or-uncomment-region (line-beginning-position)
-                                   (line-end-position))
-    (comment-dwim arg)))
+                                   (line-end-position))))
 
 (defun my-isearch-forward-regexp-other-window ()
   "`isarch-forward-regexp' in `other-window'."
@@ -59,6 +58,18 @@ result if called with the universal argument twice."
   (let ((result (eval (preceding-sexp))))
     (kill-sexp -1)
     (insert (format "%s" result))))
+
+(defun prelude-open-with ()
+  "Simple function that allows us to open the underlying
+file of a buffer in an external program."
+  (interactive)
+  (when buffer-file-name
+    (shell-command (concat
+                    (if (eq system-type 'darwin)
+                        "open"
+                      "xdg-open")
+                    " "
+                    buffer-file-name))))
 
 (provide 'my-editing-defuns)
 ;;; my-editing-defuns.el ends here

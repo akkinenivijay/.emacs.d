@@ -14,39 +14,54 @@
   '(default)
   "Use next theme.")
 
-(defvar my-themes-delta
-  0
-  "Number of themes.")
+(defvar my-current-theme
+  'default
+  "Current active theme.")
 
-(defun my-set-themes (themes)
-  "Set THEMES as the themes to use."
-  (setq my-themes (my-cycle themes)
-        my-themes-delta (length themes)))
+(defun -my-get-next-theme ()
+  (let ((theme (cadr (-drop-while (lambda (item) (not (eq item my-current-theme)))
+                                  my-themes))))
+    (or theme (car my-themes) 'default)))
+
+(defun -my-get-prev-theme ()
+  (let ((theme (-last-item (-take-while (lambda (item)
+                                          (not (eq item my-current-theme)))
+                                        my-themes))))
+    (or theme (-last-item my-themes) 'default)))
+
+(defun -my-get-theme-pkg-name (theme)
+  (format "%s-theme" (symbol-name theme)))
+
+(defun -my-theme-available? (theme)
+  (or
+   (eq theme 'default)
+   (member theme (custom-available-themes))
+   (let ((theme-pkg (-my-get-theme-pkg-name theme)))
+     (package-install (intern theme-pkg)))))
+
+
 
 (defun my-use-next-theme ()
   "Use next theme in `my-themes'."
   (interactive)
-  (my/disable-themes)
-  (let ((theme (pop my-themes)))
-    (my/load-theme theme)
-    (run-hooks 'my-load-theme-hook)
-    (message "Theme '%s' loaded" theme)))
+  (let ((theme (-my-get-next-theme)))
+    (message "Next theme is %s" theme)
+    (when (-my-theme-available? theme)
+      (my-load-theme theme)
+      (run-hooks 'my-load-theme-hook)
+      (message "Theme '%s' loaded." theme))
+    ))
 
 (defun my-use-prev-theme ()
   "Use previous theme in `my-themes'."
   (interactive)
-  (my/disable-themes)
-  (let ((n my-themes-delta))
-    (while (> n 2)
-      (pop my-themes)
-      (setq n (1- n)))
-    (my-use-next-theme)))
-
-(defun popn (n list)
-  "Pop the N-element of LIST."
-  (cond ((> n 0) (let ((_ (pop list)))
-                   (popn (1- n) list)))
-        (t (pop list))))
+  (let ((theme (-my-get-prev-theme)))
+    (message "Prev theme is %s" theme)
+    (when (-my-theme-available? theme)
+      (my-load-theme theme)
+      (run-hooks 'my-load-theme-hook)
+      (message "Theme '%s' loaded." theme))
+    ))
 
 (defun my-load-theme (theme)
   "Use THEME."
@@ -54,17 +69,10 @@
    (list
     (intern (completing-read "Load custom theme: "
                              (mapcar #'symbol-name (custom-available-themes))))))
-  (my/disable-themes)
-  (my/load-theme theme))
-
-(defun my/disable-themes ()
-  "Disable all enabled themes."
-  (mapc #'disable-theme custom-enabled-themes))
-
-(defun my/load-theme (theme)
-  "Enable THEME."
+  (mapc #'disable-theme custom-enabled-themes)
   (unless (eq theme 'default)
-    (load-theme theme :noconfirm)))
+    (load-theme theme :noconfirm))
+  (setq my-current-theme theme))
 
 (provide 'my-themes)
 ;;; my-themes.el ends here
