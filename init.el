@@ -544,29 +544,6 @@
   :ensure t
 
   :init
-
-  (defun my-web-mode-comment-or-uncomment-line (&optional arg)
-    (interactive "*P")
-    (comment-normalize-vars)
-    (when (and (not (region-active-p))
-               (not (looking-at "[ \t]*$")))
-      (web-mode-comment-or-uncomment-region (line-beginning-position)
-                                            (line-end-position))))
-
-  (defun my-web-mode-setup ()
-    (interactive)
-    ;; (local-key-set (kbd "C-;") 'my-web-mode-comment-or-uncomment-line)
-    ;; (local-key-set (kbd "C-M-;") 'web-mode-comment-or-uncomment-region)
-
-    (let ((modes '(wrap-region-mode
-                   whitespace-mode
-                   yas-minor-mode
-                   hungry-delete-mode
-                   flycheck-mode)))
-      (when (equal web-mode-content-type "jsx")
-        (flycheck-select-checker 'jsxhint-checker))
-      (my-enable-modes modes)))
-
   (setq sgml-basic-offset 2
         jsx-indent-level 2
         web-mode-markup-indent-offset 2
@@ -574,6 +551,18 @@
         web-mode-code-indent-offset 2
         fill-column 999
         web-mode-content-types-alist '(("jsx" . "\\js\\'")))
+
+  (defun my-web-mode-setup ()
+    (interactive)
+    (let ((modes '(wrap-region-mode
+                   whitespace-mode
+                   yas-minor-mode
+                   hungry-delete-mode
+                   electric-pair-mode
+                   flycheck-mode)))
+      (when (equal web-mode-content-type "jsx")
+        (flycheck-select-checker 'jsxhint-checker))
+      (my-enable-modes modes)))
 
   (defadvice web-mode-highlight-part (around tweak-jsx activate)
     (if (equal web-mode-content-type "jsx")
@@ -592,6 +581,11 @@
     :mode "\\.js\\'"
     :init (add-hook 'web-mode-hook 'my-web-mode-setup))
 
+  (use-package web-mode
+    :ensure t
+    :mode "\\.jsx\\'"
+    :init (add-hook 'web-mode-hook 'my-web-mode-setup))
+
   (use-package flycheck
     :config
     (flycheck-define-checker jsxhint-checker
@@ -603,24 +597,6 @@ npm i -g eslint
       :error-patterns
       ((error line-start (1+ nonl) ": line " line ", col " column ", " (message) line-end))
       :modes (web-mode))))
-
-
-;; (defadvice web-mode-highlight-part (around tweak-jsx activate)
-;;   (if (equal web-mode-content-type "jsx")
-;;       (let ((web-mode-enable-part-face nil))
-;;         ad-do-it)
-;;     ad-do-it))
-
-(use-package json-mode
-  :ensure t
-  :mode "\\.json\\'"
-  :init (add-hook 'json-mode-hook (defun my-json-setup ()
-                                    (interactive)
-                                    (setq json-reformat:indent-width 2
-                                          js-indent-level 2)
-
-                                    (my-enable-modes '(subword-mode
-                                                       electric-pair-mode)))))
 
 (use-package 0blayout
   :ensure t
