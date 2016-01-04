@@ -345,7 +345,8 @@
 
 (use-package helm-projectile
     :ensure projectile
-    :bind (("C-c p p" . helm-projectile-switch-project))
+    :bind (("C-c p p" . helm-projectile-switch-project)
+           ("C-c p s s" . helm-projectile-ag))
 
     :init
     (setq projectile-enable-caching t)
@@ -402,6 +403,7 @@
   :ensure t)
 
 (use-package pyvenv :ensure t :pin melpa-stable :mode "\\.py\\'")
+(use-package python-info :ensure t)
 (use-package python-mode
   :mode "\\.py\\'"
   :init (add-hook
@@ -513,90 +515,73 @@
   :init (setq rtog/mode-repl-alist '((emacs-lisp-mode . ielm)
                                      (purescript-mode . psci))))
 
-(use-package flycheck-flow
-  :ensure t)
-
-;; (use-package js2-mode
-;;   :ensure t
-;;   :mode "\\.js\\'"
-;;   :init
-;;   (add-hook 'js2-mode-hook (defun my-js-setup ()
-;;                              (interactive)
-;;                              (use-package js2-refactor
-;;                                :config (js2r-add-keybindings-with-prefix "C-c C-j"))
-;;                              (setq js2-basic-offset 2
-;;                                    js-indent-level 2
-;;                                    js2-include-node-externs t)
-
-;;                              (my-enable-modes '(subword-mode
-;;                                                 hungry-delete-mode
-;;                                                 wrap-region-mode
-;;                                                 js2-refactor-mode
-;;                                                 electric-pair-mode
-;;                                                 hl-todo-mode
-;;                                                 tern-mode
-;;                                                 skewer-mode
-;;                                                 aggressive-indent-mode)))))
-
 (use-package flycheck :ensure t)
 
+(use-package json-mode
+  :mode "\\.json\\'"
+  :init (add-hook 'json-mode-hook (defun my-json-setup ()
+                                    (interactive)
+                                    (setq json-reformat:indent-width 2
+                                          js-indent-level 2))))
+
 (use-package web-mode
+  :init (add-hook 'web-mode-hook (defun my-web-mode-setup ()
+                                   (interactive)
+                                   (my-enable-modes '(electric-pair-mode)))))
+
+
+;; (use-package web-mode
+;;   :mode "\\.js[x]?\\'"
+;;   :init (setq web-mode-content-types-alist '(("jsx" . "\\.js[x]?\\'"))
+;;               web-mode-code-indent-offset 2))
+
+(use-package js2-mode
   :ensure t
-
+  :mode ("\\.js\\'" . js2-jsx-mode)
   :init
-  (setq sgml-basic-offset 2
-        jsx-indent-level 2
-        web-mode-markup-indent-offset 2
-        web-mode-css-indent-offset 2
-        web-mode-code-indent-offset 2
-        fill-column 999
-        web-mode-content-types-alist '(("jsx" . "\\js\\'")))
+  (setq-default js2-basic-offset 2)
+  (setq-default js-indent-level 2)
+  (setq-default js2-include-node-externs t)
+  (setq-default js2-mode-indent-ignore-first-tab t)
+  (setq-default js2-mode-show-parse-errors nil)
+  (setq-default js2-strict-inconsistent-return-warning nil)
+  (setq-default js2-strict-var-hides-function-arg-warning nil)
+  (setq-default js2-strict-missing-semi-warning nil)
+  (setq-default js2-strict-trailing-comma-warning nil)
+  (setq-default js2-strict-cond-assign-warning nil)
+  (setq-default js2-strict-var-redeclaration-warning nil)
+  (setq-default js2-global-externs
+                '("module" "require" "__dirname" "process" "console" "define"
+                  "JSON" "$" "_" "Backbone" "buster" "sinon" "moment" "_gaq"
+                  "Zenbox" "Mousetrap" "Comoyo"))
 
-  (defun my-web-mode-setup ()
-    (interactive)
-    (let ((modes '(wrap-region-mode
-                   whitespace-mode
-                   yas-minor-mode
-                   hungry-delete-mode
-                   electric-pair-mode
-                   flycheck-mode)))
-      (when (equal web-mode-content-type "jsx")
-        (flycheck-select-checker 'jsxhint-checker))
-      (my-enable-modes modes)))
+  (add-hook 'js2-jsx-mode-hook
+            (defun my-js-setup ()
+              (interactive)
+              (use-package js2-refactor
+                :config (js2r-add-keybindings-with-prefix "C-c C-j"))
 
-  (defadvice web-mode-highlight-part (around tweak-jsx activate)
-    (if (equal web-mode-content-type "jsx")
-        (let ((web-mode-enable-part-face nil))
-          ad-do-it)
-      ad-do-it))
+              (my-enable-modes '(subword-mode
+                                 hungry-delete-mode
+                                 wrap-region-mode
+                                 js2-refactor-mode
+                                 electric-pair-mode
+                                 hl-todo-mode
+                                 tern-mode
+                                 emmet-mode
+                                 pretty-mode
+                                 ))))
 
   :config
-
-  (use-package web-mode
-    :ensure t
-    :mode "\\.html\\'"
-    :init (add-hook 'web-mode-hook 'my-web-mode-setup))
-
-  (use-package web-mode
-    :mode "\\.js\\'"
-    :init (add-hook 'web-mode-hook 'my-web-mode-setup))
-
-  (use-package web-mode
-    :ensure t
-    :mode "\\.jsx\\'"
-    :init (add-hook 'web-mode-hook 'my-web-mode-setup))
-
-  (use-package flycheck
-    :config
-    (flycheck-define-checker jsxhint-checker
-      "A jsx syntax and style checker based on jsxhint.
-
-npm i -g eslint
-"
-      :command ("eslint" source)
-      :error-patterns
-      ((error line-start (1+ nonl) ": line " line ", col " column ", " (message) line-end))
-      :modes (web-mode))))
+  (dolist (mode '(js2-jsx-mode js2-mode))
+    (font-lock-add-keywords
+     mode `(("\\<\\(function\\)("
+             (0 (progn (compose-region (match-beginning 1)
+                                       (match-end 1) "\u0192") nil)))))
+    (font-lock-add-keywords
+     mode `(("\\<\\(function\\) .*("
+             (0 (progn (compose-region (match-beginning 1)
+                                       (match-end 1) "\u0192") nil)))))))
 
 (use-package 0blayout
   :ensure t
@@ -641,6 +626,9 @@ npm i -g eslint
   (add-hook 'web-mode-hook 'skewer-html-mode))
 
 (use-package exec-path-from-shell :ensure t)
+
+(use-package elm-mode
+  :ensure t)
 
 (use-package html-mode
   :mode "\\.htm\\'"
@@ -813,16 +801,8 @@ If FILENAME already exists do nothing."
 (use-package helm-themes
   :bind ([f9] . helm-themes))
 
-(use-package my-themes
-  :init (setq my-themes '( espresso ))
-  :config
-  (add-hook 'my-load-theme-hook (defun my-load-theme-setup ()
-                                  (interactive)
-                                  (let ((font-and-size (format "%s-%s" my-font-family my-font-size)))
-                                    (add-to-list 'default-frame-alist `(font . ,font-and-size))
-                                    (set-default-font font-and-size))))
-  (when (and (window-system))
-    (my-use-next-theme)))
+(when (and (window-system))
+  (load-theme 'dorsey :no-confirm))
 
 (use-package org-tree-slide
   :ensure t
@@ -840,4 +820,5 @@ If FILENAME already exists do nothing."
 (use-package beacon
   :ensure t
   :config (my-enable-mode 'beacon-mode))
+
 ;;; init.el ends here
