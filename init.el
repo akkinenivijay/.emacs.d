@@ -326,7 +326,8 @@
 
 (use-package projectile
   :ensure helm
-  :bind (("C-c p D" . projectile-dired))
+  :bind (("C-c p D" . projectile-dired)
+         ("C-c p v" . projectile-vc))
 
   :init
   (setq projectile-enable-caching t)
@@ -346,7 +347,8 @@
 (use-package helm-projectile
     :ensure projectile
     :bind (("C-c p p" . helm-projectile-switch-project)
-           ("C-c p s s" . helm-projectile-ag))
+           ("C-c p s s" . helm-projectile-ag)
+           )
 
     :init
     (setq projectile-enable-caching t)
@@ -801,8 +803,17 @@ If FILENAME already exists do nothing."
 (use-package helm-themes
   :bind ([f9] . helm-themes))
 
-(when (and (window-system))
-  (load-theme 'dorsey :no-confirm))
+(use-package my-themes
+  :config
+  (add-hook 'my-load-theme-hook (defun my-theme-setup ()
+                                  (interactive)
+                                  (let ((font-and-size (format
+                                                        "%s-%s"
+                                                        my-font-family
+                                                        my-font-size)))
+                                    (when (member my-font-family (font-family-list))
+                                      (set-frame-font font-and-size)))))
+  (add-hook 'after-init-hook #'my-load-saved-theme))
 
 (use-package org-tree-slide
   :ensure t

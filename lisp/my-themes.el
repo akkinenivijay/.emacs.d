@@ -10,69 +10,28 @@
   nil
   "Hooks to run after loading a theme.")
 
-(defvar my-themes
-  '(default)
-  "Use next theme.")
+(defvar my-saved-theme-filename "~/.emacs-theme")
 
-(defvar my-current-theme
-  'default
-  "Current active theme.")
+(advice-add 'load-theme :after #'my-save-theme)
+(advice-add 'load-theme :after #'my-run-theme-hooks)
 
-(defun -my-get-next-theme ()
-  (let ((theme (cadr (-drop-while (lambda (item) (not (eq item my-current-theme)))
-                                  my-themes))))
-    (or theme (car my-themes) 'default)))
+(defun my-run-theme-hooks (theme &optional no-confirm no-enable)
+  (run-hooks 'my-load-theme-hook))
 
-(defun -my-get-prev-theme ()
-  (let ((theme (-last-item (-take-while (lambda (item)
-                                          (not (eq item my-current-theme)))
-                                        my-themes))))
-    (or theme (-last-item my-themes) 'default)))
+(defun my-save-theme (theme &optional no-confirm no-enable)
+  (with-temp-buffer
+    (insert (symbol-name theme))
+    (when (file-writable-p my-saved-theme-filename)
+      (write-region (point-min)
+                    (point-max)
+                    my-saved-theme-filename))))
 
-(defun -my-get-theme-pkg-name (theme)
-  (format "%s-theme" (symbol-name theme)))
-
-(defun -my-theme-available? (theme)
-  (or
-   (eq theme 'default)
-   (member theme (custom-available-themes))
-   (let ((theme-pkg (-my-get-theme-pkg-name theme)))
-     (package-install (intern theme-pkg)))))
-
-
-
-(defun my-use-next-theme ()
-  "Use next theme in `my-themes'."
+(defun my-load-saved-theme ()
   (interactive)
-  (let ((theme (-my-get-next-theme)))
-    (message "Next theme is %s" theme)
-    (when (-my-theme-available? theme)
-      (my-load-theme theme)
-      (run-hooks 'my-load-theme-hook)
-      (message "Theme '%s' loaded." theme))
-    ))
-
-(defun my-use-prev-theme ()
-  "Use previous theme in `my-themes'."
-  (interactive)
-  (let ((theme (-my-get-prev-theme)))
-    (message "Prev theme is %s" theme)
-    (when (-my-theme-available? theme)
-      (my-load-theme theme)
-      (run-hooks 'my-load-theme-hook)
-      (message "Theme '%s' loaded." theme))
-    ))
-
-(defun my-load-theme (theme)
-  "Use THEME."
-  (interactive
-   (list
-    (intern (completing-read "Load custom theme: "
-                             (mapcar #'symbol-name (custom-available-themes))))))
-  (mapc #'disable-theme custom-enabled-themes)
-  (unless (eq theme 'default)
-    (load-theme theme :noconfirm))
-  (setq my-current-theme theme))
+  (let ((theme (intern (with-temp-buffer
+                         (insert-file-contents my-saved-theme-filename)
+                         (buffer-string)))))
+    (load-theme theme :no-confirm)))
 
 (provide 'my-themes)
 ;;; my-themes.el ends here
