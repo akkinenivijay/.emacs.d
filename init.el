@@ -163,7 +163,7 @@
   :init (unbind-key [f3])
   :bind ([f3] . global-hl-line-mode))
 
-(use-package compilation
+(use-package compile
   :config (setq compilation-ask-about-save nil
                 compilation-always-kill t
                 compilation-scroll-output 'first-error))
@@ -327,7 +327,8 @@
 (use-package projectile
   :ensure helm
   :bind (("C-c p D" . projectile-dired)
-         ("C-c p v" . projectile-vc))
+         ("C-c p v" . projectile-vc)
+         ("C-c p f" . projectile-find-file))
 
   :init
   (setq projectile-enable-caching t)
@@ -805,6 +806,9 @@ If FILENAME already exists do nothing."
 
 (use-package my-themes
   :config
+  (set-frame-parameter (selected-frame) 'alpha '(98 98))
+  (add-to-list 'default-frame-alist '(alpha 98 98))
+  (add-to-list 'default-frame-alist `(font . ,(format "%s-%s" my-font-family my-font-size)))
   (add-hook 'my-load-theme-hook (defun my-theme-setup ()
                                   (interactive)
                                   (let ((font-and-size (format
