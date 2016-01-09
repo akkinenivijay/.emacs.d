@@ -6,12 +6,12 @@
 (require 'cl)
 
 (defcustom my-font-family
-  "Monoid"
+  "DejaVu Sans Mono Book"
   "My preferred font family."
   :group 'personal)
 
 (defcustom my-font-size
-  13
+  15
   "My preferred font size."
   :group 'personal)
 

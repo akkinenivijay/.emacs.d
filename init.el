@@ -800,24 +800,23 @@ If FILENAME already exists do nothing."
 (use-package fancy-narrow :ensure t)
 (use-package demo-it :ensure t)
 (use-package cdnjs :ensure t)
+(use-package tldr :ensure t)
 
 (use-package helm-themes
   :bind ([f9] . helm-themes))
 
 (use-package my-themes
   :config
-  (set-frame-parameter (selected-frame) 'alpha '(98 98))
-  (add-to-list 'default-frame-alist '(alpha 98 98))
-  (add-to-list 'default-frame-alist `(font . ,(format "%s-%s" my-font-family my-font-size)))
-  (add-hook 'my-load-theme-hook (defun my-theme-setup ()
-                                  (interactive)
-                                  (let ((font-and-size (format
-                                                        "%s-%s"
-                                                        my-font-family
-                                                        my-font-size)))
+  (let ((transparency 98)
+        (font&size (format "%s-%s" my-font-family my-font-size)))
+    (set-frame-parameter (selected-frame) 'alpha (list transparency transparency))
+    (add-to-list 'default-frame-alist `(alpha ,transparency ,transparency))
+    (add-to-list 'default-frame-alist `(font . ,font&size))
+    (add-hook 'my-load-theme-hook (defun my-theme-setup ()
+                                    (interactive)
                                     (when (member my-font-family (font-family-list))
-                                      (set-frame-font font-and-size)))))
-  (add-hook 'after-init-hook #'my-load-saved-theme))
+                                      (set-frame-font font&size))))
+    (add-hook 'after-init-hook #'my-load-saved-theme)))
 
 (use-package org-tree-slide
   :ensure t
