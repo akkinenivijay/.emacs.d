@@ -86,9 +86,6 @@
              (?s . (file . ,(expand-file-name "snippets" user-emacs-directory)))))
   (set-register (car r) (cdr r)))
 
-(when window-system
-  (unbind-key "C-z"))
-
 (bind-keys ("M-U"        . (command (upcase-word -1)))
            ("M-%"        . query-replace-regexp)
            ("C-M-;"      . comment-or-uncomment-region)
@@ -222,6 +219,7 @@
   (yas-reload-all))
 
 (use-package magit
+  :pin melpa-stable
   :ensure t
   :init (setq magit-last-seen-setup-instructions "1.4.0"))
 (use-package git-messenger
@@ -325,7 +323,7 @@
              ("C-h b" . helm-descbinds)))
 
 (use-package projectile
-  :ensure helm
+  :ensure t
   :bind (("C-c p D" . projectile-dired)
          ("C-c p v" . projectile-vc)
          ("C-c p f" . projectile-find-file))
@@ -346,7 +344,7 @@
   :config (setq neo-theme 'ascii))
 
 (use-package helm-projectile
-    :ensure projectile
+    :ensure t
     :bind (("C-c p p" . helm-projectile-switch-project)
            ("C-c p s s" . helm-projectile-ag)
            )
@@ -434,6 +432,9 @@
                               show-paren-mode))
            (highlight-lines-matching-regexp "i?pdb\."))))
 
+(use-package helm-hoogle :ensure t)
+(use-package helm-hayoo :ensure t)
+(use-package stack-mode :ensure t)
 (use-package haskell-mode
   :ensure t
   :mode "\\.hs\\'"
@@ -443,6 +444,7 @@
            (interactive)
            (my-enable-modes '(subword-mode
                               flycheck-mode
+                              stack-mode
                               wrap-region-mode
                               electric-pair-mode
                               haskell-doc-mode
@@ -460,6 +462,8 @@
    ("C-c C-." . haskell-mode-format-imports)
 
    ("s-i"     . haskell-navigate-imports)
+   ("s-y"     . helm-hayoo)
+   ("s-h"     . helm-hoogle)
 
    ("C-c C-l" . haskell-process-load-or-reload)
    ("C-`"     . haskell-interactive-bring)
@@ -521,6 +525,7 @@
 (use-package flycheck :ensure t)
 
 (use-package json-mode
+  :ensure t
   :mode "\\.json\\'"
   :init (add-hook 'json-mode-hook (defun my-json-setup ()
                                     (interactive)
@@ -746,6 +751,10 @@
   :ensure t
   :mode "\\.md\\'")
 
+(use-package yaml-mode
+  :ensure t
+  :mode "\\.ya?ml\\'")
+
 (use-package recursive-narrow
   :bind (("C-x n n" . recursive-narrow-or-widen-dwim)
          ("C-x n w" . recursive-widen-dwim)))
@@ -801,13 +810,15 @@ If FILENAME already exists do nothing."
 (use-package demo-it :ensure t)
 (use-package cdnjs :ensure t)
 (use-package tldr :ensure t)
+(use-package markdown-preview-mode :ensure t)
 
 (use-package helm-themes
+  :ensure t
   :bind ([f9] . helm-themes))
 
 (use-package my-themes
   :config
-  (let ((transparency 98)
+  (let ((transparency 99)
         (font&size (format "%s-%s" my-font-family my-font-size)))
     (set-frame-parameter (selected-frame) 'alpha (list transparency transparency))
     (add-to-list 'default-frame-alist `(alpha ,transparency ,transparency))
@@ -831,8 +842,17 @@ If FILENAME already exists do nothing."
                                    (interactive)
                                    (my-enable-modes '(org-bullets-mode)))))
 
-(use-package beacon
-  :ensure t
-  :config (my-enable-mode 'beacon-mode))
+(defun my-frames-setup (&optional frame)
+  (interactive)
+  (when (window-system frame)
+    (unbind-key "C-z")
+
+    (use-package beacon
+      :ensure t
+      :config (my-enable-mode 'beacon-mode))))
+
+(add-hook 'after-make-frame-functions #'my-frames-setup)
+(add-hook 'after-init-hook #'my-frames-setup)
+(autoload 'ansi-color-for-comint-mode-on "ansi-color" nil t)
 
 ;;; init.el ends here
