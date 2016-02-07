@@ -17,14 +17,12 @@
         )
       )
 (package-initialize)
-(dolist (pkg package-archives)
-  (let ((pkg-name (car pkg)))
-    (unless (file-exists-p (format "~/.emacs.d/elpa/archives/%s" pkg-name))
-      (package-refresh-contents))))
 
-(unless (require 'use-package nil :noerror)
-  (package-install 'use-package)
-  (require 'use-package))
+(unless (package-installed-p 'use-package)
+  (package-refresh-contents)
+  (package-install 'use-package))
+
+(require 'use-package)
 
 (use-package my-prelude
   :load-path "~/.emacs.d/lisp")
@@ -37,10 +35,14 @@
       load-prefer-newer t
       require-final-newline t
 
+      ;; auto-backup (filename~)
       backup-directory-alist `(("." . ,temporary-file-directory))
       backup-by-copying t
       delete-old-versions t
       version-control t
+
+      ;; auto-save (#filename#)
+      auto-save-file-name-transforms `((".*" ,temporary-file-directory t))
 
       confirm-kill-emacs #'y-or-n-p
 
@@ -137,7 +139,13 @@
   :bind (("C-x 1" . zygospore-toggle-delete-other-windows)
          ("C-M-1" . zygospore-toggle-delete-other-windows)))
 
+(use-package auto-highlight-symbol
+  :ensure t
+  :config (my-enable-mode 'global-auto-highlight-symbol-mode))
+
 (use-package align :ensure t)
+(use-package auth-password-store :ensure t)
+(use-package web-beautify :ensure t)
 
 (use-package nvm
   :ensure t
@@ -432,9 +440,14 @@
                               show-paren-mode))
            (highlight-lines-matching-regexp "i?pdb\."))))
 
-(use-package helm-hoogle :ensure t)
-(use-package helm-hayoo :ensure t)
-(use-package stack-mode :ensure t)
+(use-package helm-hoogle
+  :ensure t
+  :bind ("C-c h g" . helm-hoogle))
+
+(use-package helm-hayoo
+  :ensure t
+  :bind ("C-c h y" . helm-hayoo))
+
 (use-package haskell-mode
   :ensure t
   :mode "\\.hs\\'"
@@ -444,9 +457,7 @@
            (interactive)
            (my-enable-modes '(subword-mode
                               flycheck-mode
-                              stack-mode
                               wrap-region-mode
-                              electric-pair-mode
                               haskell-doc-mode
                               interactive-haskell-mode
                               haskell-indentation-mode))))
@@ -462,8 +473,6 @@
    ("C-c C-." . haskell-mode-format-imports)
 
    ("s-i"     . haskell-navigate-imports)
-   ("s-y"     . helm-hayoo)
-   ("s-h"     . helm-hoogle)
 
    ("C-c C-l" . haskell-process-load-or-reload)
    ("C-`"     . haskell-interactive-bring)
