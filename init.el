@@ -150,8 +150,12 @@
 (use-package nvm
   :ensure t
   :config
-  (nvm-use "v0.12.7")
+  (nvm-use "v5.8.0")
   (add-to-list 'exec-path (getenv "NVM_BIN")))
+
+(use-package sh-script
+  :config (setq sh-indentation 2
+                sh-basic-offset 2))
 
 (use-package discover
   :ensure t
