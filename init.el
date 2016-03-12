@@ -157,6 +157,9 @@
   :config (setq sh-indentation 2
                 sh-basic-offset 2))
 
+(use-package dockerfile-mode
+  :ensure t)
+
 (use-package discover
   :ensure t
   :config (my-enable-mode 'discover-mode))
@@ -546,6 +549,7 @@
                                           js-indent-level 2))))
 
 (use-package web-mode
+  :ensure t
   :init (add-hook 'web-mode-hook (defun my-web-mode-setup ()
                                    (interactive)
                                    (my-enable-modes '(electric-pair-mode)))))
