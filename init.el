@@ -487,8 +487,7 @@
    ("C-c C-i" . haskell-process-do-info)
    ("C-c C-c" . haskell-process-cabal-build)
    ("C-c C-k" . haskell-interactive-mode-clear)
-   ("C-c c"   . haskell-process-cabal)
-   ("SPC"     . haskell-mode-contextual-space)))
+   ("C-c c"   . haskell-process-cabal)))
 
 (use-package purescript-mode
   :ensure t
@@ -546,7 +545,8 @@
   :init (add-hook 'json-mode-hook (defun my-json-setup ()
                                     (interactive)
                                     (setq json-reformat:indent-width 2
-                                          js-indent-level 2))))
+                                          js-indent-level 2)
+                                    (my-enable-modes '(electric-pair-mode)))))
 
 (use-package web-mode
   :ensure t
