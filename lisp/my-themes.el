@@ -13,10 +13,14 @@
 (defvar my-saved-theme-filename "~/.emacs-theme")
 
 (advice-add 'load-theme :after #'my-save-theme)
+(advice-add 'disable-theme :after #'my-save-default-theme)
 (advice-add 'load-theme :after #'my-run-theme-hooks)
 
 (defun my-run-theme-hooks (theme &optional no-confirm no-enable)
   (run-hooks 'my-load-theme-hook))
+
+(defun my-save-default-theme (disabled-theme)
+  (my-save-theme 'default))
 
 (defun my-save-theme (theme &optional no-confirm no-enable)
   (with-temp-buffer
@@ -31,7 +35,8 @@
   (let ((theme (intern (with-temp-buffer
                          (insert-file-contents my-saved-theme-filename)
                          (buffer-string)))))
-    (load-theme theme :no-confirm)))
+    (unless (eq theme 'default)
+      (load-theme theme :no-confirm))))
 
 (provide 'my-themes)
 ;;; my-themes.el ends here
