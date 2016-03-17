@@ -50,6 +50,13 @@
   (and (fboundp 'projectile-project-p)
        (projectile-project-p)))
 
+(defun my-copy-buffer-file-name (buff)
+  "Copy filename of BUFF buffer."
+  (interactive "b")
+  (let ((filename (buffer-file-name (get-buffer buff))))
+    (when filename
+      (kill-new filename))))
+
 (defun my-kill-buffer-and-file (&optional buffer-or-name)
   "Kill BUFFER-OR-NAME and its associated file.
 If BUFFER-OR-NAME is not specified the current buffer is used."

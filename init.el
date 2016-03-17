@@ -25,7 +25,8 @@
 (require 'use-package)
 
 (use-package my-prelude
-  :load-path "~/.emacs.d/lisp")
+  :load-path "~/.emacs.d/lisp"
+  :bind (("s-k" . my-copy-buffer-file-name)))
 
 (setq-default indent-tabs-mode nil
               tab-width 8)
@@ -71,12 +72,6 @@
 
 (defalias 'yes-or-no-p 'y-or-n-p)
 
-(my-enable-modes '(global-prettify-symbols-mode
-                   global-auto-revert-mode
-                   delete-selection-mode
-                   column-number-mode
-                   savehist-mode))
-
 (my-disable-modes '(scroll-bar-mode
                     tool-bar-mode
                     menu-bar-mode
@@ -101,7 +96,6 @@
            ("C-x a r"    . align-regexp)
            ("C-c w"      . delete-region))
 
-
 (use-package my-editing-defuns
   :load-path "~/.emacs.d/lisp"
   :bind (("M-W" . my-copy-line-as-kill)
@@ -115,6 +109,21 @@
 (use-package iedit
   :ensure t
   :init (setq iedit-toggle-key-default (kbd "M-s-;")))
+
+(use-package autorevert
+  :diminish global-auto-revert-mode
+  :config (my-enable-mode 'global-auto-revert-mode))
+
+(use-package prog-mode
+  :diminish global-prettify-symbols-mode
+  :config (my-enable-mode 'global-prettify-symbols-mode))
+
+(use-package which-func
+  :config (bind-key "s-f" (command (message (which-function)))))
+
+(my-enable-modes '(delete-selection-mode
+                   column-number-mode
+                   savehist-mode))
 
 (use-package mykie
   :ensure t
@@ -228,6 +237,7 @@
 (use-package yasnippet
   :ensure t
   :defer t
+  :diminish yas-minor-mode
   :config
   (setq yas-wrap-around-region t)
   (bind-key "C-i" 'yas-next-field-or-maybe-expand yas-keymap)
@@ -610,6 +620,7 @@
 
 (use-package 0blayout
   :ensure t
+  :diminish 0blayout-mode
   :config
   (my-enable-mode '0blayout-mode)
   (0blayout-add-keybindings-with-prefix "C-x ,"))
@@ -637,6 +648,7 @@
 
 (use-package emmet-mode
   :ensure t
+  :diminish emmet-mode
   :init
   (setq emmet-indent-after-insert t
         emmet-indentation 2)
@@ -644,6 +656,7 @@
 
 (use-package skewer-mode
   :ensure t
+  :diminish skewer-mode
   :init
   (add-hook 'js2-mode-hook 'skewer-mode)
   (add-hook 'css-mode-hook 'skewer-css-mode)
@@ -816,13 +829,13 @@ If FILENAME already exists do nothing."
   '(use-package info+ :ensure t))
 
 (use-package aggressive-indent :ensure t)
-(use-package hungry-delete :ensure t)
+(use-package hungry-delete :ensure t :diminish hungry-delete-mode)
 (use-package paredit :ensure t)
-(use-package wrap-region :ensure t)
-(use-package js2-refactor :ensure t)
+(use-package wrap-region :ensure t :diminish wrap-region-mode)
 (use-package rainbow-delimiters :ensure t)
-(use-package hl-todo :ensure t)
-(use-package tern :ensure t)
+(use-package hl-todo :ensure t :diminish hl-todo-mode)
+(use-package tern :ensure t :diminish tern-mode)
+(use-package js2-refactor :ensure t :diminish js2-refactor-mode)
 (use-package fancy-narrow :ensure t)
 (use-package demo-it :ensure t)
 (use-package cdnjs :ensure t)
