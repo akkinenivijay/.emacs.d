@@ -11,7 +11,7 @@
   :group 'personal)
 
 (defcustom my-font-size
-  11
+  13
   "My preferred font size."
   :group 'personal)
 

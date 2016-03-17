@@ -788,6 +788,7 @@
   :mode "\\.ya?ml\\'")
 
 (use-package recursive-narrow
+  :ensure t
   :bind (("C-x n n" . recursive-narrow-or-widen-dwim)
          ("C-x n w" . recursive-widen-dwim)))
 
@@ -851,7 +852,7 @@ If FILENAME already exists do nothing."
 (use-package my-themes
   :config
   (add-to-list 'custom-theme-load-path (expand-file-name "themes" user-emacs-directory))
-  (let ((transparency 99)
+  (let ((transparency 100)
         (font&size (format "%s-%s" my-font-family my-font-size)))
     (set-frame-parameter (selected-frame) 'alpha (list transparency transparency))
     (add-to-list 'default-frame-alist `(alpha ,transparency ,transparency))
