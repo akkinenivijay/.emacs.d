@@ -6,12 +6,12 @@
 (require 'cl)
 
 (defcustom my-font-family
-  "Inconsolata"
+  "Hack"
   "My preferred font family."
   :group 'personal)
 
 (defcustom my-font-size
-  15
+  11
   "My preferred font size."
   :group 'personal)
 

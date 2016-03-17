@@ -26,7 +26,26 @@
 
 (use-package my-prelude
   :load-path "~/.emacs.d/lisp"
-  :bind (("s-k" . my-copy-buffer-file-name)))
+  :bind (("s-k" . my-copy-buffer-file-name))
+  :demand t
+  :config
+  ;; enable dangerous commands
+  (dolist (cmd '(narrow-to-region
+                 narrow-to-page
+                 narrow-to-defun
+                 upcase-region
+                 downcase-region
+                 erase-buffer
+                 eval-expression
+                 dired-find-alternate-file
+                 set-goal-column))
+    (put cmd 'disabled nil))
+
+  (my-disable-modes '(scroll-bar-mode
+                      tool-bar-mode
+                      menu-bar-mode
+                      blink-cursor-mode
+                      transient-mark-mode)))
 
 (setq-default indent-tabs-mode nil
               tab-width 8)
@@ -58,25 +77,7 @@
       scroll-margin 2
       scroll-preserve-screen-position t)
 
-;; enable dangerous commands
-(dolist (cmd '(narrow-to-region
-               narrow-to-page
-               narrow-to-defun
-               upcase-region
-               downcase-region
-               erase-buffer
-               eval-expression
-               dired-find-alternate-file
-               set-goal-column))
-  (put cmd 'disabled nil))
-
 (defalias 'yes-or-no-p 'y-or-n-p)
-
-(my-disable-modes '(scroll-bar-mode
-                    tool-bar-mode
-                    menu-bar-mode
-                    blink-cursor-mode
-                    transient-mark-mode))
 
 (dolist (r `((?i . (file . ,(expand-file-name "init.el" user-emacs-directory)))
              (?p . (file . ,(expand-file-name "lisp/my-prelude.el" user-emacs-directory)))
@@ -351,6 +352,7 @@
   :ensure t
   :bind (("C-c p D" . projectile-dired)
          ("C-c p v" . projectile-vc)
+         ("C-c p k" . projectile-kill-buffers)
          ("C-c p f" . projectile-find-file))
 
   :init
@@ -848,6 +850,7 @@ If FILENAME already exists do nothing."
 
 (use-package my-themes
   :config
+  (add-to-list 'custom-theme-load-path (expand-file-name "themes" user-emacs-directory))
   (let ((transparency 99)
         (font&size (format "%s-%s" my-font-family my-font-size)))
     (set-frame-parameter (selected-frame) 'alpha (list transparency transparency))
