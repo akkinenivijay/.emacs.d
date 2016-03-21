@@ -24,6 +24,9 @@
 
 (require 'use-package)
 
+(setq mouse-wheel-scroll-amount '(1 ((shift) . 1) ((control) . nil))
+      mouse-wheel-progressive-speed nil)
+
 (use-package my-prelude
   :load-path "~/.emacs.d/lisp"
   :bind (("s-k" . my-copy-buffer-file-name))
@@ -475,6 +478,7 @@
          (defun my-haskell-setup ()
            (interactive)
            (my-enable-modes '(subword-mode
+                              electric-pair-mode
                               flycheck-mode
                               wrap-region-mode
                               haskell-doc-mode
