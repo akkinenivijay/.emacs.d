@@ -6,7 +6,7 @@
 (require 'cl)
 
 (defcustom my-font-family
-  "Hack"
+  "Fantasque Sans Mono"
   "My preferred font family."
   :group 'personal)
 
