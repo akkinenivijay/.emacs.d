@@ -302,6 +302,7 @@
   :defer t
   :bind (("M-x" . helm-M-x)
          ("C-x C-m" . helm-M-x)
+         ("C-h SPC" . helm-all-mark-rings)
          ("M-Y" . helm-show-kill-ring)
          ("C-x b" . helm-mini)
          ("C-x C-b" . helm-buffers-list)
