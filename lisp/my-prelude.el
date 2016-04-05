@@ -6,12 +6,12 @@
 (require 'cl)
 
 (defcustom my-font-family
-  "Fantasque Sans Mono"
+  "Roboto Mono Regular"
   "My preferred font family."
   :group 'personal)
 
 (defcustom my-font-size
-  13
+  14
   "My preferred font size."
   :group 'personal)
 

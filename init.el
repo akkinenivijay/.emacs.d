@@ -127,7 +127,8 @@
 
 (my-enable-modes '(delete-selection-mode
                    column-number-mode
-                   savehist-mode))
+                   savehist-mode
+                   global-hi-lock-mode))
 
 (use-package mykie
   :ensure t
@@ -170,8 +171,9 @@
   :config (setq sh-indentation 2
                 sh-basic-offset 2))
 
-(use-package dockerfile-mode
-  :ensure t)
+(use-package dockerfile-mode :ensure t)
+(use-package docker :ensure t)
+(use-package docker-tramp :ensure t)
 
 (use-package discover
   :ensure t
@@ -597,22 +599,23 @@
                   "JSON" "$" "_" "Backbone" "buster" "sinon" "moment" "_gaq"
                   "Zenbox" "Mousetrap" "Comoyo"))
 
-  (add-hook 'js2-jsx-mode-hook
-            (defun my-js-setup ()
-              (interactive)
-              (use-package js2-refactor
-                :config (js2r-add-keybindings-with-prefix "C-c C-j"))
+  (add-hook 'js2-jsx-mode-hook (defun my-js-setup ()
+                                 (interactive)
+                                 (use-package js2-refactor
+                                   :config (js2r-add-keybindings-with-prefix "C-c C-j"))
 
-              (my-enable-modes '(subword-mode
-                                 hungry-delete-mode
-                                 wrap-region-mode
-                                 js2-refactor-mode
-                                 electric-pair-mode
-                                 hl-todo-mode
-                                 tern-mode
-                                 emmet-mode
-                                 pretty-mode
-                                 ))))
+                                 (highlight-lines-matching-regexp "debugger")
+
+                                 (my-enable-modes '(subword-mode
+                                                    hungry-delete-mode
+                                                    wrap-region-mode
+                                                    js2-refactor-mode
+                                                    electric-pair-mode
+                                                    hl-todo-mode
+                                                    tern-mode
+                                                    emmet-mode
+                                                    pretty-mode
+                                                    ))))
 
   :config
   (dolist (mode '(js2-jsx-mode js2-mode))
@@ -635,10 +638,10 @@
 (use-package smart-window
   :ensure t
   :init (setq smart-window-remap-keys nil)
-  :bind (("C-x w" . smart-window-move)
-         ("C-x W" . smart-window-buffer-split)
-         ("C-x M-W" . smart-window-file-split)
-         ("C-x R" . smart-window-rotate)
+  :bind (("C-c s m" . smart-window-move)
+         ("C-c s b" . smart-window-buffer-split)
+         ("C-c s f" . smart-window-file-split)
+         ("C-c s R" . smart-window-rotate)
          ("C-M-2" . sw-below)
          ("C-M-3" . sw-right)))
 
