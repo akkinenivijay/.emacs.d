@@ -6,7 +6,7 @@
 (require 'cl)
 
 (defcustom my-font-family
-  "Roboto Mono Regular"
+  "Fira Code"
   "My preferred font family."
   :group 'personal)
 

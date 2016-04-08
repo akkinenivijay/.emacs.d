@@ -153,9 +153,14 @@
   :bind (("C-x 1" . zygospore-toggle-delete-other-windows)
          ("C-M-1" . zygospore-toggle-delete-other-windows)))
 
-(use-package auto-highlight-symbol
-  :ensure t
-  :config (my-enable-mode 'global-auto-highlight-symbol-mode))
+(use-package linkd
+  :load-path "lisp/linkd"
+  :init (setq linkd-use-icons t
+              linkd-icons-directory "~/.emacs.d/lisp/linkd/icons"))
+
+;; (use-package auto-highlight-symbol
+;;   :ensure t
+;;   :config (my-enable-mode 'global-auto-highlight-symbol-mode))
 
 (use-package align :ensure t)
 (use-package auth-password-store :ensure t)
@@ -174,6 +179,10 @@
 (use-package dockerfile-mode :ensure t)
 (use-package docker :ensure t)
 (use-package docker-tramp :ensure t)
+
+(use-package persistent-scratch
+  :ensure t
+  :config (persistent-scratch-setup-default))
 
 (use-package discover
   :ensure t
@@ -234,11 +243,14 @@
 (use-package tramp
   :config (setq tramp-default-method "ssh"))
 
-(use-package server
-  :config
-  (setq server-use-tcp t)
-  (unless (server-running-p)
-    (server-start)))
+;; (use-package server
+;;   :config
+;;   (setq server-use-tcp t)
+;;   (unless (server-running-p)
+;;     (server-start)))
+
+(use-package cask-mode :ensure t)
+(use-package restclient-helm :ensure t)
 
 (use-package yasnippet
   :ensure t
@@ -261,6 +273,13 @@
 (use-package what-the-commit
   :ensure t
   :bind ("s-c" . what-the-commit-insert))
+(use-package github-browse-file
+  :ensure t
+  :init (setq github-browse-file-show-line-at-point t))
+
+(use-package swap-regions
+  :ensure t
+  :bind (("C-c C-t" . swap-regions)))
 
 (use-package fullframe
   :ensure t
