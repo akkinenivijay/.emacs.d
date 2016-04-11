@@ -6,7 +6,7 @@
 (require 'cl)
 
 (defcustom my-font-family
-  "Fira Code"
+  "Hack"
   "My preferred font family."
   :group 'personal)
 

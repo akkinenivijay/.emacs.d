@@ -604,6 +604,7 @@
   :ensure t
   :mode ("\\.js\\'" . js2-jsx-mode)
   :init
+  (setq-default s2-indent-switch-body t)
   (setq-default js2-basic-offset 2)
   (setq-default js-indent-level 2)
   (setq-default js2-include-node-externs t)
