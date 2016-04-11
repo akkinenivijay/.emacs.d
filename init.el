@@ -25,8 +25,9 @@
 (require 'use-package)
 
 (setq mouse-wheel-scroll-amount '(1 ((shift) . 1) ((control) . nil))
-      mouse-wheel-progressive-speed nil
-      tab-width 4)
+      mouse-wheel-progressive-speed nil)
+
+(setq-default tab-width 4)
 
 (use-package my-prelude
   :load-path "~/.emacs.d/lisp"
