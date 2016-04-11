@@ -25,7 +25,8 @@
 (require 'use-package)
 
 (setq mouse-wheel-scroll-amount '(1 ((shift) . 1) ((control) . nil))
-      mouse-wheel-progressive-speed nil)
+      mouse-wheel-progressive-speed nil
+      tab-width 4)
 
 (use-package my-prelude
   :load-path "~/.emacs.d/lisp"
@@ -110,9 +111,9 @@
          ("C-x C-e" . my-eval-last-sexp)
          ("C-c o o" . prelude-open-with)))
 
-(use-package iedit
-  :ensure t
-  :init (setq iedit-toggle-key-default (kbd "M-s-;")))
+;; (use-package iedit
+;;   :ensure t
+;;   :init (setq iedit-toggle-key-default (kbd "M-s-;")))
 
 (use-package autorevert
   :diminish global-auto-revert-mode
@@ -728,7 +729,6 @@
                               ( bind-key "s-." 'html-attrs-as-columns)
                               (bind-key "s-," 'html-attrs-as-line)
                               (use-package emmet-mode)
-                              (tagedit-add-experimental-features)
                               (setq emmet-indent-after-insert t
                                     emmet-indentation 2
                                     sgml-basic-offset 2
@@ -808,7 +808,8 @@
 
 (use-package markdown-mode
   :ensure t
-  :mode "\\.md\\'")
+  :mode "\\.md\\'"
+  :config (setq markdown-open-command "xdg-open"))
 
 (use-package yaml-mode
   :ensure t
