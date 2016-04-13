@@ -245,11 +245,9 @@
 (use-package tramp
   :config (setq tramp-default-method "ssh"))
 
-;; (use-package server
-;;   :config
-;;   (setq server-use-tcp t)
-;;   (unless (server-running-p)
-;;     (server-start)))
+(use-package server
+  :config (unless (server-running-p)
+            (server-start)))
 
 (use-package cask-mode :ensure t)
 (use-package restclient-helm :ensure t)
@@ -604,7 +602,7 @@
   :ensure t
   :mode ("\\.js\\'" . js2-jsx-mode)
   :init
-  (setq-default s2-indent-switch-body t)
+  (setq-default js2-indent-switch-body t)
   (setq-default js2-basic-offset 2)
   (setq-default js-indent-level 2)
   (setq-default js2-include-node-externs t)
@@ -816,11 +814,6 @@
 (use-package yaml-mode
   :ensure t
   :mode "\\.ya?ml\\'")
-
-(use-package recursive-narrow
-  :ensure t
-  :bind (("C-x n n" . recursive-narrow-or-widen-dwim)
-         ("C-x n w" . recursive-widen-dwim)))
 
 (use-package ag
   :ensure t
