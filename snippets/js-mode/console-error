@@ -1,5 +1,0 @@
-# -*- mode: snippet -*-
-# name: console log
-# key: error
-# --
-console.error($2)$1$0

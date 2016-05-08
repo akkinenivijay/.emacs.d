@@ -1,0 +1,10 @@
+# -*- mode: snippet -*-
+# name: Linear Congruential Method
+# key: rand
+# --
+function ${1:randUpdate}(n) {
+         var a = 11;
+         var m = 100;
+         var c = 1;
+         return (a * n + c) % m;
+}
