@@ -67,7 +67,8 @@
           ("C-c q" . delete-other-windows)
           ("C-M-r" . my-isearch-backward-regexp-other-window)
           ("C-x C-e" . my-eval-last-sexp)
-
+          ("M-s-<up>" . enlarge-window)
+          ("M-s-<down>" . enlarge-window-horizontally)
           )
 
   :config
@@ -237,6 +238,9 @@
   (use-package helm-descbinds
     :ensure t)
 
+  (use-package helm-ag
+    :ensure t)
+
   (use-package helm-swoop
   :ensure t
   :bind (("M-i" . helm-swoop)
@@ -393,32 +397,38 @@
 
   (add-hook 'js2-mode-hook (command (highlight-lines-matching-regexp "debugger")))
   (add-hook 'js2-mode-hook (command (highlight-lines-matching-regexp "TODO")))
-  (add-hook 'js2-mode-hook 'js2-refactor-mode)
 
   :config
-  (use-package tern
-    :ensure t
-    :defer t
-    :diminish tern-mode
-    :init
-    (add-hook 'js2-mode-hook 'tern-mode))
-
-  (use-package js2-refactor
-    :ensure t
-    :defer t
-    :diminish js2-refactor-mode
-    :config (js2r-add-keybindings-with-prefix "C-c C-j"))
 
   (dolist (mode '(js2-jsx-mode js2-mode))
     (font-lock-add-keywords
      mode `(("\\<\\(function\\)("
-             (0 (progn (compose-region (match-beginning 1)
-                                       (match-end 1) "\u0192") nil)))))
+             (0 (progn
+                  (compose-region
+                   (match-beginning 1)
+                   (match-end 1) "\u0192")
+                  nil)))))
     (font-lock-add-keywords
      mode `(("\\<\\(function\\) .*("
-             (0 (progn (compose-region (match-beginning 1)
-                                       (match-end 1) "\u0192") nil))))))
+             (0 (progn
+                  (compose-region
+                   (match-beginning 1)
+                   (match-end 1) "\u0192")
+                  nil))))))
   )
+
+(use-package tern
+  :ensure t
+  :defer t
+  :diminish tern-mode
+  :init (add-hook 'js2-mode-hook 'tern-mode))
+
+(use-package js2-refactor
+  :ensure t
+  :defer t
+  :diminish js2-refactor-mode
+  :init (add-hook 'js2-mode-hook 'js2-refactor-mode)
+  :config (js2r-add-keybindings-with-prefix "C-c C-j"))
 
 (use-package company
   :ensure t
@@ -526,6 +536,15 @@
   (add-hook 'css-mode-hook 'hungry-delete-mode)
   (add-hook 'emacs-lisp-mode-hook 'hungry-delete-mode))
 
+(use-package css-mode
+  :mode "\\.css\\'"
+  :init (add-hook 'css-mode-hook 'electric-pair-mode))
+
+(use-package rainbow-mode
+  :ensure t
+  :defer t
+  :init (add-hook 'css-mode-hook 'rainbow-mode))
+
 (use-package json-mode
   :ensure t
   :mode "\\.json\\'"
@@ -601,12 +620,6 @@
   :mode "\\.ts\\'"
   :config (setq typescript-indent-level 2))
 
-(use-package flycheck-typescript-tslint
-  :ensure t
-  :defer t
-  :init
-  (add-hook 'flycheck-mode-hook 'flycheck-typescript-tslint-setup))
-
 (use-package ns-win
   :if (eq system-type 'darwin)
   :config
@@ -622,4 +635,14 @@
 (use-package yaml-mode
   :ensure t
   :mode "\\.ya?ml\\'")
+
+(use-package tldr
+  :ensure t
+  :defer t)
+
+(use-package fullframe
+  :ensure t
+  :config
+  (fullframe magit-status magit-mode-quit-window nil)
+  (fullframe projectile-vc magit-mode-quit-window nil))
 ;;; init.el ends here
