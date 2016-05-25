@@ -215,21 +215,27 @@
   :config (setq Man-width 79))
 
 (use-package which-func
-  :init (defun my-echo-func ()
+  :init (defun my-echo-which-func ()
           (interactive)
           (message "\u0192: %s" (which-function)))
-  :bind (("C-c f" . my-echo-func)))
+  :commands (which-function)
+  :bind (("C-c f" . my-echo-which-func)))
 
 (use-package whitespace
-  :bind (("C-c c" . whitespace-cleanup))
+  :bind (("C-x S" . whitespace-cleanup-save-buffer))
   :diminish ((global-whitespace-mode . "")
              (whitespace-mode . ""))
   :init
+  (defun whitespace-cleanup-save-buffer ()
+    (interactive)
+    (whitespace-cleanup)
+    (save-buffer))
   (setq-default whitespace-style '(face trailing tab-mark))
   (add-hook 'prog-mode-hook 'whitespace-mode))
 
 (use-package dockerfile-mode
-  :ensure t)
+  :ensure t
+  :defer t)
 
 (use-package helm
   :ensure t
@@ -242,11 +248,12 @@
     :ensure t)
 
   (use-package helm-swoop
-  :ensure t
-  :bind (("M-i" . helm-swoop)
-         ("M-I" . helm-multi-swoop)
-         :isearch-mode-map
-         ("M-i" . helm-swoop-from-isearch)))
+    :ensure t
+    :demand isearch
+    :bind (("M-i" . helm-swoop)
+           ("M-I" . helm-multi-swoop)
+           :isearch-mode-map
+           ("M-i" . helm-swoop-from-isearch)))
 
   (use-package helm-config
     :diminish helm-mode
@@ -319,6 +326,7 @@
 
   (use-package helm-themes
     :ensure t
+    :if (display-graphic-p)
     :bind ([f9] . helm-themes))
   )
 ;;; end (use-package helm..)
@@ -326,15 +334,25 @@
 (use-package rainbow-delimiters
   :ensure t
   :defer t
+  :if (display-graphic-p)
   :init (add-hook 'emacs-lisp-mode-hook 'rainbow-delimiters-mode))
 
 (use-package paren
   :defer t
-  :init (add-hook 'emacs-lisp-mode-hook 'show-paren-mode))
+  :init
+  (add-hook 'emacs-lisp-mode-hook 'show-paren-mode)
+  (add-hook 'haskell-mode-hook 'show-paren-mode)
+  (add-hook 'js2-mode-hook 'show-paren-mode)
+  (add-hook 'css-mode-hook 'show-paren-mode)
+  (add-hook 'sgml-mode-hook 'show-paren-mode))
 
 (use-package elec-pair
   :defer t
-  :init (add-hook 'emacs-lisp-mode-hook 'electric-pair-mode))
+  :init
+  (add-hook 'js2-mode-hook 'electric-pair-mode)
+  (add-hook 'emacs-lisp-mode-hook 'electric-pair-mode)
+  (add-hook 'css-mode-hook 'electric-pair-mode)
+  (add-hook 'haskell-mode-hook 'electric-pair-mode))
 
 (use-package avy
   :ensure t
@@ -374,7 +392,9 @@
 (use-package subword
   :defer t
   :diminish subword-mode
-  :init (add-hook 'js2-mode-hook 'subword-mode))
+  :init
+  (add-hook 'js2-mode-hook 'subword-mode)
+  (add-hook 'haskell-mode-hook 'subword-mode))
 
 (use-package js2-mode
   :ensure t
@@ -433,19 +453,17 @@
 (use-package company
   :ensure t
   :diminish company-mode
+  :if (display-graphic-p)
   :config
-  (setq company-idle-delay 0.1)
+  (setq company-idle-delay 0.3
+        company-dabbrev-downcase nil)
   (global-company-mode)
   (use-package company-tern
     :ensure t
-    :config (add-to-list 'company-backends 'company-tern)))
-
-                                        ;(add-hook 'markdown-mode-hook 'company-emoji-init)
-
-(use-package markdown-mode
-  :ensure t
-  :mode (("\\.md" . markdown-mode)
-         ("\\.markdown" . markdown-mode)))
+    :config (add-to-list 'company-backends 'company-tern))
+  (use-package company-emoji
+    :ensure t
+    :config (add-to-list 'company-backends 'company-emoji)))
 
 (use-package skewer-mode
   :ensure t
@@ -480,40 +498,50 @@
               ("C-c C-k" . haskell-interactive-mode-clear)
               ("C-c c"   . haskell-process-cabal))
   :init
-  (add-hook 'haskell-mode-hook 'haskell-doc-mode))
+  (add-hook 'haskell-mode-hook 'haskell-doc-mode)
+
+  :config
+  (defun haskell-mode-before-save-handler ()
+    "Function that will be called before buffer's saving."
+    (haskell-sort-imports)))
 
 (use-package flycheck
   :ensure t
   :defer t
+  :if (display-graphic-p)
   :init
   (add-hook 'haskell-mode-hook 'flycheck-mode)
-  (add-hook 'typescript-mode-hook 'flycheck-mode))
+  (add-hook 'typescript-mode-hook 'flycheck-mode)
+  (add-hook 'js2-mode-hook 'flycheck-mode))
 
 
 (use-package magit
   :ensure t
   :defer t
+  :if (display-graphic-p)
   :init
   (add-hook 'magit-mode-hook 'hl-line-mode)
 
   :config
-  (setenv "GIT_PAGER" "")
+  (setenv "GIT_PAGER" ""))
 
-  (use-package git-messenger
-    :ensure t
-    :bind ("C-x g p" . git-messenger:popup-message))
+(use-package git-messenger
+  :ensure t
+  :if (display-graphic-p)
+  :bind ("C-x g p" . git-messenger:popup-message))
 
-  (use-package what-the-commit
-    :ensure t
-    :bind ("C-x g c" . what-the-commit-insert))
+(use-package what-the-commit
+  :ensure t
+  :bind ("C-x g c" . what-the-commit-insert))
 
-  (use-package github-browse-file
-    :ensure t
-    :bind ("C-x g b")
-    :init (setq github-browse-file-show-line-at-point t)))
+(use-package github-browse-file
+  :ensure t
+  :bind ("C-x g b" . github-browse-file)
+  :init (setq github-browse-file-show-line-at-point t))
 
 (use-package smart-window
   :ensure t
+  :if (display-graphic-p)
   :bind (("C-c s m" . smart-window-move)
          ("C-c s s" . smart-window-buffer-split)
          ("C-c s S" . smart-window-file-split)
@@ -537,8 +565,7 @@
   (add-hook 'emacs-lisp-mode-hook 'hungry-delete-mode))
 
 (use-package css-mode
-  :mode "\\.css\\'"
-  :init (add-hook 'css-mode-hook 'electric-pair-mode))
+  :mode "\\.css\\'")
 
 (use-package rainbow-mode
   :ensure t
@@ -642,7 +669,39 @@
 
 (use-package fullframe
   :ensure t
+  :if (display-graphic-p)
   :config
   (fullframe magit-status magit-mode-quit-window nil)
   (fullframe projectile-vc magit-mode-quit-window nil))
+
+(use-package flymd
+  :ensure t
+  :if (display-graphic-p)
+  :defer t
+  :init
+  (defun my-flymd-browser-function (url)
+    (let ((browse-url-browser-function 'browse-url-firefox))
+      (browse-url url)))
+  (setq flymd-browser-open-function 'my-flymd-browser-function))
+
+(use-package emoji-display
+  :ensure t
+  :if (display-graphic-p)
+  :config
+  (emoji-display-mode))
+
+(use-package emoji-cheat-sheet-plus
+  :ensure t
+  :if (display-graphic-p)
+  :defer t)
+
+
+(use-package markdown-mode
+  :ensure t
+  :demand markdown-toc
+  :mode (("\\.md" . markdown-mode)
+         ("\\.markdown" . markdown-mode))
+  :bind (:markdown-mode-map
+         ("C-c t" . markdown-toc-generate-toc)))
+
 ;;; init.el ends here
