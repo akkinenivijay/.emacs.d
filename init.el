@@ -283,12 +283,14 @@
 
     (setq helm-split-window-in-side-p t
           helm-buffers-fuzzy-matching t
+          helm-buffer-max-length nil
           helm-recentf-fuzzy-match t
           helm-apropos-fuzzy-match t
           helm-move-to-line-cycle-in-source t
           helm-ff-search-library-in-sexp t
           helm-ff-file-name-history-use-recentf t
-          helm-ff-auto-update-initial-value t)
+          helm-ff-auto-update-initial-value t
+          helm-full-frame nil)
 
     (add-to-list 'helm-sources-using-default-as-input #'helm-source-man-pages)
 
@@ -297,23 +299,23 @@
                        helm-autoresize-mode
                        helm-flx-mode)))
 
-  (use-package projectile
-    :ensure helm-projectile
+  (use-package helm-projectile
+    :ensure projectile
     :pin melpa-stable
-    :bind (("C-c p D" . projectile-dired)
-           ("C-c p v" . projectile-vc)
-           ("C-c p k" . projectile-kill-buffers)
+    :bind* (("C-c p D" . projectile-dired)
+            ("C-c p v" . projectile-vc)
+            ("C-c p k" . projectile-kill-buffers)
 
-           ("C-c p p" . helm-projectile-switch-project)
-           ("C-c p f" . helm-projectile-find-file)
-           ("C-c p F" . helm-projectile-find-file-in-known-projects)
-           ("C-c p g" . helm-projectile-find-file-dwin)
-           ("C-c p d" . helm-projectile-find-dir)
-           ("C-c p C-r" . helm-projectile-recentf)
-           ("C-c p b" . helm-projectile-switch-to-buffer)
-           ("C-c p s s" . helm-projectile-ag)
-           ("C-c p s g" . helm-projectile-grep)
-           )
+            ("C-c p p" . helm-projectile-switch-project)
+            ("C-c p f" . helm-projectile-find-file)
+            ("C-c p F" . helm-projectile-find-file-in-known-projects)
+            ("C-c p g" . helm-projectile-find-file-dwin)
+            ("C-c p d" . helm-projectile-find-dir)
+            ("C-c p C-r" . helm-projectile-recentf)
+            ("C-c p b" . helm-projectile-switch-to-buffer)
+            ("C-c p s s" . helm-projectile-ag)
+            ("C-c p s g" . helm-projectile-grep)
+            )
     :init
     (setq-default projectile-enable-caching t
                   projectile-indexing-method 'alien
@@ -386,6 +388,7 @@
   :diminish yas-minor-mode
   :init
   (add-hook 'js2-mode-hook 'yas-minor-mode)
+  (add-hook 'haskell-mode-hook 'yas-minor-mode)
   :config
   (yas-reload-all))
 
@@ -703,5 +706,20 @@
          ("\\.markdown" . markdown-mode))
   :bind (:markdown-mode-map
          ("C-c t" . markdown-toc-generate-toc)))
+
+(use-package intero
+  :ensure t
+  :defer t
+  :init (add-hook 'haskell-mode-hook 'intero-mode))
+
+(use-package shift-text
+  :ensure t
+  :bind (("S-<up>" . shift-text-up)
+         ("S-<down>" . shift-text-down)
+         ("S-<left>" . shift-text-left)
+         ("S-<right>" . shift-text-right)))
+
+(use-package sicp
+  :ensure t)
 
 ;;; init.el ends here
