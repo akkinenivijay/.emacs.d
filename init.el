@@ -502,6 +502,7 @@
               ("C-c c"   . haskell-process-cabal))
   :init
   (add-hook 'haskell-mode-hook 'haskell-doc-mode)
+  (add-hook 'haskell-mode-hook 'haskell-indent-mode)
 
   :config
   (defun haskell-mode-before-save-handler ()
@@ -707,10 +708,10 @@
   :bind (:markdown-mode-map
          ("C-c t" . markdown-toc-generate-toc)))
 
-(use-package intero
-  :ensure t
-  :defer t
-  :init (add-hook 'haskell-mode-hook 'intero-mode))
+;; (use-package intero
+;;   :ensure t
+;;   :defer t
+;;   :init (add-hook 'haskell-mode-hook 'intero-mode))
 
 (use-package shift-text
   :ensure t
@@ -721,5 +722,9 @@
 
 (use-package sicp
   :ensure t)
+
+(use-package python-mode
+  :mode "\\.py\\'"
+  :init (setq python-indent-offset 4))
 
 ;;; init.el ends here
