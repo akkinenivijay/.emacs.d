@@ -84,11 +84,8 @@
 
   (use-package cus-edit
     :init
-    (defconst my-custom-file "~/.emacs.d/custom.el"
-      "File used to store settings from Customization UI.")
-    (load my-custom-file :noerror :nomessage)
     :config
-    (setq custom-file my-custom-file
+    (setq custom-file (make-temp-file "")
           custom-buffer-done-kill nil
           custom-buffer-verbose-help nil
           custom-unlispify-names nil
@@ -165,6 +162,9 @@
                      column-number-mode
                      savehist-mode
                      global-hi-lock-mode))
+
+  (custom-set-faces
+   '(default ((t (:height 140 :family "Consolas")))))
 
   ) ;; end prelude
 
@@ -727,4 +727,10 @@
   :mode "\\.py\\'"
   :init (setq python-indent-offset 4))
 
+(use-package scala-mode
+  :ensure t
+  :mode "\\.scala\\'")
+
+(use-package num3-mode
+  :ensure t)
 ;;; init.el ends here
