@@ -164,7 +164,7 @@
                      global-hi-lock-mode))
 
   (custom-set-faces
-   '(default ((t (:height 140 :family "Consolas")))))
+   '(default ((t (:height 140 :family "Pragmata Pro Mono")))))
 
   ) ;; end prelude
 
