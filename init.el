@@ -164,7 +164,7 @@
                      global-hi-lock-mode))
 
   (custom-set-faces
-   '(default ((t (:height 140 :family "Pragmata Pro Mono")))))
+   '(default ((t (:height 140 :family "Pragmata Pro")))))
 
   ) ;; end prelude
 
@@ -453,20 +453,20 @@
   :init (add-hook 'js2-mode-hook 'js2-refactor-mode)
   :config (js2r-add-keybindings-with-prefix "C-c C-j"))
 
-(use-package company
-  :ensure t
-  :diminish company-mode
-  :if (display-graphic-p)
-  :config
-  (setq company-idle-delay 0.3
-        company-dabbrev-downcase nil)
-  (global-company-mode)
-  (use-package company-tern
-    :ensure t
-    :config (add-to-list 'company-backends 'company-tern))
-  (use-package company-emoji
-    :ensure t
-    :config (add-to-list 'company-backends 'company-emoji)))
+;; (use-package company
+;;   :ensure t
+;;   :diminish company-mode
+;;   :if (display-graphic-p)
+;;   :config
+;;   (setq company-idle-delay 0.3
+;;         company-dabbrev-downcase nil)
+;;   (global-company-mode)
+;;   (use-package company-tern
+;;     :ensure t
+;;     :config (add-to-list 'company-backends 'company-tern))
+;;   (use-package company-emoji
+;;     :ensure t
+;;     :config (add-to-list 'company-backends 'company-emoji)))
 
 (use-package skewer-mode
   :ensure t
@@ -502,12 +502,13 @@
               ("C-c c"   . haskell-process-cabal))
   :init
   (add-hook 'haskell-mode-hook 'haskell-doc-mode)
-  (add-hook 'haskell-mode-hook 'haskell-indent-mode)
+  (add-hook 'haskell-mode-hook 'haskell-indentation-mode)
 
   :config
   (defun haskell-mode-before-save-handler ()
     "Function that will be called before buffer's saving."
-    (haskell-sort-imports)))
+    (haskell-sort-imports)
+    (haskell-mode-stylish-buffer)))
 
 (use-package flycheck
   :ensure t
@@ -708,10 +709,10 @@
   :bind (:markdown-mode-map
          ("C-c t" . markdown-toc-generate-toc)))
 
-;; (use-package intero
-;;   :ensure t
-;;   :defer t
-;;   :init (add-hook 'haskell-mode-hook 'intero-mode))
+(use-package intero
+  :ensure t
+  :defer t
+  :init (add-hook 'haskell-mode-hook 'intero-mode))
 
 (use-package shift-text
   :ensure t
