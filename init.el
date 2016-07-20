@@ -164,7 +164,7 @@
                      global-hi-lock-mode))
 
   (custom-set-faces
-   '(default ((t (:height 140 :family "Pragmata Pro")))))
+   '(default ((t (:height 140 :family "Ubuntu Mono")))))
 
   ) ;; end prelude
 
@@ -300,7 +300,7 @@
                        helm-flx-mode)))
 
   (use-package helm-projectile
-    :ensure projectile
+    :ensure t
     :pin melpa-stable
     :bind* (("C-c p D" . projectile-dired)
             ("C-c p v" . projectile-vc)
@@ -503,19 +503,24 @@
   :init
   (add-hook 'haskell-mode-hook 'haskell-doc-mode)
   (add-hook 'haskell-mode-hook 'haskell-indentation-mode)
+  (add-hook 'haskell-mode-hook (defun haskell-project-mode ()
+                                 (interactive)
+                                 (when (projectile-project-p)
+                                   (intero-mode)
+                                   (flycheck-mode))))
 
   :config
   (defun haskell-mode-before-save-handler ()
     "Function that will be called before buffer's saving."
-    (haskell-sort-imports)
-    (haskell-mode-stylish-buffer)))
+    (when (projectile-project-p)
+      (haskell-sort-imports)
+      (haskell-mode-stylish-buffer))))
 
 (use-package flycheck
   :ensure t
   :defer t
   :if (display-graphic-p)
   :init
-  (add-hook 'haskell-mode-hook 'flycheck-mode)
   (add-hook 'typescript-mode-hook 'flycheck-mode)
   (add-hook 'js2-mode-hook 'flycheck-mode))
 
@@ -629,15 +634,6 @@
   :bind (("C-s" . isearch-forward-regexp)
          ("C-r" . isearch-backward-regexp)))
 
-(use-package tagedit
-  :ensure t
-  :pin elpa
-  :diminish tagedit-mode
-  :init (add-hook 'html-mode-hook 'tagedit-mode)
-  :config
-  (tagedit-add-paredit-like-keybindings)
-  (tagedit-add-experimental-features))
-
 (use-package 0blayout
   :ensure t
   :diminish 0blayout-mode
@@ -711,8 +707,7 @@
 
 (use-package intero
   :ensure t
-  :defer t
-  :init (add-hook 'haskell-mode-hook 'intero-mode))
+  :defer t)
 
 (use-package shift-text
   :ensure t
