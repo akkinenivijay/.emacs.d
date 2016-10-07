@@ -1,31 +1,3 @@
-;;; init.el --- Emacs configuration. -*- lexical-binding: t -*-
-;;
-;; Author: Anler Hp <inbox@anler.me>
-;; URL: https://gihub.com/anler/.emacs.d
-;; Keywords: convenience
-
-;; This file is not part of GNU Emacs.
-
-;; This program is free software; you can redistribute it and/or modify it under
-;; the terms of the GNU General Public License as published by the Free Software
-;; Foundation; either version 3 of the License, or (at your option) any later
-;; version.
-
-;; This program is distributed in the hope that it will be useful, but WITHOUT
-;; ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
-;; FOR A PARTICULAR PURPOSE.  See the GNU General Public License for more
-;; details.
-
-;; You should have received a copy of the GNU General Public License along with
-;; GNU Emacs; see the file COPYING.  If not, write to the Free Software
-;; Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301,
-;; USA.
-
-;;; Commentary:
-
-;; Emacs configuration of Anler Hp.
-
-;;; Code:
 (require 'package)
 
 (setq package-enable-at-startup nil
@@ -44,10 +16,6 @@
   (package-install 'use-package))
 
 (require 'use-package)
-
-(use-package benchmark-init
-  :ensure t
-  :config (benchmark-init/activate))
 
 (use-package prelude
   :load-path "~/.emacs.d/core"
@@ -164,7 +132,7 @@
                      global-hi-lock-mode))
 
   (custom-set-faces
-   '(default ((t (:height 140 :family "Ubuntu Mono")))))
+   '(default ((t (:height 160 :family "Operator Mono")))))
 
   ) ;; end prelude
 
@@ -174,10 +142,6 @@
 
 (use-package hi-lock
   :diminish hi-lock-mode)
-
-(use-package persistent-scratch
-  :ensure t
-  :config (persistent-scratch-setup-default))
 
 (use-package discover-my-major
   :ensure t
@@ -189,8 +153,9 @@
   (define-prefix-command 'ctl-period-equals-map)
   (bind-key "C-. =" #'ctl-period-equals-map)
 
-  (setq ediff-window-setup-function 'ediff-setup-windows-plain
-                ediff-diff-options "-w")
+  (setq
+   ;; ediff-window-setup-function 'ediff-setup-windows-plain
+   ediff-diff-options "-w")
 
   :bind (("C-. = b" . ediff-buffers)
          ("C-. = B" . ediff-buffers3)
@@ -397,60 +362,65 @@
   :diminish subword-mode
   :init
   (add-hook 'js2-mode-hook 'subword-mode)
+  (add-hook 'web-mode-hook 'subword-mode)
   (add-hook 'haskell-mode-hook 'subword-mode))
 
-(use-package js2-mode
-  :ensure t
-  :mode "\\.js\\'"
-  :init
-  (setq-default js2-indent-switch-body t
-                js2-basic-offset 2
-                js-indent-level 2
-                js-switch-indent-offset 2
-                js2-include-node-externs t
-                js2-mode-indent-ignore-first-tab t
-                js2-mode-show-parse-errors nil
-                js2-strict-inconsistent-return-warning nil
-                js2-strict-var-hides-function-arg-warning nil
-                js2-strict-missing-semi-warning nil
-                js2-strict-trailing-comma-warning nil
-                js2-strict-cond-assign-warning nil
-                js2-strict-var-redeclaration-warning nil
-                js2-global-externs '("module" "require" "__dirname" "process" "console" "JSON"))
+;; (use-package js2-mode
+;;   :ensure t
+;;   :mode "\\.js\\'"
+;;   :init
+;;   (setq-default js2-indent-switch-body t
+;;                 js2-basic-offset 2
+;;                 js-indent-level 2
+;;                 js-switch-indent-offset 2
+;;                 js2-include-node-externs t
+;;                 js2-mode-indent-ignore-first-tab t
+;;                 js2-mode-show-parse-errors nil
+;;                 js2-strict-inconsistent-return-warning nil
+;;                 js2-strict-var-hides-function-arg-warning nil
+;;                 js2-strict-missing-semi-warning nil
+;;                 js2-strict-trailing-comma-warning nil
+;;                 js2-strict-cond-assign-warning nil
+;;                 js2-strict-var-redeclaration-warning nil
+;;                 js2-global-externs '("module" "require" "__dirname" "process" "console" "JSON"))
 
-  (add-hook 'js2-mode-hook (command (highlight-lines-matching-regexp "debugger")))
-  (add-hook 'js2-mode-hook (command (highlight-lines-matching-regexp "TODO")))
+;;   (add-hook 'js2-mode-hook (command (highlight-lines-matching-regexp "debugger")))
+;;   (add-hook 'js2-mode-hook (command (highlight-lines-matching-regexp "TODO")))
 
-  :config
+;;   :config
 
-  (dolist (mode '(js2-jsx-mode js2-mode))
-    (font-lock-add-keywords
-     mode `(("\\<\\(function\\)("
-             (0 (progn
-                  (compose-region
-                   (match-beginning 1)
-                   (match-end 1) "\u0192")
-                  nil)))))
-    (font-lock-add-keywords
-     mode `(("\\<\\(function\\) .*("
-             (0 (progn
-                  (compose-region
-                   (match-beginning 1)
-                   (match-end 1) "\u0192")
-                  nil))))))
-  )
+;;   (dolist (mode '(js2-jsx-mode js2-mode))
+;;     (font-lock-add-keywords
+;;      mode `(("\\<\\(function\\)("
+;;              (0 (progn
+;;                   (compose-region
+;;                    (match-beginning 1)
+;;                    (match-end 1) "\u0192")
+;;                   nil)))))
+;;     (font-lock-add-keywords
+;;      mode `(("\\<\\(function\\) .*("
+;;              (0 (progn
+;;                   (compose-region
+;;                    (match-beginning 1)
+;;                    (match-end 1) "\u0192")
+;;                   nil))))))
+;;   )
 
-(use-package tern
-  :ensure t
-  :defer t
-  :diminish tern-mode
-  :init (add-hook 'js2-mode-hook 'tern-mode))
+;; (use-package tern
+;;   :ensure t
+;;   :defer t
+;;   :diminish tern-mode
+;;   :init (add-hook 'js2-mode-hook 'tern-mode))
 
 (use-package js2-refactor
   :ensure t
   :defer t
   :diminish js2-refactor-mode
-  :init (add-hook 'js2-mode-hook 'js2-refactor-mode)
+  :init (add-hook 'web-mode-hook (defun my/set-jsx-js2-refactor ()
+                                   (when (or
+                                          (string= web-mode-content-type "javascript")
+                                          (string= web-mode-content-type "jsx"))
+                                     (js2-refactor-mode))))
   :config (js2r-add-keybindings-with-prefix "C-c C-j"))
 
 ;; (use-package company
@@ -481,6 +451,7 @@
   :init
   (add-hook 'sgml-mode-hook 'emmet-mode)
   (add-hook 'html-mode-hook 'emmet-mode)
+  (add-hook 'web-mode-hook 'emmet-mode)
   (add-hook 'css-mode-hook 'emmet-mode))
 
 (use-package haskell-mode
@@ -503,25 +474,31 @@
   :init
   (add-hook 'haskell-mode-hook 'haskell-doc-mode)
   (add-hook 'haskell-mode-hook 'haskell-indentation-mode)
-  (add-hook 'haskell-mode-hook (defun haskell-project-mode ()
-                                 (interactive)
-                                 (when (projectile-project-p)
-                                   (intero-mode)
-                                   (flycheck-mode))))
 
   :config
   (defun haskell-mode-before-save-handler ()
     "Function that will be called before buffer's saving."
     (when (projectile-project-p)
-      (haskell-sort-imports)
-      (haskell-mode-stylish-buffer))))
+      (haskell-sort-imports))))
 
 (use-package flycheck
   :ensure t
-  :defer t
   :if (display-graphic-p)
-  :init
+  :config
+  (flycheck-add-mode 'javascript-eslint 'web-mode)
   (add-hook 'typescript-mode-hook 'flycheck-mode)
+  (add-hook 'web-mode-hook (defun my/flycheck-web-mode-setup ()
+                             (let* ((root (locate-dominating-file
+                                           (or (buffer-file-name) default-directory)
+                                           "node_modules"))
+                                    (eslint (and
+                                             root
+                                             (expand-file-name "node_modules/.bin/eslint" root))))
+                               (when (and
+                                      eslint
+                                      (file-executable-p eslint))
+                                 (setq-local flycheck-javascript-eslint-executable eslint)))
+                             (flycheck-mode)))
   (add-hook 'js2-mode-hook 'flycheck-mode))
 
 
@@ -716,9 +693,6 @@
          ("S-<left>" . shift-text-left)
          ("S-<right>" . shift-text-right)))
 
-(use-package sicp
-  :ensure t)
-
 (use-package python-mode
   :mode "\\.py\\'"
   :init (setq python-indent-offset 4))
@@ -727,6 +701,43 @@
   :ensure t
   :mode "\\.scala\\'")
 
-(use-package num3-mode
-  :ensure t)
-;;; init.el ends here
+(use-package web-mode
+  :ensure t
+  :mode "\\.js\\'"
+  :init
+  (defadvice web-mode-highlight-part (around tweak-jsx activate)
+    (if (equal web-mode-content-type "jsx")
+        (let ((web-mode-enable-part-face nil))
+          ad-do-it)
+      ad-do-it))
+
+  (setq web-mode-markup-indent-offset 2
+        web-mode-css-indent-offset 2
+        web-mode-code-indent-offset 2
+        web-mode-attr-indent-offset 2
+
+        web-mode-style-padding 2
+        web-mode-script-padding 2
+
+        web-mode-enable-auto-pairing t
+        web-mode-enable-css-colorization t
+        web-mode-enable-block-face t
+        web-mode-enable-part-face t
+        web-mode-enable-comment-keywords t
+        web-mode-enable-current-element-highlight t
+        web-mode-enable-current-column-highlight t
+        )
+  (add-hook 'web-mode-hook (defun my/set-jsx-content-type ()
+                             (when (string= web-mode-content-type "javascript")
+                               (web-mode-set-content-type "jsx")
+                               (message "now set to: %s" web-mode-content-type)
+                               )))
+  )
+
+(use-package nvm :ensure t)
+
+(use-package exec-path-from-shell
+  :ensure t
+  :config
+  (exec-path-from-shell-initialize)
+  (setenv "SUPPRESS_NO_CONFIG_WARNING" "yes"))
