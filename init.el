@@ -255,7 +255,14 @@
           helm-ff-search-library-in-sexp t
           helm-ff-file-name-history-use-recentf t
           helm-ff-auto-update-initial-value t
-          helm-full-frame nil)
+          helm-full-frame nil
+          helm-split-window-in-side-p t)
+
+    (add-to-list 'display-buffer-alist
+                 `(,(rx bos "*helm" (* not-newline) "*" eos)
+                   (display-buffer-in-side-window)
+                   (inhibit-same-window . t)
+                   (window-height . 0.4)))
 
     (add-to-list 'helm-sources-using-default-as-input #'helm-source-man-pages)
 
@@ -352,8 +359,12 @@
   :defer t
   :diminish yas-minor-mode
   :init
+  (use-package elm-yasnippets :ensure t)
+
   (add-hook 'js2-mode-hook 'yas-minor-mode)
   (add-hook 'haskell-mode-hook 'yas-minor-mode)
+  (add-hook 'elm-mode-hook 'yas-minor-mode)
+
   :config
   (yas-reload-all))
 
@@ -363,7 +374,11 @@
   :init
   (add-hook 'js2-mode-hook 'subword-mode)
   (add-hook 'web-mode-hook 'subword-mode)
-  (add-hook 'haskell-mode-hook 'subword-mode))
+  (add-hook 'haskell-mode-hook 'subword-mode)
+  (add-hook 'purescript-mode-hook 'subword-mode)
+  (add-hook 'elm-mode-hook 'subword-mode)
+  (add-hook 'scala-mode-hook 'subword-mode)
+  )
 
 ;; (use-package js2-mode
 ;;   :ensure t
@@ -454,6 +469,10 @@
   (add-hook 'web-mode-hook 'emmet-mode)
   (add-hook 'css-mode-hook 'emmet-mode))
 
+;; (use-package intero
+;;   :ensure t
+;;   :init (add-hook 'haskell-mode-hook 'intero-mode))
+
 (use-package haskell-mode
   :ensure t
   :mode "\\.hs\\'"
@@ -472,22 +491,23 @@
               ("C-c C-k" . haskell-interactive-mode-clear)
               ("C-c c"   . haskell-process-cabal))
   :init
+  (setq haskell-stylish-on-save t)
   (add-hook 'haskell-mode-hook 'haskell-doc-mode)
-  (add-hook 'haskell-mode-hook 'haskell-indentation-mode)
+  (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
 
   :config
   (defun haskell-mode-before-save-handler ()
     "Function that will be called before buffer's saving."
     (when (projectile-project-p)
+      (haskell-mode-stylish-buffer)
       (haskell-sort-imports))))
 
 (use-package flycheck
   :ensure t
   :if (display-graphic-p)
   :config
-  (flycheck-add-mode 'javascript-eslint 'web-mode)
-  (add-hook 'typescript-mode-hook 'flycheck-mode)
   (add-hook 'web-mode-hook (defun my/flycheck-web-mode-setup ()
+                             (flycheck-add-mode 'javascript-eslint 'web-mode)
                              (let* ((root (locate-dominating-file
                                            (or (buffer-file-name) default-directory)
                                            "node_modules"))
@@ -499,7 +519,16 @@
                                       (file-executable-p eslint))
                                  (setq-local flycheck-javascript-eslint-executable eslint)))
                              (flycheck-mode)))
-  (add-hook 'js2-mode-hook 'flycheck-mode))
+  (add-hook 'js2-mode-hook 'flycheck-mode)
+  (add-hook 'typescript-mode-hook 'flycheck-mode)
+  (add-hook 'elm-mode-hook 'flycheck-mode)
+  (add-hook 'haskell-mode-hook 'flycheck-mode)
+  (add-hook 'scala-mode-hook (defun my/flycheck-scala-mode ()
+                               (when (eq
+                                      (file-name-extension
+                                       (buffer-file-name))
+                                      "scala")
+                                 (flycheck-mode)))))
 
 
 (use-package magit
@@ -549,10 +578,14 @@
   (add-hook 'sgml-mode-hook 'hungry-delete-mode)
   (add-hook 'html-mode-hook 'hungry-delete-mode)
   (add-hook 'css-mode-hook 'hungry-delete-mode)
-  (add-hook 'emacs-lisp-mode-hook 'hungry-delete-mode))
+  (add-hook 'emacs-lisp-mode-hook 'hungry-delete-mode)
+  (add-hook 'haskell-mode-hook 'hungry-delete-mode)
+  (add-hook 'elm-mode-hook 'hungry-delete-mode)
+  (add-hook 'scala-mode-hook 'hungry-delete-mode))
 
 (use-package css-mode
-  :mode "\\.css\\'")
+  :mode "\\.css\\'"
+  :init (setq css-indent-offset 2))
 
 (use-package rainbow-mode
   :ensure t
@@ -600,7 +633,10 @@
   :bind (("C-c o c" . org-capture)
          ("C-c o l" . org-store-link)
          ("C-c o a" . org-agenda)
-         ("C-c o h" . helm-info-org)))
+         ("C-c o h" . helm-info-org))
+  :init
+  (eval-after-load "org"
+    '(require 'ox-md nil t)))
 
 (use-package simple
   :config
@@ -697,9 +733,29 @@
   :mode "\\.py\\'"
   :init (setq python-indent-offset 4))
 
+(defun scala/enable-eldoc ()
+  (setq-local eldoc-documentation-function
+              (defun scala/eldoc-documentation-function ()
+                (when (and
+                       (boundp 'ensime-connected-p)
+                       (ensime-connected-p))
+                  (ensime-print-type-at-point))))
+  (eldoc-mode +1))
+
+(use-package ensime
+  :ensure t
+  :pin melpa-stable
+  :init (setq ensime-use-helm t))
+
 (use-package scala-mode
   :ensure t
-  :mode "\\.scala\\'")
+  :mode "\\.scala\\'"
+  :init
+  (setq flycheck-scalastyle-jar "/usr/local/Cellar/scalastyle/0.8.0/libexec/scalastyle_2.11-0.8.0-batch.jar"
+        flycheck-scalastylerc "/usr/local/etc/scalastyle_config.xml"
+        )
+
+  (add-hook 'scala-mode-hook 'scala/enable-eldoc))
 
 (use-package web-mode
   :ensure t
@@ -724,7 +780,7 @@
         web-mode-enable-block-face t
         web-mode-enable-part-face t
         web-mode-enable-comment-keywords t
-        web-mode-enable-current-element-highlight t
+        web-mode-enable-current-element-highlight nil
         web-mode-enable-current-column-highlight t
         )
   (add-hook 'web-mode-hook (defun my/set-jsx-content-type ()
@@ -741,3 +797,49 @@
   :config
   (exec-path-from-shell-initialize)
   (setenv "SUPPRESS_NO_CONFIG_WARNING" "yes"))
+
+(use-package neotree
+  :ensure t
+  :bind (([f8] . neotree-toggle))
+  :init (setq projectile-switch-project-action 'neotree-projectile-action)
+  :config
+  (when neo-persist-show
+    (add-hook 'popwin:before-popup-hook
+              (lambda () (setq neo-persist-show nil)))
+    (add-hook 'popwin:after-popup-hook
+              (lambda () (setq neo-persist-show t)))))
+
+(use-package popwin :ensure t)
+
+(use-package purescript-mode
+  :ensure t
+  :mode "\\.purs\\'")
+
+(use-package elm-mode
+  :ensure t
+  :mode "\\.elm\\'"
+  :init
+  (setq elm-format-on-save t))
+
+(use-package flycheck-elm
+  :ensure t
+  :init (eval-after-load 'flycheck
+          '(add-hook 'flycheck-mode-hook #'flycheck-elm-setup)))
+
+(use-package restclient
+  :ensure t
+  :mode "\\.http\\'")
+
+(use-package fancy-narrow
+  :ensure t
+  :config (fancy-narrow-mode))
+
+(use-package gradle-mode
+  :ensure t
+  :mode "\\.gradle\\'")
+
+(use-package server
+  :config
+  (setq server-socket-dir "~/.emacs.d/server")
+  (unless (server-running-p)
+    (server-mode)))
