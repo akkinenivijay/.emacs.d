@@ -24,3 +24,4 @@ tldr/
 /.persistent-scratch
 /.emacs-theme
 /custom.el
+ensime/

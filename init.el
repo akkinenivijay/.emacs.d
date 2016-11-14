@@ -132,7 +132,7 @@
                      global-hi-lock-mode))
 
   (custom-set-faces
-   '(default ((t (:height 160 :family "Operator Mono")))))
+   '(default ((t (:height 160 :family "Triplicate T4c")))))
 
   ) ;; end prelude
 
@@ -326,6 +326,8 @@
   (add-hook 'js2-mode-hook 'electric-pair-mode)
   (add-hook 'emacs-lisp-mode-hook 'electric-pair-mode)
   (add-hook 'css-mode-hook 'electric-pair-mode)
+  (add-hook 'elm-mode-hook 'electric-pair-mode)
+  (add-hook 'scala-mode-hook 'electric-pair-mode)
   (add-hook 'haskell-mode-hook 'electric-pair-mode))
 
 (use-package avy
@@ -524,11 +526,7 @@
   (add-hook 'elm-mode-hook 'flycheck-mode)
   (add-hook 'haskell-mode-hook 'flycheck-mode)
   (add-hook 'scala-mode-hook (defun my/flycheck-scala-mode ()
-                               (when (eq
-                                      (file-name-extension
-                                       (buffer-file-name))
-                                      "scala")
-                                 (flycheck-mode)))))
+                               (flycheck-mode))))
 
 
 (use-package magit
@@ -747,6 +745,22 @@
   :pin melpa-stable
   :init (setq ensime-use-helm t))
 
+(use-package company
+  :ensure t
+  :diminish company-mode
+  :commands company-mode
+  :init
+  (setq
+   company-dabbrev-ignore-case nil
+   company-dabbrev-code-ignore-case nil
+   company-dabbrev-downcase nil
+   company-idle-delay 0
+   company-minimum-prefix-length 4)
+  :config
+  ;; disables TAB in company-mode, freeing it for yasnippet
+  (define-key company-active-map [tab] nil)
+  (define-key company-active-map (kbd "TAB") nil))
+
 (use-package scala-mode
   :ensure t
   :mode "\\.scala\\'"
@@ -755,7 +769,8 @@
         flycheck-scalastylerc "/usr/local/etc/scalastyle_config.xml"
         )
 
-  (add-hook 'scala-mode-hook 'scala/enable-eldoc))
+  (add-hook 'scala-mode-hook 'scala/enable-eldoc)
+  )
 
 (use-package web-mode
   :ensure t
@@ -800,14 +815,23 @@
 
 (use-package neotree
   :ensure t
-  :bind (([f8] . neotree-toggle))
-  :init (setq projectile-switch-project-action 'neotree-projectile-action)
-  :config
-  (when neo-persist-show
-    (add-hook 'popwin:before-popup-hook
-              (lambda () (setq neo-persist-show nil)))
-    (add-hook 'popwin:after-popup-hook
-              (lambda () (setq neo-persist-show t)))))
+  :bind (([f8] . neotree-project-toggle))
+  :init
+  (setq projectile-switch-project-action 'neotree-projectile-action
+        neo-theme (if window-system 'icons 'arrow)
+        neo-smart-open t)
+  (defun neotree-project-toggle ()
+    "Open NeoTree using the git root."
+    (interactive)
+    (let ((project-dir (projectile-project-root))
+          (file-name (buffer-file-name)))
+      (if project-dir
+          (if (neotree-toggle)
+              (progn
+                (neotree-dir project-dir)
+                (neotree-find file-name)))
+        (message "Could not find git project root."))))
+  )
 
 (use-package popwin :ensure t)
 
@@ -843,3 +867,16 @@
   (setq server-socket-dir "~/.emacs.d/server")
   (unless (server-running-p)
     (server-mode)))
+
+(use-package persistent-scratch
+  :ensure t
+  :config (persistent-scratch-setup-default))
+
+(use-package all-the-icons :ensure t)
+(use-package all-the-icons-dired
+  :ensure t
+  :init (add-hook 'dired-mode-hook 'all-the-icons-dired-mode))
+
+(use-package golden-ratio
+  :ensure t
+  :config (golden-ratio-mode))
