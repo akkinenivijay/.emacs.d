@@ -132,7 +132,7 @@
                      global-hi-lock-mode))
 
   (custom-set-faces
-   '(default ((t (:height 160 :family "Triplicate T4c")))))
+   '(default ((t (:height 170 :family "Triplicate T4c")))))
 
   ) ;; end prelude
 
@@ -316,9 +316,11 @@
   :init
   (add-hook 'emacs-lisp-mode-hook 'show-paren-mode)
   (add-hook 'haskell-mode-hook 'show-paren-mode)
+  (add-hook 'elm-mode-hook 'show-paren-mode)
   (add-hook 'js2-mode-hook 'show-paren-mode)
   (add-hook 'css-mode-hook 'show-paren-mode)
-  (add-hook 'sgml-mode-hook 'show-paren-mode))
+  (add-hook 'sgml-mode-hook 'show-paren-mode)
+  (add-hook 'scala-mode-hook 'show-paren-mode))
 
 (use-package elec-pair
   :defer t
@@ -340,7 +342,11 @@
 
 (use-package ace-window
   :ensure t
-  :bind (("M-o" . ace-window)))
+  :init (defun other-window-backwards ()
+          (interactive)
+          (other-window -1))
+  :bind (("M-o" . other-window)
+         ("M-O" . other-window-backwards)))
 
 (use-package multiple-cursors
   :ensure t
@@ -524,9 +530,7 @@
   (add-hook 'js2-mode-hook 'flycheck-mode)
   (add-hook 'typescript-mode-hook 'flycheck-mode)
   (add-hook 'elm-mode-hook 'flycheck-mode)
-  (add-hook 'haskell-mode-hook 'flycheck-mode)
-  (add-hook 'scala-mode-hook (defun my/flycheck-scala-mode ()
-                               (flycheck-mode))))
+  (add-hook 'haskell-mode-hook 'flycheck-mode))
 
 
 (use-package magit
@@ -731,20 +735,6 @@
   :mode "\\.py\\'"
   :init (setq python-indent-offset 4))
 
-(defun scala/enable-eldoc ()
-  (setq-local eldoc-documentation-function
-              (defun scala/eldoc-documentation-function ()
-                (when (and
-                       (boundp 'ensime-connected-p)
-                       (ensime-connected-p))
-                  (ensime-print-type-at-point))))
-  (eldoc-mode +1))
-
-(use-package ensime
-  :ensure t
-  :pin melpa-stable
-  :init (setq ensime-use-helm t))
-
 (use-package company
   :ensure t
   :diminish company-mode
@@ -763,14 +753,7 @@
 
 (use-package scala-mode
   :ensure t
-  :mode "\\.scala\\'"
-  :init
-  (setq flycheck-scalastyle-jar "/usr/local/Cellar/scalastyle/0.8.0/libexec/scalastyle_2.11-0.8.0-batch.jar"
-        flycheck-scalastylerc "/usr/local/etc/scalastyle_config.xml"
-        )
-
-  (add-hook 'scala-mode-hook 'scala/enable-eldoc)
-  )
+  :mode "\\.scala\\'")
 
 (use-package web-mode
   :ensure t
@@ -852,7 +835,7 @@
 
 (use-package restclient
   :ensure t
-  :mode "\\.http\\'")
+  :mode ("\\.http\\'" . restclient-mode))
 
 (use-package fancy-narrow
   :ensure t
@@ -879,4 +862,12 @@
 
 (use-package golden-ratio
   :ensure t
+  :diminish golden-ratio-mode
   :config (golden-ratio-mode))
+
+(use-package mac
+  :if (string-equal system-type "darwin"))
+
+(use-package wgrep :ensure t)
+(use-package wgrep-helm :ensure t)
+(use-package wgrep-ag :ensure t)
