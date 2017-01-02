@@ -87,18 +87,6 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
     (when filename
       (kill-new filename))))
 
-(defun my-kill-buffer-and-file (&optional buffer-or-name)
-  "Kill BUFFER-OR-NAME and its associated file.
-If BUFFER-OR-NAME is not specified the current buffer is used."
-  (interactive
-   (list (read-buffer (format "Kill buffer and its file (default %s): "
-                              (buffer-name (current-buffer))))))
-  (let* ((buffer (get-buffer buffer-or-name))
-         (filename (buffer-file-name buffer)))
-    (kill-buffer buffer)
-    (when filename
-      (delete-file filename))))
-
 ;; Diff two regions
 ;; Step 1: Select a region and `M-x diff-region-tag-selected-as-a'
 ;; Step 2: Select another region and `M-x diff-region-compare-with-b'

@@ -24,7 +24,8 @@
           ("M-`" . other-frame)
           ("M-J" . delete-indentation)
           ("C-M-;" . comment-or-uncomment-region)
-          ("C-M-K" . my-kill-sexp-backwards)
+          ("C-M-k" . kill-sexp)
+          ("C-M-S-k" . my-kill-sexp-backwards)
           ("C-<tab>" . mode-line-other-buffer)
           ("C-x C-d" . my-duplicate-line)
           ("C-x C-v" . my-find-alternate-file-with-sudo)
@@ -876,3 +877,25 @@
 (use-package backward-forward
   :ensure t
   :config (backward-forward-mode))
+
+(use-package mykie
+  :ensure t
+  :init
+  (defun my-kill-buffer-and-file (&optional buffer-or-name)
+    "Kill BUFFER-OR-NAME and its associated file.
+If BUFFER-OR-NAME is not specified the current buffer is used."
+    (interactive
+     (list (read-buffer (format "Kill buffer and its file (default %s): "
+                                (buffer-name (current-buffer))))))
+    (let* ((buffer (get-buffer buffer-or-name))
+           (filename (buffer-file-name buffer)))
+      (kill-buffer buffer)
+      (when filename
+        (delete-file filename))))
+
+  :config
+  (mykie:set-keys nil
+                  "C-x k"
+                  :default kill-buffer
+                  :C-u     my-kill-buffer-and-file
+                  ))
