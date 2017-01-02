@@ -24,6 +24,7 @@
           ("M-`" . other-frame)
           ("M-J" . delete-indentation)
           ("C-M-;" . comment-or-uncomment-region)
+          ("C-M-K" . my-kill-sexp-backwards)
           ("C-<tab>" . mode-line-other-buffer)
           ("C-x C-d" . my-duplicate-line)
           ("C-x C-v" . my-find-alternate-file-with-sudo)
@@ -51,7 +52,6 @@
   (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
 
   (use-package cus-edit
-    :init
     :config
     (setq custom-file (make-temp-file "")
           custom-buffer-done-kill nil
@@ -132,7 +132,7 @@
                      global-hi-lock-mode))
 
   (custom-set-faces
-   '(default ((t (:height 170 :family "Triplicate T4c")))))
+   '(default ((t (:height 170 :family "Hack")))))
 
   ) ;; end prelude
 
@@ -663,13 +663,6 @@
   :mode "\\.ts\\'"
   :config (setq typescript-indent-level 2))
 
-(use-package ns-win
-  :if (eq system-type 'darwin)
-  :config
-  (setq mac-option-modifier 'meta
-        mac-control-modifier 'control
-        mac-right-option-modifier 'super))
-
 (use-package osx-trash
   :ensure t
   :if (eq system-type 'darwin)
@@ -753,7 +746,15 @@
 
 (use-package scala-mode
   :ensure t
-  :mode "\\.scala\\'")
+  :mode "\\.scala\\'"
+  :interpreter ("scala" . scala-mode))
+
+(use-package prog-mode
+  :init (add-hook 'scala-mode-hook (defun prettify-scala ()
+                                     (interactive)
+                                     (setq prettify-symbols-alist scala-prettify-symbols-alist)
+                                     (prettify-symbols-mode)
+                                     )))
 
 (use-package web-mode
   :ensure t
@@ -871,3 +872,7 @@
 (use-package wgrep :ensure t)
 (use-package wgrep-helm :ensure t)
 (use-package wgrep-ag :ensure t)
+
+(use-package backward-forward
+  :ensure t
+  :config (backward-forward-mode))
