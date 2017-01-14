@@ -133,7 +133,7 @@
                      global-hi-lock-mode))
 
   (custom-set-faces
-   '(default ((t (:height 170 :family "Hack")))))
+   '(default ((t (:height 180 :family "Operator Mono")))))
 
   ) ;; end prelude
 
@@ -750,13 +750,6 @@
   :mode "\\.scala\\'"
   :interpreter ("scala" . scala-mode))
 
-(use-package prog-mode
-  :init (add-hook 'scala-mode-hook (defun prettify-scala ()
-                                     (interactive)
-                                     (setq prettify-symbols-alist scala-prettify-symbols-alist)
-                                     (prettify-symbols-mode)
-                                     )))
-
 (use-package web-mode
   :ensure t
   :mode "\\.js\\'"
@@ -899,3 +892,7 @@ If BUFFER-OR-NAME is not specified the current buffer is used."
                   :default kill-buffer
                   :C-u     my-kill-buffer-and-file
                   ))
+
+(use-package untitled-new-buffer
+  :ensure t
+  :bind (("M-N" . untitled-new-buffer-with-select-major-mode)))
