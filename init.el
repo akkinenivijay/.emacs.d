@@ -896,3 +896,37 @@ If BUFFER-OR-NAME is not specified the current buffer is used."
 (use-package untitled-new-buffer
   :ensure t
   :bind (("M-N" . untitled-new-buffer-with-select-major-mode)))
+
+(use-package ensime
+  :ensure t
+  :bind ([f10] . ensime-reload)
+  :config (setq ensime-startup-notification nil
+                ensime-startup-snapshot-notification nil))
+
+;; themes
+
+(use-package atom-one-dark-theme :ensure t :defer t)
+(use-package birds-of-paradise-plus-theme :ensure t :defer t)
+(use-package bliss-theme :ensure t :defer t)
+(use-package borland-blue-theme :ensure t :defer t)
+(use-package cyberpunk-theme :ensure t :defer t)
+(use-package django-theme :ensure t :defer t)
+(use-package eclipse-theme :ensure t :defer t)
+(use-package espresso-theme :ensure t :defer t)
+(use-package faff-theme :ensure t :defer t)
+(use-package github-theme :ensure t :defer t)
+(use-package greymatters-theme :ensure t :defer t)
+(use-package heroku-theme :ensure t :defer t)
+(use-package idea-darkula-theme :ensure t :defer t)
+(use-package leuven-theme :ensure t :defer t)
+(use-package mac-classic-theme :ensure t :defer t)
+(use-package minimal-theme :ensure t :defer t)
+(use-package plan9-theme :ensure t :defer t)
+(use-package purple-haze-theme :ensure t :defer t)
+(use-package railscasts-theme :ensure t :defer t)
+(use-package rebecca-theme :ensure t :defer t)
+(use-package solarized-theme :ensure t :defer t)
+(use-package soothe-theme :ensure t :defer t)
+(use-package subatomic-theme :ensure t :defer t)
+(use-package sublime-themes :ensure t :defer t)
+(use-package white-theme :ensure t :defer t)
