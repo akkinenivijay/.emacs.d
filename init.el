@@ -274,7 +274,6 @@
 
   (use-package helm-projectile
     :ensure t
-    :pin melpa-stable
     :bind* (("C-c p D" . projectile-dired)
             ("C-c p v" . projectile-vc)
             ("C-c p k" . projectile-kill-buffers)
@@ -289,6 +288,7 @@
             ("C-c p s s" . helm-projectile-ag)
             ("C-c p s g" . helm-projectile-grep)
             )
+    :diminish projectile-mode
     :init
     (setq-default projectile-enable-caching t
                   projectile-indexing-method 'alien
@@ -919,7 +919,6 @@ If BUFFER-OR-NAME is not specified the current buffer is used."
 (use-package heroku-theme :ensure t :defer t)
 (use-package idea-darkula-theme :ensure t :defer t)
 (use-package leuven-theme :ensure t :defer t)
-(use-package mac-classic-theme :ensure t :defer t)
 (use-package minimal-theme :ensure t :defer t)
 (use-package plan9-theme :ensure t :defer t)
 (use-package purple-haze-theme :ensure t :defer t)
