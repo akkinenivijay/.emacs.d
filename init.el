@@ -793,11 +793,16 @@
 
 (use-package neotree
   :ensure t
-  :bind (([f8] . neotree-project-toggle))
+  :bind (([f8] . neotree-toggle))
   :init
   (setq projectile-switch-project-action 'neotree-projectile-action
         neo-theme (if window-system 'icons 'arrow)
-        neo-smart-open t)
+        neo-window-position 'right
+        neo-smart-open t
+        neo-window-width 30
+        neo-window-fixed-size t
+        neo-auto-indent-point t)
+
   (defun neotree-project-toggle ()
     "Open NeoTree using the git root."
     (interactive)
@@ -850,7 +855,9 @@
   :ensure t
   :config (persistent-scratch-setup-default))
 
-(use-package all-the-icons :ensure t)
+(use-package all-the-icons
+  :ensure t
+  :init (setq all-the-icons-scale-factor 0.8))
 (use-package all-the-icons-dired
   :ensure t
   :init (add-hook 'dired-mode-hook 'all-the-icons-dired-mode))
