@@ -61,7 +61,7 @@
           custom-unlispify-menu-entries nil))
 
   (setq-default indent-tabs-mode nil
-                tab-width 4)
+                tab-width 2)
 
   (setq gc-cons-threshold 100000000
         large-file-warning-threshold 100000000
@@ -211,6 +211,9 @@
     :ensure t)
 
   (use-package helm-ag
+    :ensure t)
+
+  (use-package helm-tramp
     :ensure t)
 
   (use-package helm-swoop
@@ -389,52 +392,52 @@
   (add-hook 'scala-mode-hook 'subword-mode)
   )
 
-;; (use-package js2-mode
-;;   :ensure t
-;;   :mode "\\.js\\'"
-;;   :init
-;;   (setq-default js2-indent-switch-body t
-;;                 js2-basic-offset 2
-;;                 js-indent-level 2
-;;                 js-switch-indent-offset 2
-;;                 js2-include-node-externs t
-;;                 js2-mode-indent-ignore-first-tab t
-;;                 js2-mode-show-parse-errors nil
-;;                 js2-strict-inconsistent-return-warning nil
-;;                 js2-strict-var-hides-function-arg-warning nil
-;;                 js2-strict-missing-semi-warning nil
-;;                 js2-strict-trailing-comma-warning nil
-;;                 js2-strict-cond-assign-warning nil
-;;                 js2-strict-var-redeclaration-warning nil
-;;                 js2-global-externs '("module" "require" "__dirname" "process" "console" "JSON"))
+(use-package js2-mode
+  :ensure t
+  :mode "\\.js\\'"
+  :init
+  (setq-default js2-indent-switch-body t
+                js2-basic-offset 2
+                js-indent-level 2
+                js-switch-indent-offset 2
+                js2-include-node-externs t
+                js2-mode-indent-ignore-first-tab t
+                js2-mode-show-parse-errors nil
+                js2-strict-inconsistent-return-warning nil
+                js2-strict-var-hides-function-arg-warning nil
+                js2-strict-missing-semi-warning nil
+                js2-strict-trailing-comma-warning nil
+                js2-strict-cond-assign-warning nil
+                js2-strict-var-redeclaration-warning nil
+                js2-global-externs '("module" "require" "__dirname" "process" "console" "JSON"))
 
-;;   (add-hook 'js2-mode-hook (command (highlight-lines-matching-regexp "debugger")))
-;;   (add-hook 'js2-mode-hook (command (highlight-lines-matching-regexp "TODO")))
+  (add-hook 'js2-mode-hook (command (highlight-lines-matching-regexp "debugger")))
+  (add-hook 'js2-mode-hook (command (highlight-lines-matching-regexp "TODO")))
 
-;;   :config
+  :config
 
-;;   (dolist (mode '(js2-jsx-mode js2-mode))
-;;     (font-lock-add-keywords
-;;      mode `(("\\<\\(function\\)("
-;;              (0 (progn
-;;                   (compose-region
-;;                    (match-beginning 1)
-;;                    (match-end 1) "\u0192")
-;;                   nil)))))
-;;     (font-lock-add-keywords
-;;      mode `(("\\<\\(function\\) .*("
-;;              (0 (progn
-;;                   (compose-region
-;;                    (match-beginning 1)
-;;                    (match-end 1) "\u0192")
-;;                   nil))))))
-;;   )
+  (dolist (mode '(js2-jsx-mode js2-mode))
+    (font-lock-add-keywords
+     mode `(("\\<\\(function\\)("
+             (0 (progn
+                  (compose-region
+                   (match-beginning 1)
+                   (match-end 1) "\u0192")
+                  nil)))))
+    (font-lock-add-keywords
+     mode `(("\\<\\(function\\) .*("
+             (0 (progn
+                  (compose-region
+                   (match-beginning 1)
+                   (match-end 1) "\u0192")
+                  nil))))))
+  )
 
-;; (use-package tern
-;;   :ensure t
-;;   :defer t
-;;   :diminish tern-mode
-;;   :init (add-hook 'js2-mode-hook 'tern-mode))
+(use-package tern
+  :ensure t
+  :defer t
+  :diminish tern-mode
+  :init (add-hook 'js2-mode-hook 'tern-mode))
 
 (use-package js2-refactor
   :ensure t
@@ -708,11 +711,12 @@
 
 (use-package markdown-mode
   :ensure t
-  :demand markdown-toc
+  :demand (markdown-edit-indirect markdown-toc)
   :mode (("\\.md" . markdown-mode)
          ("\\.markdown" . markdown-mode))
   :bind (:markdown-mode-map
-         ("C-c t" . markdown-toc-generate-toc)))
+         ("C-c t" . markdown-toc-generate-toc)
+         ("C-c '" . markdown-edit-indirect)))
 
 (use-package intero
   :ensure t
@@ -752,7 +756,7 @@
 
 (use-package web-mode
   :ensure t
-  :mode "\\.js\\'"
+  :mode "\\.jsx\\'"
   :init
   (defadvice web-mode-highlight-part (around tweak-jsx activate)
     (if (equal web-mode-content-type "jsx")
@@ -787,6 +791,7 @@
 
 (use-package exec-path-from-shell
   :ensure t
+  :init (setq exec-path-from-shell-check-startup-files nil)
   :config
   (exec-path-from-shell-initialize)
   (setenv "SUPPRESS_NO_CONFIG_WARNING" "yes"))
@@ -936,3 +941,4 @@ If BUFFER-OR-NAME is not specified the current buffer is used."
 (use-package subatomic-theme :ensure t :defer t)
 (use-package sublime-themes :ensure t :defer t)
 (use-package white-theme :ensure t :defer t)
+(use-package madhat2r-theme :ensure t :defer t)
