@@ -40,7 +40,6 @@
           ("M-s-<up>" . enlarge-window)
           ("M-s-<down>" . enlarge-window-horizontally)
           )
-
   :config
   (define-key isearch-mode-map (kbd "C-<return>") #'my-isearch-done-opposite)
 
@@ -133,7 +132,7 @@
                      global-hi-lock-mode))
 
   (custom-set-faces
-   '(default ((t (:height 180 :family "Operator Mono")))))
+   '(default ((t (:height 160 :family "Operator Mono" :weight normal)))))
 
   ) ;; end prelude
 
@@ -641,6 +640,7 @@
          ("C-c o a" . org-agenda)
          ("C-c o h" . helm-info-org))
   :init
+  (setq org-agenda-files '("~/Documents"))
   (eval-after-load "org"
     '(require 'ox-md nil t)))
 
@@ -942,3 +942,4 @@ If BUFFER-OR-NAME is not specified the current buffer is used."
 (use-package sublime-themes :ensure t :defer t)
 (use-package white-theme :ensure t :defer t)
 (use-package madhat2r-theme :ensure t :defer t)
+(use-package kosmos-theme :ensure t :defer t)
