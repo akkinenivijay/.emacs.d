@@ -1,12 +1,12 @@
 (require 'package)
 
+(setq elpa '("elpa" . "http://elpa.gnu.org/packages/")
+      org '("org" . "http://orgmode.org/elpa/")
+      melpa/stable '("melpa-stable" . "http://stable.melpa.org/packages/")
+      melpa '("melpa" . "http://melpa.org/packages/"))
+
 (setq package-enable-at-startup nil
-      package-archives '(
-                         ("elpa" . "http://elpa.gnu.org/packages/")
-                         ("org" . "http://orgmode.org/elpa/")
-                         ("melpa-stable" . "http://stable.melpa.org/packages/")
-                         ("melpa" . "http://melpa.org/packages/")
-                         )
+      package-archives `(,elpa ,org ,melpa/stable ,melpa)
       )
 
 (package-initialize)
@@ -17,131 +17,138 @@
 
 (require 'use-package)
 
-(use-package prelude
-  :load-path "~/.emacs.d/core"
-  :demand t
-  :bind* (("M-%" . query-replace-regexp)
-          ("M-`" . other-frame)
-          ("M-J" . delete-indentation)
-          ("C-M-;" . comment-or-uncomment-region)
-          ("C-M-k" . kill-sexp)
-          ("C-M-S-k" . my-kill-sexp-backwards)
-          ("C-<tab>" . mode-line-other-buffer)
-          ("C-x C-d" . my-duplicate-line)
-          ("C-x C-v" . my-find-alternate-file-with-sudo)
-          ("S-<delete>" . delete-region)
-          ("M-W" . my-copy-line-as-kill)
-          ("s-M-k" . my-kill-sexp-backwards)
-          ("C-;" . comment-line)
-          ("C-M-s" . my-isearch-forward-regexp-other-window)
-          ("C-c q" . delete-other-windows)
-          ("C-M-r" . my-isearch-backward-regexp-other-window)
-          ("C-x C-e" . my-eval-last-sexp)
-          ("M-s-<up>" . enlarge-window)
-          ("M-s-<down>" . enlarge-window-horizontally)
-          )
-  :config
-  (define-key isearch-mode-map (kbd "C-<return>") #'my-isearch-done-opposite)
+(custom-set-faces
+ '(default ((t (:height 150 :family "PT Mono" :weight normal)))))
 
-  (prefer-coding-system 'utf-8)
-  (set-default-coding-systems 'utf-8)
-  (set-terminal-coding-system 'utf-8)
-  (set-keyboard-coding-system 'utf-8)
+(add-hook
+ 'after-init-hook
+ (defun my/configure-emacs ()
+   (interactive)
+   (bind-keys*
+    ("M-%" . query-replace-regexp)
+    ("M-`" . other-frame)
+    ("C-M-;" . comment-or-uncomment-region)
+    ("C-M-k" . kill-sexp)
+    ("C-<tab>" . mode-line-other-buffer)
+    ("C-;" . comment-line)
+    ("C-c q" . delete-other-windows)
+    )
 
-  ;; Treat clipboard input as UTF-8 string first; compound text next, etc.
-  (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
+   (add-to-list 'custom-theme-load-path (expand-file-name "themes" user-emacs-directory))
 
-  (use-package cus-edit
-    :config
-    (setq custom-file (make-temp-file "")
-          custom-buffer-done-kill nil
-          custom-buffer-verbose-help nil
-          custom-unlispify-names nil
-          custom-unlispify-menu-entries nil))
+   (prefer-coding-system 'utf-8)
+   (set-default-coding-systems 'utf-8)
+   (set-terminal-coding-system 'utf-8)
+   (set-keyboard-coding-system 'utf-8)
 
-  (setq-default indent-tabs-mode nil
-                tab-width 2)
+   ;; Treat clipboard input as UTF-8 string first; compound text next, etc.
+   (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
 
-  (setq gc-cons-threshold 100000000
-        large-file-warning-threshold 100000000
 
-        load-prefer-newer t
-        require-final-newline t
+   (setq indent-tabs-mode nil
+         tab-width 2
 
-        mouse-wheel-scroll-amount '(1 ((shift) . 1) ((control) . nil))
-        mouse-wheel-progressive-speed nil
+         custom-file (make-temp-file "")
+         custom-buffer-done-kill nil
+         custom-buffer-verbose-help nil
+         custom-unlispify-names nil
+         custom-unlispify-menu-entries nil
 
-        ;; auto-backup (filename~)
-        backup-directory-alist `(("." . ,temporary-file-directory))
-        backup-by-copying t
-        delete-old-versions t
-        version-control t
+         gc-cons-threshold 100000000
+         large-file-warning-threshold 100000000
 
-        ;; auto-save (#filename#)
-        auto-save-file-name-transforms `((".*" ,temporary-file-directory t))
+         load-prefer-newer t
+         require-final-newline t
 
-        confirm-kill-emacs #'y-or-n-p
+         mouse-wheel-scroll-amount '(1 ((shift) . 1) ((control) . nil))
+         mouse-wheel-progressive-speed nil
 
-        echo-keystrokes 0.2
-        ring-bell-function #'ignore
+         ;; auto-backup (filename~)
+         backup-directory-alist `(("." . ,temporary-file-directory))
+         backup-by-copying t
+         delete-old-versions t
+         version-control t
 
-        set-mark-command-repeat-pop t
+         ;; auto-save (#filename#)
+         auto-save-file-name-transforms `((".*" ,temporary-file-directory t))
 
-        inhibit-default-init t
-        inhibit-startup-screen t
-        initial-scratch-message nil
+         confirm-kill-emacs #'y-or-n-p
 
-        scroll-margin 2
-        scroll-preserve-screen-position t)
+         echo-keystrokes 0.2
+         ring-bell-function #'ignore
 
-  (defalias 'yes-or-no-p 'y-or-n-p)
+         set-mark-command-repeat-pop t
 
-  (dolist (r `((?i . (file . ,(expand-file-name "init.el" user-emacs-directory)))
-               (?p . (file . ,(expand-file-name "core/my-prelude.el" user-emacs-directory)))
-               (?s . (file . ,(expand-file-name "snippets" user-emacs-directory)))))
-    (set-register (car r) (cdr r)))
+         inhibit-default-init t
+         inhibit-startup-screen t
+         initial-scratch-message nil
 
-  (when (window-system)
-    (unbind-key "C-z"))
+         scroll-margin 2
+         scroll-preserve-screen-position t)
 
-  (add-to-list 'custom-theme-load-path (expand-file-name "themes" user-emacs-directory))
-  (add-hook 'after-init-hook #'my-load-saved-theme)
+   (defalias 'yes-or-no-p 'y-or-n-p)
 
-  (dolist (cmd '(narrow-to-region
-                 narrow-to-page
-                 narrow-to-defun
-                 upcase-region
-                 downcase-region
-                 erase-buffer
-                 eval-expression
-                 dired-find-alternate-file
-                 set-goal-column))
-    (put cmd 'disabled nil))
+   (dolist (r `((?i . (file . ,(expand-file-name "init.el" user-emacs-directory)))
+                ))
+     (set-register (car r) (cdr r)))
 
-  (my-disable-modes '(scroll-bar-mode
-                      tool-bar-mode
-                      blink-cursor-mode
-                      transient-mark-mode))
+   (when (window-system) (unbind-key "C-z"))
 
-  (when (not (eq system-type 'darwin))
-    (my-disable-mode 'menu-bar-mode))
+   (dolist (cmd '(narrow-to-region
+                  narrow-to-page
+                  narrow-to-defun
+                  upcase-region
+                  downcase-region
+                  erase-buffer
+                  eval-expression
+                  dired-find-alternate-file
+                  set-goal-column))
+     (put cmd 'disabled nil))
 
-  (my-enable-modes '(delete-selection-mode
-                     column-number-mode
-                     savehist-mode
-                     global-hi-lock-mode))
+   (my/disable-modes '(scroll-bar-mode
+                       tool-bar-mode
+                       blink-cursor-mode
+                       transient-mark-mode))
 
-  (custom-set-faces
-   '(default ((t (:height 160 :family "Operator Mono" :weight normal)))))
+   (when (not (eq system-type 'darwin))
+     (my/disable-mode 'menu-bar-mode))
 
-  ) ;; end prelude
+   (my/enable-modes '(delete-selection-mode
+                      column-number-mode
+                      savehist-mode
+                      global-hi-lock-mode))
+   ))
 
-(use-package autorevert
-  :diminish auto-revert-mode
-  :config (global-auto-revert-mode))
+(use-package defuns :load-path "~/.emacs.d/site-lisp")
 
-(use-package hi-lock
-  :diminish hi-lock-mode)
+(use-package editing-extras
+  :load-path "~/.emacs.d/site-lisp"
+  :bind* (
+
+          ("C-M-S-k" . my/kill-sexp-backwards)
+          ("C-x C-v" . my/find-alternate-file-with-sudo)
+          ("C-M-s"   . my/isearch-forward-regexp-other-window)
+          ("C-M-r"   . my/isearch-backward-regexp-other-window)
+          ("C-x C-e" . my/eval-last-sexp)
+
+          ))
+
+(use-package remember-last-theme :load-path "~/src/public/remember-theme")
+
+(use-package isearch
+  :init
+  (defun my/isearch-done-opposite (&optional nopush edit)
+    "End current search in the opposite side of the match.
+
+The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'."
+    (interactive)
+    (funcall #'isearch-done nopush edit)
+    (when isearch-other-end (goto-char isearch-other-end)))
+  :bind (:map isearch-mode-map ("C-<return>" . my/isearch-done-opposite)))
+
+(use-package autorevert :diminish auto-revert-mode :config (global-auto-revert-mode))
+
+(use-package hi-lock :diminish hi-lock-mode)
 
 (use-package discover-my-major
   :ensure t
@@ -172,83 +179,53 @@
   :config
   (use-package ediff-keep))
 
-(use-package sh-script
-  :config (setq sh-indentation 2
-                sh-basic-offset 2))
+(use-package sh-script :init (setq sh-indentation 2 sh-basic-offset 2) :defer t)
 
-(use-package man
-  :config (setq Man-width 79))
+(use-package man :init (setq Man-width 79) :defer t)
 
 (use-package which-func
-  :init (defun my-echo-which-func ()
-          (interactive)
-          (message "\u0192: %s" (which-function)))
+  :init
+  (defun my/echo-which-func ()
+    (interactive)
+    (message "\u0192: %s" (which-function)))
   :commands (which-function)
-  :bind (("C-c f" . my-echo-which-func)))
+  :bind (("C-c f" . my/echo-which-func)))
 
 (use-package whitespace
-  :bind (("C-x S" . whitespace-cleanup-save-buffer))
-  :diminish ((global-whitespace-mode . "")
-             (whitespace-mode . ""))
   :init
   (defun whitespace-cleanup-save-buffer ()
     (interactive)
     (whitespace-cleanup)
     (save-buffer))
   (setq-default whitespace-style '(face trailing tab-mark))
-  (add-hook 'prog-mode-hook 'whitespace-mode))
+  (add-hook 'prog-mode-hook 'whitespace-mode)
+  :bind (("C-x S" . whitespace-cleanup-save-buffer))
+  :diminish ((global-whitespace-mode . "") (whitespace-mode . "")))
 
-(use-package dockerfile-mode
-  :ensure t
-  :defer t)
+(use-package dockerfile-mode :ensure t :defer t)
 
 (use-package helm
   :ensure t
-  :config
+  :diminish helm-mode
+  :bind (("M-x" . helm-M-x)
+         ("C-h SPC" . helm-all-mark-rings)
+         ("M-Y" . helm-show-kill-ring)
+         ("C-x b" . helm-mini)
+         ("C-x C-b" . helm-buffers-list)
+         ("C-x C-S-b" . ibuffer)
+         ("C-x C-f" . helm-find-files)
+         ("C-x C-r" . helm-recentf)
 
-  (use-package helm-descbinds
-    :ensure t)
+         ("C-x c !" . helm-calcul-expression)
+         ("M-:" . helm-eval-expression-with-eldoc)
 
-  (use-package helm-ag
-    :ensure t)
-
-  (use-package helm-tramp
-    :ensure t)
-
-  (use-package helm-swoop
-    :ensure t
-    :demand isearch
-    :bind (("M-i" . helm-swoop)
-           ("M-I" . helm-multi-swoop)
-           :isearch-mode-map
-           ("M-i" . helm-swoop-from-isearch)))
-
-  (use-package helm-config
-    :diminish helm-mode
-    :demand t
-    :bind (("M-x" . helm-M-x)
-           ("C-h SPC" . helm-all-mark-rings)
-           ("M-Y" . helm-show-kill-ring)
-           ("C-x b" . helm-mini)
-           ("C-x C-b" . helm-buffers-list)
-           ("C-x C-S-b" . ibuffer)
-           ("C-x C-f" . helm-find-files)
-           ("C-x C-r" . helm-recentf)
-
-           ("C-x C-o" . helm-swoop)
-           ("C-x C-M-o" . helm-multi-swoop)
-
-           ("C-x c !" . helm-calcul-expression)
-           ("M-:" . helm-eval-expression-with-eldoc)
-
-           ("C-h a" . helm-apropos)
-           ("C-h i" . helm-info-emacs)
-           ("C-h b" . helm-descbinds)
-           ("C-h C-l" . helm-locate-library)
-           ("C-c h" . helm-command-prefix))
+         ("C-h a" . helm-apropos)
+         ("C-h i" . helm-info-emacs)
+         ("C-h b" . helm-descbinds)
+         ("C-h C-l" . helm-locate-library)
+         ("C-c h" . helm-command-prefix))
 
     :config
-
     (setq helm-split-window-in-side-p t
           helm-buffers-fuzzy-matching t
           helm-buffer-max-length nil
@@ -269,44 +246,50 @@
 
     (add-to-list 'helm-sources-using-default-as-input #'helm-source-man-pages)
 
-    (my-enable-modes '(helm-mode
+    (my/enable-modes '(helm-mode
                        helm-descbinds-mode
                        helm-autoresize-mode
                        helm-flx-mode)))
 
-  (use-package helm-projectile
-    :ensure t
-    :bind* (("C-c p D" . projectile-dired)
-            ("C-c p v" . projectile-vc)
-            ("C-c p k" . projectile-kill-buffers)
 
-            ("C-c p p" . helm-projectile-switch-project)
-            ("C-c p f" . helm-projectile-find-file)
-            ("C-c p F" . helm-projectile-find-file-in-known-projects)
-            ("C-c p g" . helm-projectile-find-file-dwin)
-            ("C-c p d" . helm-projectile-find-dir)
-            ("C-c p C-r" . helm-projectile-recentf)
-            ("C-c p b" . helm-projectile-switch-to-buffer)
-            ("C-c p s s" . helm-projectile-ag)
-            ("C-c p s g" . helm-projectile-grep)
-            )
-    :diminish projectile-mode
-    :init
-    (setq-default projectile-enable-caching t
-                  projectile-indexing-method 'alien
-                  projectile-completion-system 'helm
-                  projectile-mode-line '(:eval (format " {%s}" (projectile-project-name))))
+(use-package helm-descbinds :ensure t :defer t)
+(use-package helm-ag :ensure t :defer t)
+(use-package helm-tramp :ensure t :defer t)
+(use-package helm-themes :if (display-graphic-p) :bind ([f9] . helm-themes))
+(use-package helm-swoop
+  :ensure t
+  :demand isearch
+  :bind (("M-i" . helm-swoop)
+         ("M-I" . helm-multi-swoop)
+         :isearch-mode-map
+         ("M-i" . helm-swoop-from-isearch)))
 
-    :config
-    (projectile-global-mode)
-    (helm-projectile-on))
+(use-package helm-projectile
+  :ensure t
+  :bind* (("C-c p D" . projectile-dired)
+          ("C-c p v" . projectile-vc)
+          ("C-c p k" . projectile-kill-buffers)
 
-  (use-package helm-themes
-    :ensure t
-    :if (display-graphic-p)
-    :bind ([f9] . helm-themes))
-  )
-;;; end (use-package helm..)
+          ("C-c p p" . helm-projectile-switch-project)
+          ("C-c p f" . helm-projectile-find-file)
+          ("C-c p F" . helm-projectile-find-file-in-known-projects)
+          ("C-c p g" . helm-projectile-find-file-dwin)
+          ("C-c p d" . helm-projectile-find-dir)
+          ("C-c p C-r" . helm-projectile-recentf)
+          ("C-c p b" . helm-projectile-switch-to-buffer)
+          ("C-c p s s" . helm-projectile-ag)
+          ("C-c p s g" . helm-projectile-grep)
+          )
+  :diminish projectile-mode
+  :init
+  (setq-default projectile-enable-caching t
+                projectile-indexing-method 'alien
+                projectile-completion-system 'helm
+                projectile-mode-line '(:eval (format " {%s}" (projectile-project-name))))
+
+  :config
+  (projectile-global-mode)
+  (helm-projectile-on))
 
 (use-package rainbow-delimiters
   :ensure t
@@ -391,84 +374,6 @@
   (add-hook 'scala-mode-hook 'subword-mode)
   )
 
-(use-package js2-mode
-  :ensure t
-  :mode "\\.js\\'"
-  :init
-  (setq-default js2-indent-switch-body t
-                js2-basic-offset 2
-                js-indent-level 2
-                js-switch-indent-offset 2
-                js2-include-node-externs t
-                js2-mode-indent-ignore-first-tab t
-                js2-mode-show-parse-errors nil
-                js2-strict-inconsistent-return-warning nil
-                js2-strict-var-hides-function-arg-warning nil
-                js2-strict-missing-semi-warning nil
-                js2-strict-trailing-comma-warning nil
-                js2-strict-cond-assign-warning nil
-                js2-strict-var-redeclaration-warning nil
-                js2-global-externs '("module" "require" "__dirname" "process" "console" "JSON"))
-
-  (add-hook 'js2-mode-hook (command (highlight-lines-matching-regexp "debugger")))
-  (add-hook 'js2-mode-hook (command (highlight-lines-matching-regexp "TODO")))
-
-  :config
-
-  (dolist (mode '(js2-jsx-mode js2-mode))
-    (font-lock-add-keywords
-     mode `(("\\<\\(function\\)("
-             (0 (progn
-                  (compose-region
-                   (match-beginning 1)
-                   (match-end 1) "\u0192")
-                  nil)))))
-    (font-lock-add-keywords
-     mode `(("\\<\\(function\\) .*("
-             (0 (progn
-                  (compose-region
-                   (match-beginning 1)
-                   (match-end 1) "\u0192")
-                  nil))))))
-  )
-
-(use-package tern
-  :ensure t
-  :defer t
-  :diminish tern-mode
-  :init (add-hook 'js2-mode-hook 'tern-mode))
-
-(use-package js2-refactor
-  :ensure t
-  :defer t
-  :diminish js2-refactor-mode
-  :init (add-hook 'web-mode-hook (defun my/set-jsx-js2-refactor ()
-                                   (when (or
-                                          (string= web-mode-content-type "javascript")
-                                          (string= web-mode-content-type "jsx"))
-                                     (js2-refactor-mode))))
-  :config (js2r-add-keybindings-with-prefix "C-c C-j"))
-
-;; (use-package company
-;;   :ensure t
-;;   :diminish company-mode
-;;   :if (display-graphic-p)
-;;   :config
-;;   (setq company-idle-delay 0.3
-;;         company-dabbrev-downcase nil)
-;;   (global-company-mode)
-;;   (use-package company-tern
-;;     :ensure t
-;;     :config (add-to-list 'company-backends 'company-tern))
-;;   (use-package company-emoji
-;;     :ensure t
-;;     :config (add-to-list 'company-backends 'company-emoji)))
-
-(use-package skewer-mode
-  :ensure t
-  :diminish ((skewer-mode . "")
-             (skewer-css-mode . "")
-             (skewer-html-mode . "")))
 
 (use-package emmet-mode
   :ensure t
@@ -479,10 +384,6 @@
   (add-hook 'html-mode-hook 'emmet-mode)
   (add-hook 'web-mode-hook 'emmet-mode)
   (add-hook 'css-mode-hook 'emmet-mode))
-
-;; (use-package intero
-;;   :ensure t
-;;   :init (add-hook 'haskell-mode-hook 'intero-mode))
 
 (use-package haskell-mode
   :ensure t
@@ -639,10 +540,39 @@
          ("C-c o l" . org-store-link)
          ("C-c o a" . org-agenda)
          ("C-c o h" . helm-info-org))
+  :demand t
   :init
-  (setq org-agenda-files '("~/Documents"))
-  (eval-after-load "org"
-    '(require 'ox-md nil t)))
+  (setq org-agenda-files '("~/Documents")
+        org-src-fontify-natively t
+        )
+  (eval-after-load "org" '(require 'ox-md nil t)))
+
+(use-package org-present
+  :ensure t
+  :init
+  (use-package hide-mode-line :load-path "vendor")
+  (setq org-present-text-scale 3)
+  (add-hook
+   'org-present-mode-hook
+   (defun org-present/on-start ()
+     (interactive)
+     (org-present-big)
+     ;; (org-display-inline-images)
+     ;; (org-present-hide-cursor)
+     (org-present-read-only)
+     ;; (hide-mode-line)
+     ))
+
+  (add-hook
+   'org-present-mode-quit-hook
+   (defun org-present/on-quit ()
+     (interactive)
+     ;; (org-present-small)
+     ;; (org-remove-inline-images)
+     ;; (org-present-show-cursor)
+     (org-present-read-write)
+     ;; (hide-mode-line)
+     )))
 
 (use-package simple
   :config
@@ -900,10 +830,10 @@ If BUFFER-OR-NAME is not specified the current buffer is used."
 
   :config
   (mykie:set-keys nil
-                  "C-x k"
-                  :default kill-buffer
-                  :C-u     my-kill-buffer-and-file
-                  ))
+    "C-x k"
+    :default kill-buffer
+    :C-u     my-kill-buffer-and-file
+    ))
 
 (use-package untitled-new-buffer
   :ensure t

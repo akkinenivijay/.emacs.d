@@ -25,3 +25,5 @@ tldr/
 /.emacs-theme
 /custom.el
 ensime/
+/.DS_Store
+/remember-last-theme.txt
