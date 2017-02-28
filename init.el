@@ -20,106 +20,100 @@
 (custom-set-faces
  '(default ((t (:height 150 :family "PT Mono" :weight normal)))))
 
-(add-hook
- 'after-init-hook
- (defun my/configure-emacs ()
-   (interactive)
-   (bind-keys*
-    ("M-%" . query-replace-regexp)
-    ("M-`" . other-frame)
-    ("C-M-;" . comment-or-uncomment-region)
-    ("C-M-k" . kill-sexp)
-    ("C-<tab>" . mode-line-other-buffer)
-    ("C-;" . comment-line)
-    ("C-c q" . delete-other-windows)
-    )
-
-   (add-to-list 'custom-theme-load-path (expand-file-name "themes" user-emacs-directory))
-
-   (prefer-coding-system 'utf-8)
-   (set-default-coding-systems 'utf-8)
-   (set-terminal-coding-system 'utf-8)
-   (set-keyboard-coding-system 'utf-8)
-
-   ;; Treat clipboard input as UTF-8 string first; compound text next, etc.
-   (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
-
-
-   (setq indent-tabs-mode nil
-         tab-width 2
-
-         custom-file (make-temp-file "")
-         custom-buffer-done-kill nil
-         custom-buffer-verbose-help nil
-         custom-unlispify-names nil
-         custom-unlispify-menu-entries nil
-
-         gc-cons-threshold 100000000
-         large-file-warning-threshold 100000000
-
-         load-prefer-newer t
-         require-final-newline t
-
-         mouse-wheel-scroll-amount '(1 ((shift) . 1) ((control) . nil))
-         mouse-wheel-progressive-speed nil
-
-         ;; auto-backup (filename~)
-         backup-directory-alist `(("." . ,temporary-file-directory))
-         backup-by-copying t
-         delete-old-versions t
-         version-control t
-
-         ;; auto-save (#filename#)
-         auto-save-file-name-transforms `((".*" ,temporary-file-directory t))
-
-         confirm-kill-emacs #'y-or-n-p
-
-         echo-keystrokes 0.2
-         ring-bell-function #'ignore
-
-         set-mark-command-repeat-pop t
-
-         inhibit-default-init t
-         inhibit-startup-screen t
-         initial-scratch-message nil
-
-         scroll-margin 2
-         scroll-preserve-screen-position t)
-
-   (defalias 'yes-or-no-p 'y-or-n-p)
-
-   (dolist (r `((?i . (file . ,(expand-file-name "init.el" user-emacs-directory)))
-                ))
-     (set-register (car r) (cdr r)))
-
-   (when (window-system) (unbind-key "C-z"))
-
-   (dolist (cmd '(narrow-to-region
-                  narrow-to-page
-                  narrow-to-defun
-                  upcase-region
-                  downcase-region
-                  erase-buffer
-                  eval-expression
-                  dired-find-alternate-file
-                  set-goal-column))
-     (put cmd 'disabled nil))
-
-   (my/disable-modes '(scroll-bar-mode
-                       tool-bar-mode
-                       blink-cursor-mode
-                       transient-mark-mode))
-
-   (when (not (eq system-type 'darwin))
-     (my/disable-mode 'menu-bar-mode))
-
-   (my/enable-modes '(delete-selection-mode
-                      column-number-mode
-                      savehist-mode
-                      global-hi-lock-mode))
-   ))
-
 (use-package defuns :load-path "~/.emacs.d/site-lisp")
+
+(bind-keys*
+ ("M-%" . query-replace-regexp)
+ ("M-`" . other-frame)
+ ("C-M-;" . comment-or-uncomment-region)
+ ("C-M-k" . kill-sexp)
+ ("C-<tab>" . mode-line-other-buffer)
+ ("C-;" . comment-line)
+ ("C-c q" . delete-other-windows)
+ )
+
+(add-to-list 'custom-theme-load-path (expand-file-name "themes" user-emacs-directory))
+
+(prefer-coding-system 'utf-8)
+(set-default-coding-systems 'utf-8)
+(set-terminal-coding-system 'utf-8)
+(set-keyboard-coding-system 'utf-8)
+
+;; Treat clipboard input as UTF-8 string first; compound text next, etc.
+(setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
+
+
+(setq-default indent-tabs-mode nil tab-width 2)
+
+(setq custom-file (make-temp-file "")
+      custom-buffer-done-kill nil
+      custom-buffer-verbose-help nil
+      custom-unlispify-names nil
+      custom-unlispify-menu-entries nil
+
+      gc-cons-threshold 100000000
+      large-file-warning-threshold 100000000
+
+      load-prefer-newer t
+      require-final-newline t
+
+      mouse-wheel-scroll-amount '(1 ((shift) . 1) ((control) . nil))
+      mouse-wheel-progressive-speed nil
+
+      ;; auto-backup (filename~)
+      backup-directory-alist `(("." . ,temporary-file-directory))
+      backup-by-copying t
+      delete-old-versions t
+      version-control t
+
+      ;; auto-save (#filename#)
+      auto-save-file-name-transforms `((".*" ,temporary-file-directory t))
+
+      confirm-kill-emacs #'y-or-n-p
+
+      echo-keystrokes 0.2
+      ring-bell-function #'ignore
+
+      set-mark-command-repeat-pop t
+
+      inhibit-default-init t
+      inhibit-startup-screen t
+      initial-scratch-message nil
+
+      scroll-margin 2
+      scroll-preserve-screen-position t)
+
+(defalias 'yes-or-no-p 'y-or-n-p)
+
+(dolist (r `((?i . (file . ,(expand-file-name "init.el" user-emacs-directory)))
+             ))
+  (set-register (car r) (cdr r)))
+
+(when (window-system) (unbind-key "C-z"))
+
+(dolist (cmd '(narrow-to-region
+               narrow-to-page
+               narrow-to-defun
+               upcase-region
+               downcase-region
+               erase-buffer
+               eval-expression
+               dired-find-alternate-file
+               set-goal-column))
+  (put cmd 'disabled nil))
+
+(my/disable-modes '(scroll-bar-mode
+                    tool-bar-mode
+                    blink-cursor-mode
+                    transient-mark-mode))
+
+(when (not (eq system-type 'darwin))
+  (my/disable-mode 'menu-bar-mode))
+
+(my/enable-modes '(delete-selection-mode
+                   column-number-mode
+                   savehist-mode
+                   global-hi-lock-mode))
 
 (use-package editing-extras
   :load-path "~/.emacs.d/site-lisp"
@@ -130,6 +124,8 @@
           ("C-M-s"   . my/isearch-forward-regexp-other-window)
           ("C-M-r"   . my/isearch-backward-regexp-other-window)
           ("C-x C-e" . my/eval-last-sexp)
+          ("C-<down>". my/scroll-one-down)
+          ("C-<up>"  . my/scroll-one-up)
 
           ))
 
@@ -258,7 +254,7 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
 (use-package helm-themes :if (display-graphic-p) :bind ([f9] . helm-themes))
 (use-package helm-swoop
   :ensure t
-  :demand isearch
+  :demand t
   :bind (("M-i" . helm-swoop)
          ("M-I" . helm-multi-swoop)
          :isearch-mode-map
@@ -639,14 +635,17 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   :defer t)
 
 
+(use-package markdown-edit-indirect :ensure t :defer t)
+(use-package markdown-toc :ensure t :defer t)
 (use-package markdown-mode
   :ensure t
-  :demand (markdown-edit-indirect markdown-toc)
+  :init
+  (add-hook 'markdown-mode-hook (defun configure-markdown-mode ()
+                                  (interactive)
+                                  (local-set-key (kbd "C-c '") 'markdown-edit-indirect)
+                                  (local-set-key (kbd "C-c t") 'markdown-toc-generate-toc)))
   :mode (("\\.md" . markdown-mode)
-         ("\\.markdown" . markdown-mode))
-  :bind (:markdown-mode-map
-         ("C-c t" . markdown-toc-generate-toc)
-         ("C-c '" . markdown-edit-indirect)))
+         ("\\.markdown" . markdown-mode)))
 
 (use-package intero
   :ensure t
@@ -802,8 +801,7 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   :diminish golden-ratio-mode
   :config (golden-ratio-mode))
 
-(use-package mac
-  :if (string-equal system-type "darwin"))
+(use-package mac :if (string-equal system-type "darwin"))
 
 (use-package wgrep :ensure t)
 (use-package wgrep-helm :ensure t)

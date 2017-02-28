@@ -146,4 +146,14 @@
       (open-line 1)
       (insert line-text))))
 
+(defun my/scroll-one-up ()
+  (interactive)
+  (scroll-down 1)
+  (next-line -1))
+
+(defun my/scroll-one-down ()
+  (interactive)
+  (scroll-up 1)
+  (next-line))
+
 (provide 'defuns)
