@@ -156,4 +156,9 @@
   (scroll-up 1)
   (next-line))
 
+(defun my/save-theme ()
+  (interactive)
+  (custom-set-variables `(,'custom-enabled-themes (quote ,custom-enabled-themes)))
+  (custom-save-all))
+
 (provide 'defuns)

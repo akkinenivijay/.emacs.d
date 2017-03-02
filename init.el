@@ -17,10 +17,17 @@
 
 (require 'use-package)
 
-(custom-set-faces
- '(default ((t (:height 150 :family "PT Mono" :weight normal)))))
-
 (use-package defuns :load-path "~/.emacs.d/site-lisp")
+
+(add-hook
+ 'after-init-hook
+ (defun my/configure-emacs ()
+   (custom-set-faces
+    '(default ((t (:height 160 :family "Operator Mono" :weight normal)))))
+
+   (load custom-file)
+   (add-hook 'kill-emacs-hook 'my/save-theme)
+   ))
 
 (bind-keys*
  ("M-%" . query-replace-regexp)
@@ -42,14 +49,15 @@
 ;; Treat clipboard input as UTF-8 string first; compound text next, etc.
 (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
 
-
 (setq-default indent-tabs-mode nil tab-width 2)
 
-(setq custom-file (make-temp-file "")
+(setq custom-file (format "%scustom.el" user-emacs-directory)
       custom-buffer-done-kill nil
       custom-buffer-verbose-help nil
       custom-unlispify-names nil
       custom-unlispify-menu-entries nil
+
+      custom-safe-themes t
 
       gc-cons-threshold 100000000
       large-file-warning-threshold 100000000
@@ -128,8 +136,6 @@
           ("C-<up>"  . my/scroll-one-up)
 
           ))
-
-(use-package remember-last-theme :load-path "~/src/public/remember-theme")
 
 (use-package isearch
   :init
