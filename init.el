@@ -23,11 +23,13 @@
  'after-init-hook
  (defun my/configure-emacs ()
    (custom-set-faces
-    '(default ((t (:height 160 :family "Operator Mono" :weight normal)))))
+    '(default ((t (:height 170 :family "Fantasque Sans Mono" :weight normal)))))
 
-   (load custom-file)
-   (add-hook 'kill-emacs-hook 'my/save-theme)
+   ;; (load custom-file)
+   ;; (add-hook 'kill-emacs-hook 'my/save-theme)
    ))
+
+(use-package remember-last-theme :load-path "~/src/public/remember-theme")
 
 (bind-keys*
  ("M-%" . query-replace-regexp)
@@ -35,6 +37,7 @@
  ("C-M-;" . comment-or-uncomment-region)
  ("C-M-k" . kill-sexp)
  ("C-<tab>" . mode-line-other-buffer)
+ ("C-S-<tab>" . next-buffer)
  ("C-;" . comment-line)
  ("C-c q" . delete-other-windows)
  )
@@ -94,6 +97,7 @@
 (defalias 'yes-or-no-p 'y-or-n-p)
 
 (dolist (r `((?i . (file . ,(expand-file-name "init.el" user-emacs-directory)))
+             (?d . (file . ,(expand-file-name "site-lisp/defuns.el" user-emacs-directory)))
              ))
   (set-register (car r) (cdr r)))
 
@@ -877,3 +881,4 @@ If BUFFER-OR-NAME is not specified the current buffer is used."
 (use-package white-theme :ensure t :defer t)
 (use-package madhat2r-theme :ensure t :defer t)
 (use-package kosmos-theme :ensure t :defer t)
+(use-package plain-theme :ensure t :defer t)
