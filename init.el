@@ -23,13 +23,14 @@
  'after-init-hook
  (defun my/configure-emacs ()
    (custom-set-faces
-    '(default ((t (:height 170 :family "Fantasque Sans Mono" :weight normal)))))
+    '(default ((t (:height 170 :family "Operator Mono" :weight normal)))))
 
-   ;; (load custom-file)
-   ;; (add-hook 'kill-emacs-hook 'my/save-theme)
+   (load custom-file)
    ))
 
-(use-package remember-last-theme :load-path "~/src/public/remember-theme")
+(use-package remember-last-theme
+  :load-path "~/src/public/remember-theme"
+  :config (remember-last-theme-enable))
 
 (bind-keys*
  ("M-%" . query-replace-regexp)
@@ -458,6 +459,10 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   :if (display-graphic-p)
   :bind ("C-x g p" . git-messenger:popup-message))
 
+(use-package git-timemachine
+  :ensure t
+  :bind ("C-x g t" . git-timemachine-toggle))
+
 (use-package what-the-commit
   :ensure t
   :bind ("C-x g c" . what-the-commit-insert))
@@ -783,6 +788,7 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
 
 (use-package fancy-narrow
   :ensure t
+  :diminish fancy-narrow-mode
   :config (fancy-narrow-mode))
 
 (use-package gradle-mode
@@ -850,6 +856,7 @@ If BUFFER-OR-NAME is not specified the current buffer is used."
 (use-package ensime
   :ensure t
   :bind ([f10] . ensime-reload)
+  :diminish ensime-mode
   :config (setq ensime-startup-notification nil
                 ensime-startup-snapshot-notification nil))
 
@@ -868,6 +875,25 @@ If BUFFER-OR-NAME is not specified the current buffer is used."
 (use-package greymatters-theme :ensure t :defer t)
 (use-package heroku-theme :ensure t :defer t)
 (use-package idea-darkula-theme :ensure t :defer t)
+
+(advice-add
+ 'load-theme
+ :after
+ (defun my/apply-theme-customizations (theme &optional no-cofirm no-enable)
+   (let ((customize-theme (intern (format "customize-%s-theme" theme))))
+     (when (functionp customize-theme)
+       (funcall customize-theme)))))
+
+(use-package darcula-theme :ensure t
+  :defer t
+  :init
+  (defun customize-darcula-theme ()
+    (custom-theme-set-faces
+     'darcula
+     '(isearch ((t (:background "#214283" :box (:line-width -1 :color "#bbbbbb")))))
+     '(font-lock-constant-face ((t (:foreground "#6897bb" :italic t :weight bold :inherit 'font-lock-variable-name-face))))
+     )))
+
 (use-package leuven-theme :ensure t :defer t)
 (use-package minimal-theme :ensure t :defer t)
 (use-package plan9-theme :ensure t :defer t)
