@@ -23,14 +23,12 @@
  'after-init-hook
  (defun my/configure-emacs ()
    (custom-set-faces
-    '(default ((t (:height 170 :family "Operator Mono" :weight normal)))))
-
-   (load custom-file)
+    '(default ((t (:height 160 :family "Operator Mono" :weight normal)))))
    ))
 
 (use-package remember-last-theme
   :load-path "~/src/public/remember-theme"
-  :config (remember-last-theme-enable))
+  :config (remember-last-theme-with-file-enable "~/.emacs-theme"))
 
 (bind-keys*
  ("M-%" . query-replace-regexp)
@@ -55,13 +53,15 @@
 
 (setq-default indent-tabs-mode nil tab-width 2)
 
-(setq custom-file (format "%scustom.el" user-emacs-directory)
+(setq custom-file (make-temp-file "emacs-custom-")
       custom-buffer-done-kill nil
       custom-buffer-verbose-help nil
       custom-unlispify-names nil
       custom-unlispify-menu-entries nil
 
       custom-safe-themes t
+
+      frame-title-format '("" "%b @ Emacs " emacs-version)
 
       gc-cons-threshold 100000000
       large-file-warning-threshold 100000000
@@ -126,7 +126,8 @@
 (my/enable-modes '(delete-selection-mode
                    column-number-mode
                    savehist-mode
-                   global-hi-lock-mode))
+                   global-hi-lock-mode
+                   semantic-mode))
 
 (use-package editing-extras
   :load-path "~/.emacs.d/site-lisp"
@@ -154,7 +155,6 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   :bind (:map isearch-mode-map ("C-<return>" . my/isearch-done-opposite)))
 
 (use-package autorevert :diminish auto-revert-mode :config (global-auto-revert-mode))
-
 (use-package hi-lock :diminish hi-lock-mode)
 
 (use-package discover-my-major
@@ -198,6 +198,17 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   :commands (which-function)
   :bind (("C-c f" . my/echo-which-func)))
 
+(use-package elisp-mode
+  :mode (("\\.el\\'" . emacs-lisp-mode)
+         ("Cask" . emacs-lisp-mode)))
+
+(use-package smooth-scrolling :ensure t :config (smooth-scrolling-mode))
+
+(defmacro add-modes-hook (hook &rest modes)
+  `(dolist (mode (quote ,modes))
+     (let ((mode-name (symbol-name mode)))
+       (add-hook (intern (format "%s-mode-hook" mode-name)) (quote ,hook)))))
+
 (use-package whitespace
   :init
   (defun whitespace-cleanup-save-buffer ()
@@ -205,15 +216,16 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
     (whitespace-cleanup)
     (save-buffer))
   (setq-default whitespace-style '(face trailing tab-mark))
-  (add-hook 'prog-mode-hook 'whitespace-mode)
+  (add-modes-hook whitespace-mode prog)
   :bind (("C-x S" . whitespace-cleanup-save-buffer))
   :diminish ((global-whitespace-mode . "") (whitespace-mode . "")))
 
 (use-package dockerfile-mode :ensure t :defer t)
 
-(use-package helm
-  :ensure t
+(use-package helm-config
+  :ensure helm
   :diminish helm-mode
+  :demand t
   :bind (("M-x" . helm-M-x)
          ("C-h SPC" . helm-all-mark-rings)
          ("M-Y" . helm-show-kill-ring)
@@ -230,34 +242,35 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
          ("C-h i" . helm-info-emacs)
          ("C-h b" . helm-descbinds)
          ("C-h C-l" . helm-locate-library)
-         ("C-c h" . helm-command-prefix))
+         ("C-c h i" . helm-semantic-or-imenu)
+         )
 
-    :config
-    (setq helm-split-window-in-side-p t
-          helm-buffers-fuzzy-matching t
-          helm-buffer-max-length nil
-          helm-recentf-fuzzy-match t
-          helm-apropos-fuzzy-match t
-          helm-move-to-line-cycle-in-source t
-          helm-ff-search-library-in-sexp t
-          helm-ff-file-name-history-use-recentf t
-          helm-ff-auto-update-initial-value t
-          helm-full-frame nil
-          helm-split-window-in-side-p t)
+  :config
+  (setq helm-command-prefix-key "C-c h"
+        helm-split-window-in-side-p t
+        helm-buffers-fuzzy-matching t
+        helm-buffer-max-length nil
+        helm-recentf-fuzzy-match t
+        helm-apropos-fuzzy-match t
+        helm-move-to-line-cycle-in-source t
+        helm-ff-search-library-in-sexp t
+        helm-ff-file-name-history-use-recentf t
+        helm-ff-auto-update-initial-value t
+        helm-full-frame nil
+        helm-split-window-in-side-p t)
 
-    (add-to-list 'display-buffer-alist
-                 `(,(rx bos "*helm" (* not-newline) "*" eos)
-                   (display-buffer-in-side-window)
-                   (inhibit-same-window . t)
-                   (window-height . 0.4)))
+  (add-to-list 'display-buffer-alist
+               `(,(rx bos "*helm" (* not-newline) "*" eos)
+                 (display-buffer-in-side-window)
+                 (inhibit-same-window . t)
+                 (window-height . 0.4)))
 
-    (add-to-list 'helm-sources-using-default-as-input #'helm-source-man-pages)
+  ;; (add-to-list 'helm-sources-using-default-as-input #'helm-source-man-pages)
 
-    (my/enable-modes '(helm-mode
-                       helm-descbinds-mode
-                       helm-autoresize-mode
-                       helm-flx-mode)))
-
+  (my/enable-modes '(helm-mode
+                     helm-descbinds-mode
+                     helm-autoresize-mode
+                     helm-flx-mode)))
 
 (use-package helm-descbinds :ensure t :defer t)
 (use-package helm-ag :ensure t :defer t)
@@ -302,28 +315,19 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   :ensure t
   :defer t
   :if (display-graphic-p)
-  :init (add-hook 'emacs-lisp-mode-hook 'rainbow-delimiters-mode))
+  :init (add-modes-hook rainbow-delimiters-mode emacs-lisp))
 
 (use-package paren
   :defer t
   :init
-  (add-hook 'emacs-lisp-mode-hook 'show-paren-mode)
-  (add-hook 'haskell-mode-hook 'show-paren-mode)
-  (add-hook 'elm-mode-hook 'show-paren-mode)
-  (add-hook 'js2-mode-hook 'show-paren-mode)
-  (add-hook 'css-mode-hook 'show-paren-mode)
-  (add-hook 'sgml-mode-hook 'show-paren-mode)
-  (add-hook 'scala-mode-hook 'show-paren-mode))
+  (add-modes-hook show-paren-mode emacs-lisp haskell sml elm js2 css scala)
+  )
 
 (use-package elec-pair
   :defer t
   :init
-  (add-hook 'js2-mode-hook 'electric-pair-mode)
-  (add-hook 'emacs-lisp-mode-hook 'electric-pair-mode)
-  (add-hook 'css-mode-hook 'electric-pair-mode)
-  (add-hook 'elm-mode-hook 'electric-pair-mode)
-  (add-hook 'scala-mode-hook 'electric-pair-mode)
-  (add-hook 'haskell-mode-hook 'electric-pair-mode))
+  (add-modes-hook electric-pair-mode js2 emacs-lisp css elm scala haskell sml)
+  )
 
 (use-package avy
   :ensure t
@@ -357,28 +361,22 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
 
 (use-package yasnippet
   :ensure t
-  :defer t
+  :defer 5
   :diminish yas-minor-mode
   :init
   (use-package elm-yasnippets :ensure t)
 
-  (add-hook 'js2-mode-hook 'yas-minor-mode)
-  (add-hook 'haskell-mode-hook 'yas-minor-mode)
-  (add-hook 'elm-mode-hook 'yas-minor-mode)
+  (add-modes-hook yas-minor-mode js2 haskell sml elm scala)
 
   :config
-  (yas-reload-all))
+  (yas-reload-all)
+  )
 
 (use-package subword
   :defer t
   :diminish subword-mode
   :init
-  (add-hook 'js2-mode-hook 'subword-mode)
-  (add-hook 'web-mode-hook 'subword-mode)
-  (add-hook 'haskell-mode-hook 'subword-mode)
-  (add-hook 'purescript-mode-hook 'subword-mode)
-  (add-hook 'elm-mode-hook 'subword-mode)
-  (add-hook 'scala-mode-hook 'subword-mode)
+  (add-modes-hook subword-mode js2 web haskell sml purescript elm scala sml)
   )
 
 
@@ -387,10 +385,12 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   :diminish emmet-mode
   :defer t
   :init
-  (add-hook 'sgml-mode-hook 'emmet-mode)
-  (add-hook 'html-mode-hook 'emmet-mode)
-  (add-hook 'web-mode-hook 'emmet-mode)
-  (add-hook 'css-mode-hook 'emmet-mode))
+  (add-modes-hook emmet-mode sgml html web css)
+  )
+
+(use-package sml-mode
+  :ensure t
+  :mode "\\.sml\'")
 
 (use-package haskell-mode
   :ensure t
@@ -438,10 +438,9 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
                                       (file-executable-p eslint))
                                  (setq-local flycheck-javascript-eslint-executable eslint)))
                              (flycheck-mode)))
-  (add-hook 'js2-mode-hook 'flycheck-mode)
-  (add-hook 'typescript-mode-hook 'flycheck-mode)
-  (add-hook 'elm-mode-hook 'flycheck-mode)
-  (add-hook 'haskell-mode-hook 'flycheck-mode))
+
+  (add-modes-hook flycheck-mode js2 typescript haskell sml)
+  )
 
 
 (use-package magit
@@ -827,6 +826,10 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   :ensure t
   :config (backward-forward-mode))
 
+(use-package centered-window-mode
+  :load-path "~/src/public/centered-window-mode"
+  :init (setq cwm-use-vertical-padding nil))
+
 (use-package mykie
   :ensure t
   :init
@@ -860,22 +863,16 @@ If BUFFER-OR-NAME is not specified the current buffer is used."
   :config (setq ensime-startup-notification nil
                 ensime-startup-snapshot-notification nil))
 
+(use-package key-chord
+  :ensure t
+  :config
+  (key-chord-mode 1)
+  (key-chord-define-global "fj" 'split-window-horizontally)
+  (key-chord-define-global "fk" 'split-window-vertically)
+  )
+
+
 ;; themes
-
-(use-package atom-one-dark-theme :ensure t :defer t)
-(use-package birds-of-paradise-plus-theme :ensure t :defer t)
-(use-package bliss-theme :ensure t :defer t)
-(use-package borland-blue-theme :ensure t :defer t)
-(use-package cyberpunk-theme :ensure t :defer t)
-(use-package django-theme :ensure t :defer t)
-(use-package eclipse-theme :ensure t :defer t)
-(use-package espresso-theme :ensure t :defer t)
-(use-package faff-theme :ensure t :defer t)
-(use-package github-theme :ensure t :defer t)
-(use-package greymatters-theme :ensure t :defer t)
-(use-package heroku-theme :ensure t :defer t)
-(use-package idea-darkula-theme :ensure t :defer t)
-
 (advice-add
  'load-theme
  :after
@@ -894,17 +891,30 @@ If BUFFER-OR-NAME is not specified the current buffer is used."
      '(font-lock-constant-face ((t (:foreground "#6897bb" :italic t :weight bold :inherit 'font-lock-variable-name-face))))
      )))
 
-(use-package leuven-theme :ensure t :defer t)
+(use-package atom-one-dark-theme :ensure t :defer t)
+(use-package birds-of-paradise-plus-theme :ensure t :defer t)
+(use-package bliss-theme :ensure t :defer t)
+(use-package borland-blue-theme :ensure t :defer t)
+(use-package cyberpunk-theme :ensure t :defer t)
+(use-package eclipse-theme :ensure t :defer t)
+(use-package espresso-theme :ensure t :defer t)
+(use-package faff-theme :ensure t :defer t)
+(use-package greymatters-theme :ensure t :defer t)
+(use-package idea-darkula-theme :ensure t :defer t)
 (use-package minimal-theme :ensure t :defer t)
 (use-package plan9-theme :ensure t :defer t)
-(use-package purple-haze-theme :ensure t :defer t)
+(use-package noctilux-theme :ensure t :defer t)
 (use-package railscasts-theme :ensure t :defer t)
 (use-package rebecca-theme :ensure t :defer t)
-(use-package solarized-theme :ensure t :defer t)
 (use-package soothe-theme :ensure t :defer t)
 (use-package subatomic-theme :ensure t :defer t)
-(use-package sublime-themes :ensure t :defer t)
 (use-package white-theme :ensure t :defer t)
 (use-package madhat2r-theme :ensure t :defer t)
 (use-package kosmos-theme :ensure t :defer t)
 (use-package plain-theme :ensure t :defer t)
+(use-package spacemacs-theme :ensure t :defer t)
+(use-package paganini-theme :ensure t :defer t)
+(use-package nord-theme :ensure t :defer t)
+(use-package avk-emacs-themes :ensure t :defer t)
+(use-package challenger-deep-theme :ensure t :defer t)
+(use-package ir-black-theme :ensure t :defer t)
