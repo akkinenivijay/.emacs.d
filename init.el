@@ -23,7 +23,7 @@
  'after-init-hook
  (defun my/configure-emacs ()
    (custom-set-faces
-    '(default ((t (:height 160 :family "Operator Mono" :weight normal)))))
+    '(default ((t (:height 160 :family "Fira Code" :weight normal)))))
    ))
 
 (use-package remember-last-theme
@@ -120,6 +120,18 @@
                     blink-cursor-mode
                     transient-mark-mode))
 
+(defun my-presentation-mode ()
+  (interactive)
+  (custom-set-faces
+   '(default ((t (:height 300 :family "Operator Mono" :weight normal)))))
+  (hide-mode-line))
+
+(defun my-normal-mode ()
+  (interactive)
+  (custom-set-faces
+   '(default ((t (:height 160 :family "Operator Mono" :weight normal)))))
+  (show-mode-lines))
+
 (when (not (eq system-type 'darwin))
   (my/disable-mode 'menu-bar-mode))
 
@@ -160,6 +172,8 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
 (use-package discover-my-major
   :ensure t
   :bind ("C-h C-m" . discover-my-major))
+
+(use-package save-place :config (save-place-mode +1))
 
 (use-package ediff
   :init
@@ -361,15 +375,12 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
 
 (use-package yasnippet
   :ensure t
-  :defer 5
   :diminish yas-minor-mode
+  :bind (("C-c C-y" . yas-expand))
   :init
   (use-package elm-yasnippets :ensure t)
 
-  (add-modes-hook yas-minor-mode js2 haskell sml elm scala)
-
-  :config
-  (yas-reload-all)
+  (add-modes-hook yas-minor-mode js2 haskell sml elm scala emacs-lisp-mode)
   )
 
 (use-package subword
@@ -420,6 +431,12 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
     (when (projectile-project-p)
       (haskell-mode-stylish-buffer)
       (haskell-sort-imports))))
+
+;; (use-package dante
+;;   :ensure t
+;;   :commands 'dante-mode
+;;   :init
+;;   (add-hook 'haskell-mode-hook 'dante-mode))
 
 (use-package flycheck
   :ensure t
@@ -553,6 +570,7 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   :demand t
   :init
   (setq org-agenda-files '("~/Documents")
+        org-default-notes-file "~/Documents/notes.org"
         org-src-fontify-natively t
         )
   (eval-after-load "org" '(require 'ox-md nil t)))
@@ -650,7 +668,10 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
 
 
 (use-package markdown-edit-indirect :ensure t :defer t)
-(use-package markdown-toc :ensure t :defer t)
+(use-package markdown-toc
+  :ensure t
+  :defer t)
+
 (use-package markdown-mode
   :ensure t
   :init
@@ -743,7 +764,7 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   :ensure t
   :bind (([f8] . neotree-toggle))
   :init
-  (setq projectile-switch-project-action 'neotree-projectile-action
+  (setq ;projectile-switch-project-action 'neotree-projectile-action
         neo-theme (if window-system 'icons 'arrow)
         neo-window-position 'right
         neo-smart-open t
@@ -811,11 +832,6 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   :ensure t
   :init (add-hook 'dired-mode-hook 'all-the-icons-dired-mode))
 
-(use-package golden-ratio
-  :ensure t
-  :diminish golden-ratio-mode
-  :config (golden-ratio-mode))
-
 (use-package mac :if (string-equal system-type "darwin"))
 
 (use-package wgrep :ensure t)
@@ -828,7 +844,16 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
 
 (use-package centered-window-mode
   :load-path "~/src/public/centered-window-mode"
-  :init (setq cwm-use-vertical-padding nil))
+  :init (setq cwm-use-vertical-padding t
+              cwm-frame-internal-border 15
+              cwm-incremental-padding nil
+              cwm-left-fringe-ratio 0 )
+  :config (centered-window-mode))
+
+(use-package golden-ratio
+  :ensure t
+  :diminish golden-ratio-mode
+  :config (golden-ratio-mode))
 
 (use-package mykie
   :ensure t
