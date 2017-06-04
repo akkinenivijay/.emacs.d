@@ -23,7 +23,7 @@
  'after-init-hook
  (defun my/configure-emacs ()
    (custom-set-faces
-    '(default ((t (:height 160 :family "Fira Code" :weight normal)))))
+    '(default ((t (:height 180 :family "Fantasque Sans Mono" :weight normal)))))
    ))
 
 (use-package remember-last-theme
@@ -51,13 +51,16 @@
 ;; Treat clipboard input as UTF-8 string first; compound text next, etc.
 (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
 
-(setq-default indent-tabs-mode nil tab-width 2)
+(setq-default indent-tabs-mode nil tab-width 2
+              indicate-empty-lines t)
 
 (setq custom-file (make-temp-file "emacs-custom-")
       custom-buffer-done-kill nil
       custom-buffer-verbose-help nil
       custom-unlispify-names nil
       custom-unlispify-menu-entries nil
+
+      frame-title-format ""
 
       custom-safe-themes t
 
@@ -331,6 +334,11 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   :if (display-graphic-p)
   :init (add-modes-hook rainbow-delimiters-mode emacs-lisp))
 
+(use-package beacon
+  :ensure t
+  :if (display-graphic-p)
+  :config (beacon-mode 1))
+
 (use-package paren
   :defer t
   :init
@@ -376,11 +384,10 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
 (use-package yasnippet
   :ensure t
   :diminish yas-minor-mode
-  :bind (("C-c C-y" . yas-expand))
   :init
   (use-package elm-yasnippets :ensure t)
-
   (add-modes-hook yas-minor-mode js2 haskell sml elm scala emacs-lisp-mode)
+  :config (yas-reload-all)
   )
 
 (use-package subword
@@ -431,12 +438,6 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
     (when (projectile-project-p)
       (haskell-mode-stylish-buffer)
       (haskell-sort-imports))))
-
-;; (use-package dante
-;;   :ensure t
-;;   :commands 'dante-mode
-;;   :init
-;;   (add-hook 'haskell-mode-hook 'dante-mode))
 
 (use-package flycheck
   :ensure t
@@ -491,12 +492,13 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
 (use-package smart-window
   :ensure t
   :if (display-graphic-p)
+  :demand t
   :bind (("C-c s m" . smart-window-move)
          ("C-c s s" . smart-window-buffer-split)
          ("C-c s S" . smart-window-file-split)
          ("C-c s r" . smart-window-rotate)
-         ("C-c 2" . sw-below)
-         ("C-c 3" . sw-right)))
+         ("C-c 2"   . sw-below)
+         ("C-c 3"   . sw-right)))
 
 (use-package zygospore
   :ensure t
@@ -642,8 +644,9 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   :ensure t
   :if (display-graphic-p)
   :config
-  (fullframe magit-status magit-mode-quit-window nil)
-  (fullframe projectile-vc magit-mode-quit-window nil))
+  ;; (fullframe magit-status magit-mode-quit-window nil)
+  ;; (fullframe projectile-vc magit-mode-quit-window nil)
+  )
 
 (use-package flymd
   :ensure t
@@ -712,11 +715,6 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   ;; disables TAB in company-mode, freeing it for yasnippet
   (define-key company-active-map [tab] nil)
   (define-key company-active-map (kbd "TAB") nil))
-
-(use-package scala-mode
-  :ensure t
-  :mode "\\.scala\\'"
-  :interpreter ("scala" . scala-mode))
 
 (use-package web-mode
   :ensure t
@@ -806,11 +804,6 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   :ensure t
   :mode ("\\.http\\'" . restclient-mode))
 
-(use-package fancy-narrow
-  :ensure t
-  :diminish fancy-narrow-mode
-  :config (fancy-narrow-mode))
-
 (use-package gradle-mode
   :ensure t
   :mode "\\.gradle\\'")
@@ -825,12 +818,25 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   :ensure t
   :config (persistent-scratch-setup-default))
 
+(use-package fancy-narrow
+  :ensure t
+  :diminish fancy-narrow-mode
+  :if (display-graphic-p)
+  :config (fancy-narrow-mode))
+
 (use-package all-the-icons
   :ensure t
+  :if (display-graphic-p)
   :init (setq all-the-icons-scale-factor 0.8))
+
 (use-package all-the-icons-dired
   :ensure t
+  :if (display-graphic-p)
   :init (add-hook 'dired-mode-hook 'all-the-icons-dired-mode))
+
+(use-package mode-icons
+  :ensure t
+  :config (mode-icons-mode))
 
 (use-package mac :if (string-equal system-type "darwin"))
 
@@ -846,9 +852,9 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   :load-path "~/src/public/centered-window-mode"
   :init (setq cwm-use-vertical-padding t
               cwm-frame-internal-border 15
-              cwm-incremental-padding nil
+              cwm-incremental-padding t
               cwm-left-fringe-ratio 0 )
-  :config (centered-window-mode))
+  )
 
 (use-package golden-ratio
   :ensure t
@@ -883,10 +889,20 @@ If BUFFER-OR-NAME is not specified the current buffer is used."
 
 (use-package ensime
   :ensure t
-  :bind ([f10] . ensime-reload)
+  :pin melpa
   :diminish ensime-mode
   :config (setq ensime-startup-notification nil
                 ensime-startup-snapshot-notification nil))
+
+(use-package sbt-mode
+  :ensure t
+  :pin melpa)
+
+(use-package scala-mode
+  :ensure t
+  :pin melpa
+  :mode (("\\.scalaX?\\'" . scala-mode)
+         ("\\.scX?\\'" . scala-mode)))
 
 (use-package key-chord
   :ensure t
