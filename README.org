@@ -1,3 +1,18 @@
-Personal configuration for the [[http://scienceblogs.com/gregladen/2009/03/03/the-one-true-editor/][The One True Editor]].
+* .emacs.d
 
-I also [[https://github.com/jwiegley/use-package][use-package]] for /everything/.
+My personal configuration for the [[http://scienceblogs.com/gregladen/2009/03/03/the-one-true-editor/][The One True Editor]].
+
+I use [[https://github.com/jwiegley/use-package][use-package]] for /everything/.
+
+** Installation
+
+Emacs installation instrucctions for macOS.
+
+#+BEGIN_SRC sh
+brew tap railwaycat/emacsmacport && \
+brew install emacs-mac --with-xml2 --with-natural-title-bar --with-modern-icon -- with-imagemagick
+#+END_SRC
+
+** Screenshots
+
+[[https://raw.githubusercontent.com/anler/.emacs.d/master/images/screenshot.png]]
