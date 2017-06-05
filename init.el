@@ -332,10 +332,10 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   :if (display-graphic-p)
   :init (add-modes-hook rainbow-delimiters-mode emacs-lisp))
 
-(use-package beacon
-  :ensure t
-  :if (display-graphic-p)
-  :config (beacon-mode 1))
+;; (use-package beacon
+  ;; :ensure t
+  ;; :if (display-graphic-p)
+  ;; :config (beacon-mode 1))
 
 (use-package paren
   :defer t
