@@ -290,7 +290,7 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
 (use-package helm-descbinds :ensure t :defer t)
 (use-package helm-ag :ensure t :defer t)
 (use-package helm-tramp :ensure t :defer t)
-(use-package helm-themes :if (display-graphic-p) :bind ([f9] . helm-themes))
+(use-package helm-themes :ensure t :if (display-graphic-p) :bind ([f9] . helm-themes))
 (use-package helm-swoop
   :ensure t
   :demand t
