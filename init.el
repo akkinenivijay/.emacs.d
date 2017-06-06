@@ -832,9 +832,9 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   :if (display-graphic-p)
   :init (add-hook 'dired-mode-hook 'all-the-icons-dired-mode))
 
-(use-package mode-icons
-  :ensure t
-  :config (mode-icons-mode))
+;; (use-package mode-icons
+  ;; :ensure t
+  ;; :config (mode-icons-mode))
 
 (use-package mac :if (string-equal system-type "darwin"))
 
