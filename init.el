@@ -23,7 +23,7 @@
  'after-init-hook
  (defun my/configure-emacs ()
    (custom-set-faces
-    '(default ((t (:height 180 :family "Fantasque Sans Mono" :weight normal)))))
+    '(default ((t (:height 160 :family "Inconsolata" :weight normal)))))
    ))
 
 (use-package remember-last-theme
