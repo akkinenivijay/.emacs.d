@@ -62,7 +62,7 @@
 
       custom-safe-themes t
 
-      frame-title-format '("" "%b @ Emacs " emacs-version)
+      frame-title-format ""
 
       gc-cons-threshold 100000000
       large-file-warning-threshold 100000000
