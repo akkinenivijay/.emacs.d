@@ -23,7 +23,7 @@
  'after-init-hook
  (defun my/configure-emacs ()
    (custom-set-faces
-    '(default ((t (:height 170 :family "Operator Mono" :weight normal)))))
+    '(default ((t (:height 150 :family "Input Mono" :weight normal)))))
    ))
 
 (use-package remember-last-theme
