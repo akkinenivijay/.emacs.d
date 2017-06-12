@@ -23,7 +23,7 @@
  'after-init-hook
  (defun my/configure-emacs ()
    (custom-set-faces
-    '(default ((t (:height 160 :family "Inconsolata" :weight normal)))))
+    '(default ((t (:height 150 :family "Input Mono" :weight normal)))))
    ))
 
 (use-package remember-last-theme
@@ -51,7 +51,8 @@
 ;; Treat clipboard input as UTF-8 string first; compound text next, etc.
 (setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
 
-(setq-default indent-tabs-mode nil tab-width 2
+(setq-default indent-tabs-mode nil
+              tab-width 2
               indicate-empty-lines t)
 
 (setq custom-file (make-temp-file "emacs-custom-")
@@ -893,6 +894,14 @@ If BUFFER-OR-NAME is not specified the current buffer is used."
   :ensure t
   :bind (("M-N" . untitled-new-buffer-with-select-major-mode)))
 
+(use-package cc-mode
+  :defer t
+  :init
+  (add-hook 'java-mode-hook (defun my/java-mode-setup ()
+                              (setq c-basic-offset 2
+                                    tab-width 2
+                                    indent-tabs-mode nil))))
+
 (use-package ensime
   :ensure t
   :pin melpa
@@ -965,3 +974,5 @@ If BUFFER-OR-NAME is not specified the current buffer is used."
 (use-package avk-emacs-themes :ensure t :defer t)
 (use-package challenger-deep-theme :ensure t :defer t)
 (use-package ir-black-theme :ensure t :defer t)
+(use-package solarized-theme :ensure t :defer t)
+(use-package goose-theme :ensure t :defer t)
