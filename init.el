@@ -645,8 +645,8 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   :ensure t
   :if (display-graphic-p)
   :config
-  ;; (fullframe magit-status magit-mode-quit-window nil)
-  ;; (fullframe projectile-vc magit-mode-quit-window nil)
+  (fullframe magit-status magit-mode-quit-window nil)
+  (fullframe projectile-vc magit-mode-quit-window nil)
   )
 
 (use-package flymd
