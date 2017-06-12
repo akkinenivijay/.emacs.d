@@ -470,12 +470,6 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   :config
   (setenv "GIT_PAGER" ""))
 
-(use-package magithub
-  :ensure t
-  :after magit
-  :init (setq magithub-api-timeout 5)
-  :config (magithub-feature-autoinject t))
-
 (use-package github-pullrequest :ensure t)
 
 (use-package git-messenger
