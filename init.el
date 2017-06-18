@@ -23,7 +23,7 @@
  'after-init-hook
  (defun my/configure-emacs ()
    (custom-set-faces
-    '(default ((t (:height 150 :family "Input Mono" :weight normal)))))
+    '(default ((t (:height 140 :family "DejaVu Sans Mono" :weight normal)))))
    ))
 
 (use-package remember-last-theme
@@ -63,7 +63,7 @@
 
       custom-safe-themes t
 
-      frame-title-format ""
+      frame-title-format '("" "%b @ Emacs " emacs-version)
 
       gc-cons-threshold 100000000
       large-file-warning-threshold 100000000
@@ -118,8 +118,8 @@
   (put cmd 'disabled nil))
 
 (my/disable-modes '(scroll-bar-mode
-                    tool-bar-mode
-                    blink-cursor-mode
+                    ; tool-bar-mode
+                    ; blink-cursor-mode
                     transient-mark-mode))
 
 (defun my-presentation-mode ()
