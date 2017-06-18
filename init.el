@@ -175,7 +175,7 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   :ensure t
   :bind ("C-h C-m" . discover-my-major))
 
-(use-package save-place :config (save-place-mode +1))
+(use-package save-place :ensure t :config (save-place-mode +1))
 
 (use-package ediff
   :init
@@ -236,113 +236,57 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   :bind (("C-x S" . whitespace-cleanup-save-buffer))
   :diminish ((global-whitespace-mode . "") (whitespace-mode . "")))
 
-(use-package dockerfile-mode :ensure t :defer t)
+(use-package counsel
+  :ensure t
+  :bind (("M-x" . counsel-M-x)
+         ("C-x C-f" . counsel-find-file)
+         ("C-h f" . counsel-describe-function)
+         ("C-h v" . counsel-describe-variable)
+         ("C-h b" . counsel-descbinds)
+         ("C-h C-l" . counsel-find-library)
+         ("C-h i" . counsel-info-lookup-symbol)
+         ("C-h u" . counsel-unicode-char)
 
-(use-package helm-config
-  :ensure helm
-  :diminish helm-mode
-  :demand t
-  :bind (("M-x" . helm-M-x)
-         ("C-h SPC" . helm-all-mark-rings)
-         ("M-Y" . helm-show-kill-ring)
-         ("C-x b" . helm-mini)
-         ("C-x C-b" . helm-buffers-list)
-         ("C-x C-S-b" . ibuffer)
-         ("C-x C-f" . helm-find-files)
-         ("C-x C-r" . helm-recentf)
+         ("C-c g" . counsel-git)
+         ("C-c j" . counsel-git-grep)
+         ("C-c k" . counsel-ag)
+         ("C-c r" . counsel-recentf)
+         ("C-x l" . counsel-locate)
+         ("C-M-y" . counsel-yank-pop)
 
-         ("C-x c !" . helm-calcul-expression)
-         ("M-:" . helm-eval-expression-with-eldoc)
+         ([f9] . counsel-load-theme)
+         ))
 
-         ("C-h a" . helm-apropos)
-         ("C-h i" . helm-info-emacs)
-         ("C-h b" . helm-descbinds)
-         ("C-h C-l" . helm-locate-library)
-         ("C-c h i" . helm-semantic-or-imenu)
+(use-package ivy
+  :ensure t
+  :diminish ivy-mode
+  :init (setq ivy-use-virtual-buffers t
+              ivy-count-format "%d/%d ")
+  :bind (("M-s" . swiper)
+         ("C-c C-r" . ivy-resume)
          )
+  :config (ivy-mode 1))
 
-  :config
-  (setq helm-command-prefix-key "C-c h"
-        helm-split-window-in-side-p t
-        helm-buffers-fuzzy-matching t
-        helm-buffer-max-length nil
-        helm-recentf-fuzzy-match t
-        helm-apropos-fuzzy-match t
-        helm-move-to-line-cycle-in-source t
-        helm-ff-search-library-in-sexp t
-        helm-ff-file-name-history-use-recentf t
-        helm-ff-auto-update-initial-value t
-        helm-full-frame nil
-        helm-split-window-in-side-p t)
-
-  (add-to-list 'display-buffer-alist
-               `(,(rx bos "*helm" (* not-newline) "*" eos)
-                 (display-buffer-in-side-window)
-                 (inhibit-same-window . t)
-                 (window-height . 0.4)))
-
-  ;; (add-to-list 'helm-sources-using-default-as-input #'helm-source-man-pages)
-
-  (my/enable-modes '(helm-mode
-                     helm-descbinds-mode
-                     helm-autoresize-mode
-                     helm-flx-mode)))
-
-(use-package helm-descbinds :ensure t :defer t)
-(use-package helm-ag :ensure t :defer t)
-(use-package helm-tramp :ensure t :defer t)
-(use-package helm-themes :ensure t :if (display-graphic-p) :bind ([f9] . helm-themes))
-(use-package helm-swoop
+(use-package projectile
   :ensure t
-  :demand t
-  :bind (("M-i" . helm-swoop)
-         ("M-I" . helm-multi-swoop)
-         :isearch-mode-map
-         ("M-i" . helm-swoop-from-isearch)))
-
-(use-package helm-projectile
-  :ensure t
-  :bind* (("C-c p D" . projectile-dired)
-          ("C-c p v" . projectile-vc)
-          ("C-c p k" . projectile-kill-buffers)
-
-          ("C-c p p" . helm-projectile-switch-project)
-          ("C-c p f" . helm-projectile-find-file)
-          ("C-c p F" . helm-projectile-find-file-in-known-projects)
-          ("C-c p g" . helm-projectile-find-file-dwin)
-          ("C-c p d" . helm-projectile-find-dir)
-          ("C-c p C-r" . helm-projectile-recentf)
-          ("C-c p b" . helm-projectile-switch-to-buffer)
-          ("C-c p s s" . helm-projectile-ag)
-          ("C-c p s g" . helm-projectile-grep)
-          )
-  :diminish projectile-mode
   :init
-  (setq-default projectile-enable-caching t
-                projectile-indexing-method 'alien
-                projectile-completion-system 'helm
-                projectile-mode-line '(:eval (format " {%s}" (projectile-project-name))))
-
+  (setq projectile-mode-line ""
+        projectile-remember-windows-config t
+        projectile-completion-system 'ivy)
   :config
-  (projectile-global-mode)
-  (helm-projectile-on))
+  (projectile-global-mode))
+
+(use-package counsel-projectile
+  :ensure t
+  :config (counsel-projectile-on))
+
+(use-package dockerfile-mode :ensure t :defer t)
 
 (use-package rainbow-delimiters
   :ensure t
   :defer t
   :if (display-graphic-p)
   :init (add-modes-hook rainbow-delimiters-mode emacs-lisp))
-
-;; (use-package beacon
-  ;; :ensure t
-  ;; :if (display-graphic-p)
-  ;; :config (beacon-mode 1))
-
-(use-package paren
-  :defer t
-  :init
-  (add-modes-hook show-paren-mode emacs-lisp haskell sml elm js2 css scala)
-  )
 
 (use-package elec-pair
   :defer t
@@ -380,22 +324,12 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   :ensure t
   :bind ("C-@" . er/expand-region))
 
-(use-package yasnippet
-  :ensure t
-  :diminish yas-minor-mode
-  :init
-  (use-package elm-yasnippets :ensure t)
-  (add-modes-hook yas-minor-mode js2 haskell sml elm scala emacs-lisp-mode)
-  :config (yas-reload-all)
-  )
-
 (use-package subword
   :defer t
   :diminish subword-mode
   :init
   (add-modes-hook subword-mode js2 web haskell sml purescript elm scala sml)
   )
-
 
 (use-package emmet-mode
   :ensure t
@@ -460,35 +394,33 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   )
 
 
+(use-package gitignore-mode :ensure t)
+(use-package github-pullrequest :ensure t)
+(use-package git-messenger
+  :ensure t
+  :if (display-graphic-p)
+  :bind ("C-x g p" . git-messenger:popup-message))
+(use-package git-timemachine
+  :ensure t
+  :bind ("C-x g t" . git-timemachine-toggle))
+(use-package what-the-commit
+  :ensure t
+  :bind ("C-x g c" . what-the-commit-insert))
+(use-package github-browse-file
+  :ensure t
+  :bind ("C-x g b" . github-browse-file)
+  :init (setq github-browse-file-show-line-at-point t))
 (use-package magit
   :ensure t
   :defer t
   :if (display-graphic-p)
   :init
+  (when (functionp 'ivy-completing-read)
+    (setq magit-completing-read-function 'ivy-completing-read))
   (add-hook 'magit-mode-hook 'hl-line-mode)
 
   :config
   (setenv "GIT_PAGER" ""))
-
-(use-package github-pullrequest :ensure t)
-
-(use-package git-messenger
-  :ensure t
-  :if (display-graphic-p)
-  :bind ("C-x g p" . git-messenger:popup-message))
-
-(use-package git-timemachine
-  :ensure t
-  :bind ("C-x g t" . git-timemachine-toggle))
-
-(use-package what-the-commit
-  :ensure t
-  :bind ("C-x g c" . what-the-commit-insert))
-
-(use-package github-browse-file
-  :ensure t
-  :bind ("C-x g b" . github-browse-file)
-  :init (setq github-browse-file-show-line-at-point t))
 
 (use-package smart-window
   :ensure t
@@ -569,7 +501,8 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   :bind (("C-c o c" . org-capture)
          ("C-c o l" . org-store-link)
          ("C-c o a" . org-agenda)
-         ("C-c o h" . helm-info-org))
+         ;;("C-c o h" . helm-info-org)
+         )
   :demand t
   :init
   (setq org-agenda-files '("~/Documents")
@@ -830,19 +763,18 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   :if (display-graphic-p)
   :init (setq all-the-icons-scale-factor 0.8))
 
+(use-package all-the-icons-ivy
+  :ensure t
+  :config (all-the-icons-ivy-setup))
+
 (use-package all-the-icons-dired
   :ensure t
   :if (display-graphic-p)
   :init (add-hook 'dired-mode-hook 'all-the-icons-dired-mode))
 
-;; (use-package mode-icons
-  ;; :ensure t
-  ;; :config (mode-icons-mode))
-
 (use-package mac :if (string-equal system-type "darwin"))
 
 (use-package wgrep :ensure t)
-(use-package wgrep-helm :ensure t)
 (use-package wgrep-ag :ensure t)
 
 (use-package backward-forward
