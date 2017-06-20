@@ -264,8 +264,10 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
               ivy-count-format "%d/%d ")
   :bind (("M-s" . swiper)
          ("C-c C-r" . ivy-resume)
+         :map isearch-mode-map
+         ("M-s" . swiper-from-isearch)
          )
-  :config (ivy-mode 1))
+  :config (ivy-mode))
 
 (use-package projectile
   :ensure t
@@ -501,7 +503,6 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   :bind (("C-c o c" . org-capture)
          ("C-c o l" . org-store-link)
          ("C-c o a" . org-agenda)
-         ;;("C-c o h" . helm-info-org)
          )
   :demand t
   :init
