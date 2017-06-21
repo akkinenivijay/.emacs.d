@@ -26,9 +26,12 @@
     '(default ((t (:height 140 :family "DejaVu Sans Mono" :weight normal)))))
    ))
 
-(use-package remember-last-theme
-  :load-path "~/src/public/remember-theme"
-  :config (remember-last-theme-with-file-enable "~/.emacs-theme"))
+(if (file-exists-p "~/src/public/remember-last-theme")
+    (use-package remember-last-theme
+      :load-path "~/src/public/remember-theme"
+      :config (remember-last-theme-with-file-enable "~/.emacs-theme"))
+  (use-package remember-last-theme
+    :config (remember-last-theme-with-file-enable "~/.emacs-theme")))
 
 (bind-keys*
  ("M-%" . query-replace-regexp)
@@ -374,6 +377,11 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
       (haskell-mode-stylish-buffer)
       (haskell-sort-imports))))
 
+(use-package flycheck-haskell
+  :ensure t
+  :init (eval-after-load 'flycheck
+          '(add-hook 'flycheck-mode-hook 'flycheck-haskell-setup)))
+
 (use-package flycheck
   :ensure t
   :if (display-graphic-p)
@@ -484,6 +492,10 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   :defer t
   :bind (:map dired-mode-map
               ("/" . dired-narrow)))
+
+(use-package dired+ :ensure t)
+
+(use-package dired-subtree :ensure t)
 
 (use-package term
   :bind (:map
