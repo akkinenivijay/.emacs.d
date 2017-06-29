@@ -33,6 +33,8 @@
   (use-package remember-last-theme
     :config (remember-last-theme-with-file-enable "~/.emacs-theme")))
 
+(use-package paren :config (show-paren-mode))
+
 (bind-keys*
  ("M-%" . query-replace-regexp)
  ("M-`" . other-frame)
@@ -78,7 +80,7 @@
       mouse-wheel-progressive-speed nil
 
       ;; auto-backup (filename~)
-      backup-directory-alist `(("." . ,temporary-file-directory))
+      backup-directory-alist `((".*" . ,temporary-file-directory))
       backup-by-copying t
       delete-old-versions t
       version-control t
@@ -122,7 +124,7 @@
 
 (my/disable-modes '(scroll-bar-mode
                     ; tool-bar-mode
-                    ; blink-cursor-mode
+                    blink-cursor-mode
                     transient-mark-mode))
 
 (defun my-presentation-mode ()
@@ -423,6 +425,7 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
 (use-package magit
   :ensure t
   :defer t
+  :pin melpa-stable
   :if (display-graphic-p)
   :init
   (when (functionp 'ivy-completing-read)
@@ -452,14 +455,9 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   :defer t
   :diminish hungry-delete-mode
   :init
-  (add-hook 'js2-mode-hook 'hungry-delete-mode)
-  (add-hook 'sgml-mode-hook 'hungry-delete-mode)
-  (add-hook 'html-mode-hook 'hungry-delete-mode)
-  (add-hook 'css-mode-hook 'hungry-delete-mode)
-  (add-hook 'emacs-lisp-mode-hook 'hungry-delete-mode)
-  (add-hook 'haskell-mode-hook 'hungry-delete-mode)
-  (add-hook 'elm-mode-hook 'hungry-delete-mode)
-  (add-hook 'scala-mode-hook 'hungry-delete-mode))
+  (add-modes-hook
+   hungry-delete-mode
+   js2 sgml html css emacs-lisp haskell elm scala))
 
 (use-package css-mode
   :mode "\\.css\\'"
@@ -915,3 +913,5 @@ If BUFFER-OR-NAME is not specified the current buffer is used."
 (use-package ir-black-theme :ensure t :defer t)
 (use-package solarized-theme :ensure t :defer t)
 (use-package goose-theme :ensure t :defer t)
+(use-package doom-themes :ensure t :defer t)
+(use-package github-theme :ensure t :defer t)
