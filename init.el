@@ -661,6 +661,14 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   (define-key company-active-map [tab] nil)
   (define-key company-active-map (kbd "TAB") nil))
 
+(use-package yasnippet
+  :if (not noninteractive)
+  :diminish yas-minor-mode
+  :commands (yas-global-mode yas-minor-mode)
+  :init (setq yas-indent-line nil
+              )
+  :config (yas-global-mode))
+
 (use-package web-mode
   :ensure t
   :mode "\\.jsx\\'"
