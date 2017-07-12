@@ -17,7 +17,8 @@
 
 (require 'use-package)
 
-(use-package defuns :load-path "~/.emacs.d/site-lisp")
+(use-package defuns
+  :load-path "~/.emacs.d/site-lisp")
 
 (add-hook
  'after-init-hook
@@ -31,9 +32,8 @@
       :load-path "~/src/public/remember-theme"
       :config (remember-last-theme-with-file-enable "~/.emacs-theme"))
   (use-package remember-last-theme
+    :ensure t
     :config (remember-last-theme-with-file-enable "~/.emacs-theme")))
-
-(use-package paren :config (show-paren-mode))
 
 (bind-keys*
  ("M-%" . query-replace-regexp)
@@ -46,7 +46,8 @@
  ("C-c q" . delete-other-windows)
  )
 
-(add-to-list 'custom-theme-load-path (expand-file-name "themes" user-emacs-directory))
+(add-to-list 'custom-theme-load-path
+             (expand-file-name "themes" user-emacs-directory))
 
 (prefer-coding-system 'utf-8)
 (set-default-coding-systems 'utf-8)
@@ -122,22 +123,26 @@
                set-goal-column))
   (put cmd 'disabled nil))
 
-(my/disable-modes '(scroll-bar-mode
-                    ; tool-bar-mode
-                    blink-cursor-mode
-                    transient-mark-mode))
+(my/disable-modes '(scroll-bar-mode transient-mark-mode))
 
-(defun my-presentation-mode ()
+(defmacro add-modes-hook (hook &rest modes)
+  `(dolist (mode (quote ,modes))
+     (let ((mode-name (symbol-name mode)))
+       (add-hook (intern (format "%s-mode-hook" mode-name)) (quote ,hook)))))
+
+(defun activate-presentation-mode ()
   (interactive)
   (custom-set-faces
-   '(default ((t (:height 300 :family "Operator Mono" :weight normal)))))
-  (hide-mode-line))
+   '(default ((t (:height 200)))))
+  (tool-bar-mode -1)
+  (blink-cursor-mode -1))
 
-(defun my-normal-mode ()
+(defun activate-development-mode ()
   (interactive)
   (custom-set-faces
-   '(default ((t (:height 160 :family "Operator Mono" :weight normal)))))
-  (show-mode-lines))
+   '(default ((t (:height 140 :family "DejaVu Sans Mono" :weight normal)))))
+  (tool-bar-mode +1)
+  (blink-cursor-mode +1))
 
 (when (not (eq system-type 'darwin))
   (my/disable-mode 'menu-bar-mode))
@@ -162,6 +167,8 @@
 
           ))
 
+(use-package paren :config (show-paren-mode))
+
 (use-package isearch
   :init
   (defun my/isearch-done-opposite (&optional nopush edit)
@@ -175,10 +182,6 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
 
 (use-package autorevert :diminish auto-revert-mode :config (global-auto-revert-mode))
 (use-package hi-lock :diminish hi-lock-mode)
-
-(use-package discover-my-major
-  :ensure t
-  :bind ("C-h C-m" . discover-my-major))
 
 (use-package save-place :ensure t :config (save-place-mode +1))
 
@@ -211,24 +214,11 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
 
 (use-package man :init (setq Man-width 79) :defer t)
 
-(use-package which-func
-  :init
-  (defun my/echo-which-func ()
-    (interactive)
-    (message "\u0192: %s" (which-function)))
-  :commands (which-function)
-  :bind (("C-c f" . my/echo-which-func)))
-
 (use-package elisp-mode
   :mode (("\\.el\\'" . emacs-lisp-mode)
          ("Cask" . emacs-lisp-mode)))
 
 (use-package smooth-scrolling :ensure t :config (smooth-scrolling-mode))
-
-(defmacro add-modes-hook (hook &rest modes)
-  `(dolist (mode (quote ,modes))
-     (let ((mode-name (symbol-name mode)))
-       (add-hook (intern (format "%s-mode-hook" mode-name)) (quote ,hook)))))
 
 (use-package whitespace
   :init
@@ -287,7 +277,7 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   :ensure t
   :config (counsel-projectile-on))
 
-(use-package dockerfile-mode :ensure t :defer t)
+(use-package dockerfile-mode :ensure t)
 
 (use-package rainbow-delimiters
   :ensure t
@@ -297,9 +287,7 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
 
 (use-package elec-pair
   :defer t
-  :init
-  (add-modes-hook electric-pair-mode js2 emacs-lisp css elm scala haskell sml)
-  )
+  :init (add-modes-hook electric-pair-mode js2 emacs-lisp css elm scala haskell sml))
 
 (use-package avy
   :ensure t
@@ -335,16 +323,7 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   :defer t
   :diminish subword-mode
   :init
-  (add-modes-hook subword-mode js2 web haskell sml purescript elm scala sml)
-  )
-
-(use-package emmet-mode
-  :ensure t
-  :diminish emmet-mode
-  :defer t
-  :init
-  (add-modes-hook emmet-mode sgml html web css)
-  )
+  (add-modes-hook subword-mode js2 web haskell sml purescript elm scala sml))
 
 (use-package sml-mode
   :ensure t
@@ -387,23 +366,7 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
 (use-package flycheck
   :ensure t
   :if (display-graphic-p)
-  :config
-  (add-hook 'web-mode-hook (defun my/flycheck-web-mode-setup ()
-                             (flycheck-add-mode 'javascript-eslint 'web-mode)
-                             (let* ((root (locate-dominating-file
-                                           (or (buffer-file-name) default-directory)
-                                           "node_modules"))
-                                    (eslint (and
-                                             root
-                                             (expand-file-name "node_modules/.bin/eslint" root))))
-                               (when (and
-                                      eslint
-                                      (file-executable-p eslint))
-                                 (setq-local flycheck-javascript-eslint-executable eslint)))
-                             (flycheck-mode)))
-
-  (add-modes-hook flycheck-mode js2 typescript haskell sml)
-  )
+  :init (add-modes-hook flycheck-mode js2 typescript haskell sml))
 
 
 (use-package gitignore-mode :ensure t)
@@ -471,28 +434,23 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
 (use-package json-mode
   :ensure t
   :mode "\\.json\\'"
-  :bind (("C-c b" . json-mode-beautify))
   :init (setq-default json-reformat:indent-width 2
                       js-indent-level 2))
 
 (use-package dired
   :config
   (add-hook 'dired-mode-hook 'dired-hide-details-mode))
-
 (use-package peep-dired
   :ensure t
   :defer t
   :bind (:map dired-mode-map
               ("P" . peep-dired)))
-
 (use-package dired-narrow
   :ensure t
   :defer t
   :bind (:map dired-mode-map
               ("/" . dired-narrow)))
-
 (use-package dired+ :ensure t)
-
 (use-package dired-subtree :ensure t)
 
 (use-package term
@@ -522,38 +480,6 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
         )
   (eval-after-load "org" '(require 'ox-md nil t)))
 
-(use-package org-present
-  :ensure t
-  :init
-  (use-package hide-mode-line :load-path "vendor")
-  (setq org-present-text-scale 3)
-  (add-hook
-   'org-present-mode-hook
-   (defun org-present/on-start ()
-     (interactive)
-     (org-present-big)
-     ;; (org-display-inline-images)
-     ;; (org-present-hide-cursor)
-     (org-present-read-only)
-     ;; (hide-mode-line)
-     ))
-
-  (add-hook
-   'org-present-mode-quit-hook
-   (defun org-present/on-quit ()
-     (interactive)
-     ;; (org-present-small)
-     ;; (org-remove-inline-images)
-     ;; (org-present-show-cursor)
-     (org-present-read-write)
-     ;; (hide-mode-line)
-     )))
-
-(use-package simple
-  :config
-  (add-hook 'org-mode-hook 'visual-line-mode)
-  (add-hook 'org-mode-hook 'toggle-word-wrap))
-
 (use-package isearch
   :bind (("C-s" . isearch-forward-regexp)
          ("C-r" . isearch-backward-regexp)))
@@ -564,13 +490,7 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   :bind (("C-c , b" . 0blayout-switch)
          ("C-c , c" . 0blayout-new)
          ("C-c , k" . 0blayout-kill))
-  :config
-  (0blayout-mode))
-
-(use-package typescript-mode
-  :ensure t
-  :mode "\\.ts\\'"
-  :config (setq typescript-indent-level 2))
+  :config (0blayout-mode))
 
 (use-package osx-trash
   :ensure t
@@ -585,41 +505,10 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   :ensure t
   :defer t)
 
-(use-package fullframe
-  :ensure t
-  :if (display-graphic-p)
-  :config
-  (fullframe magit-status magit-mode-quit-window nil)
-  (fullframe projectile-vc magit-mode-quit-window nil)
-  )
-
-(use-package flymd
-  :ensure t
-  :if (display-graphic-p)
-  :defer t
-  :init
-  (defun my-flymd-browser-function (url)
-    (let ((browse-url-browser-function 'browse-url-firefox))
-      (browse-url url)))
-  (setq flymd-browser-open-function 'my-flymd-browser-function))
-
-(use-package emoji-display
-  :ensure t
-  :if (display-graphic-p)
-  :config
-  (emoji-display-mode))
-
-(use-package emoji-cheat-sheet-plus
-  :ensure t
-  :if (display-graphic-p)
-  :defer t)
-
-
 (use-package markdown-edit-indirect :ensure t :defer t)
 (use-package markdown-toc
   :ensure t
   :defer t)
-
 (use-package markdown-mode
   :ensure t
   :init
@@ -630,79 +519,16 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   :mode (("\\.md" . markdown-mode)
          ("\\.markdown" . markdown-mode)))
 
-(use-package intero
-  :ensure t
-  :defer t)
-
-(use-package shift-text
-  :ensure t
-  :bind (("S-<up>" . shift-text-up)
-         ("S-<down>" . shift-text-down)
-         ("S-<left>" . shift-text-left)
-         ("S-<right>" . shift-text-right)))
-
 (use-package python-mode
   :mode "\\.py\\'"
-  :init (setq python-indent-offset 4))
-
-(use-package company
-  :ensure t
-  :diminish company-mode
-  :commands company-mode
-  :init
-  (setq
-   company-dabbrev-ignore-case nil
-   company-dabbrev-code-ignore-case nil
-   company-dabbrev-downcase nil
-   company-idle-delay 0
-   company-minimum-prefix-length 4)
-  :config
-  ;; disables TAB in company-mode, freeing it for yasnippet
-  (define-key company-active-map [tab] nil)
-  (define-key company-active-map (kbd "TAB") nil))
+  :init (setq python-indent-offset 2))
 
 (use-package yasnippet
-  :if (not noninteractive)
+  :if (display-graphic-p)
   :diminish yas-minor-mode
   :commands (yas-global-mode yas-minor-mode)
-  :init (setq yas-indent-line nil
-              )
+  :init (setq yas-indent-line nil)
   :config (yas-global-mode))
-
-(use-package web-mode
-  :ensure t
-  :mode "\\.jsx\\'"
-  :init
-  (defadvice web-mode-highlight-part (around tweak-jsx activate)
-    (if (equal web-mode-content-type "jsx")
-        (let ((web-mode-enable-part-face nil))
-          ad-do-it)
-      ad-do-it))
-
-  (setq web-mode-markup-indent-offset 2
-        web-mode-css-indent-offset 2
-        web-mode-code-indent-offset 2
-        web-mode-attr-indent-offset 2
-
-        web-mode-style-padding 2
-        web-mode-script-padding 2
-
-        web-mode-enable-auto-pairing t
-        web-mode-enable-css-colorization t
-        web-mode-enable-block-face t
-        web-mode-enable-part-face t
-        web-mode-enable-comment-keywords t
-        web-mode-enable-current-element-highlight nil
-        web-mode-enable-current-column-highlight t
-        )
-  (add-hook 'web-mode-hook (defun my/set-jsx-content-type ()
-                             (when (string= web-mode-content-type "javascript")
-                               (web-mode-set-content-type "jsx")
-                               (message "now set to: %s" web-mode-content-type)
-                               )))
-  )
-
-(use-package nvm :ensure t)
 
 (use-package exec-path-from-shell
   :ensure t
@@ -736,8 +562,6 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
         (message "Could not find git project root."))))
   )
 
-(use-package popwin :ensure t)
-
 (use-package purescript-mode
   :ensure t
   :mode "\\.purs\\'")
@@ -764,8 +588,7 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
 (use-package server
   :config
   (setq server-socket-dir "~/.emacs.d/server")
-  (unless (server-running-p)
-    (server-mode)))
+  (unless (server-running-p) (server-mode)))
 
 (use-package persistent-scratch
   :ensure t
@@ -781,37 +604,18 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   :ensure t
   :if (display-graphic-p)
   :init (setq all-the-icons-scale-factor 0.8))
-
 (use-package all-the-icons-ivy
   :ensure t
   :config (all-the-icons-ivy-setup))
-
 (use-package all-the-icons-dired
   :ensure t
   :if (display-graphic-p)
   :init (add-hook 'dired-mode-hook 'all-the-icons-dired-mode))
 
-(use-package mac :if (string-equal system-type "darwin"))
+(use-package mac :if (eq system-type 'darwin))
 
 (use-package wgrep :ensure t)
 (use-package wgrep-ag :ensure t)
-
-(use-package backward-forward
-  :ensure t
-  :config (backward-forward-mode))
-
-(use-package centered-window-mode
-  :load-path "~/src/public/centered-window-mode"
-  :init (setq cwm-use-vertical-padding t
-              cwm-frame-internal-border 15
-              cwm-incremental-padding t
-              cwm-left-fringe-ratio 0 )
-  )
-
-(use-package golden-ratio
-  :ensure t
-  :diminish golden-ratio-mode
-  :config (golden-ratio-mode))
 
 (use-package mykie
   :ensure t
@@ -853,25 +657,14 @@ If BUFFER-OR-NAME is not specified the current buffer is used."
   :diminish ensime-mode
   :config (setq ensime-startup-notification nil
                 ensime-startup-snapshot-notification nil))
-
 (use-package sbt-mode
   :ensure t
   :pin melpa)
-
 (use-package scala-mode
   :ensure t
   :pin melpa
   :mode (("\\.scalaX?\\'" . scala-mode)
          ("\\.scX?\\'" . scala-mode)))
-
-(use-package key-chord
-  :ensure t
-  :config
-  (key-chord-mode 1)
-  (key-chord-define-global "fj" 'split-window-horizontally)
-  (key-chord-define-global "fk" 'split-window-vertically)
-  )
-
 
 ;; themes
 (advice-add
