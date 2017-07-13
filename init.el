@@ -506,9 +506,15 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   :defer t)
 
 (use-package markdown-edit-indirect :ensure t :defer t)
-(use-package markdown-toc
-  :ensure t
-  :defer t)
+(use-package markdown-toc :ensure t :defer t)
+(use-package flymd :ensure t
+  :init (setq flymd-browser-open-function (defun my-flymd-browser-function (url)
+                                            (let ((process-environment (browse-url-process-environment)))
+                                              (apply 'start-process
+                                                     (concat "firefox " url)
+                                                     nil
+                                                     "/usr/bin/open"
+                                                     (list "-a" "firefox" url))))))
 (use-package markdown-mode
   :ensure t
   :init
@@ -516,8 +522,8 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
                                   (interactive)
                                   (local-set-key (kbd "C-c '") 'markdown-edit-indirect)
                                   (local-set-key (kbd "C-c t") 'markdown-toc-generate-toc)))
-  :mode (("\\.md" . markdown-mode)
-         ("\\.markdown" . markdown-mode)))
+  :mode (("\\.md" . gfm-mode)
+         ("\\.markdown" . gfm-mode)))
 
 (use-package python-mode
   :mode "\\.py\\'"
