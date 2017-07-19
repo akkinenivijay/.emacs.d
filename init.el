@@ -125,11 +125,6 @@
 
 (my/disable-modes '(scroll-bar-mode transient-mark-mode))
 
-(defmacro add-modes-hook (hook &rest modes)
-  `(dolist (mode (quote ,modes))
-     (let ((mode-name (symbol-name mode)))
-       (add-hook (intern (format "%s-mode-hook" mode-name)) (quote ,hook)))))
-
 (defun activate-presentation-mode ()
   (interactive)
   (custom-set-faces
@@ -227,7 +222,7 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
     (whitespace-cleanup)
     (save-buffer))
   (setq-default whitespace-style '(face trailing tab-mark))
-  (add-modes-hook whitespace-mode prog)
+  (add-hook 'prog-mode-hook 'whitespace-mode)
   :bind (("C-x S" . whitespace-cleanup-save-buffer))
   :diminish ((global-whitespace-mode . "") (whitespace-mode . "")))
 
@@ -283,11 +278,23 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   :ensure t
   :defer t
   :if (display-graphic-p)
-  :init (add-modes-hook rainbow-delimiters-mode emacs-lisp))
+  :init (add-hook 'emacs-lisp-mode 'rainbow-delimiters-mode))
+
+(use-package emmet-mode
+  :ensure t
+  :init (add-hook 'html-mode 'emmet-mode))
+
+(use-package elnode :ensure t)
 
 (use-package elec-pair
   :defer t
-  :init (add-modes-hook electric-pair-mode js2 emacs-lisp css elm scala haskell sml))
+  :init
+  (add-hook 'haskell-mode-hook 'electric-pair-mode)
+  (add-hook 'scala-mode-hook 'electric-pair-mode)
+  (add-hook 'js2-mode-hook 'electric-pair-mode)
+  (add-hook 'emacs-lisp-mode-hook 'electric-pair-mode)
+  (add-hook 'elm-mode-hook 'electric-pair-mode)
+  )
 
 (use-package avy
   :ensure t
@@ -323,7 +330,11 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   :defer t
   :diminish subword-mode
   :init
-  (add-modes-hook subword-mode js2 web haskell sml purescript elm scala sml))
+  (add-hook 'haskell-mode-hook 'subword-mode)
+  (add-hook 'scala-mode-hook 'subword-mode)
+  (add-hook 'elm-mode-hook 'subword-mode)
+  (add-hook 'js2-mode-hook 'subword-mode)
+  )
 
 (use-package sml-mode
   :ensure t
@@ -365,8 +376,7 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
 
 (use-package flycheck
   :ensure t
-  :if (display-graphic-p)
-  :init (add-modes-hook flycheck-mode js2 typescript haskell sml))
+  :if (display-graphic-p))
 
 
 (use-package gitignore-mode :ensure t)
@@ -418,9 +428,10 @@ The arguments NOPUSH and EDIT are passed to the wrapped function `isearch-done'.
   :defer t
   :diminish hungry-delete-mode
   :init
-  (add-modes-hook
-   hungry-delete-mode
-   js2 sgml html css emacs-lisp haskell elm scala))
+  (add-hook 'haskell-mode-hook 'hungry-delete-mode)
+  (add-hook 'emacs-lisp-mode-hook 'hungry-delete-mode)
+  (add-hook 'scala-mode-hook 'hungry-delete-mode)
+  )
 
 (use-package css-mode
   :mode "\\.css\\'"
