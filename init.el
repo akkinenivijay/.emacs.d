@@ -341,9 +341,9 @@
   :init (setq python-indent-offset 2))
 
 (use-package yasnippet
-  :if (display-graphic-p)
+  :ensure t
   :diminish yas-minor-mode
-  :commands (yas-global-mode yas-minor-mode)
+  :if (display-graphic-p)
   :init (setq yas-indent-line nil)
   :config (yas-global-mode))
 
@@ -501,6 +501,10 @@
   :config
   (remember-last-theme-enable)
   (load custom-file))
+
+(use-package cmake-ide
+  :ensure rtags
+  :config (cmake-ide-setup))
 
 (use-package atom-one-dark-theme :ensure t :defer t)
 (use-package birds-of-paradise-plus-theme :ensure t :defer t)
