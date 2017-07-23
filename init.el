@@ -498,7 +498,9 @@
 (use-package remember-last-theme
   :ensure t
   :if (display-graphic-p)
-  :config (remember-last-theme-enable))
+  :config
+  (remember-last-theme-enable)
+  (load custom-file))
 
 (use-package atom-one-dark-theme :ensure t :defer t)
 (use-package birds-of-paradise-plus-theme :ensure t :defer t)
