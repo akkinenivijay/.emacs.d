@@ -447,7 +447,7 @@
          ("M-I" . helm-multi-swoop)))
 
 (use-package helm-projectile
-  :ensure projectile
+  :ensure t
   :if (display-graphic-p)
   :bind* (("C-c p D" . projectile-dired)
           ("C-c p v" . projectile-vc)
