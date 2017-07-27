@@ -105,7 +105,7 @@
   (unbind-key "C-z"))
 
 (scroll-bar-mode -1)
-;; (tool-bar-mode -1)
+(tool-bar-mode -1)
 (transient-mark-mode -1)
 
 (use-package paren :config (show-paren-mode))
@@ -344,7 +344,7 @@
   :ensure t
   :diminish yas-minor-mode
   :if (display-graphic-p)
-  :init (setq yas-indent-line nil)
+  :init (setq yas-indent-line t)
   :config (yas-global-mode))
 
 (use-package purescript-mode
