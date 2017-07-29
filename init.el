@@ -19,6 +19,7 @@
  ("M-%" . query-replace-regexp)
  ("M-`" . other-frame)
  ("C-M-;" . comment-or-uncomment-region)
+ ("M-M" . man)
  ("C-M-k" . kill-sexp)
  ("C-<tab>" . mode-line-other-buffer)
  ("C-S-<tab>" . next-buffer)
@@ -106,6 +107,8 @@
 
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
+(unless (display-graphic-p)
+  (menu-bar-mode -1))
 (transient-mark-mode -1)
 
 (use-package paren :config (show-paren-mode))
@@ -178,6 +181,15 @@
   (setq-default whitespace-style '(face trailing tab-mark))
   (add-hook 'prog-mode-hook 'whitespace-mode))
 
+(use-package electric
+  :init (add-hook 'prog-mode-hook 'electric-indent-mode))
+
+(use-package which-key
+  :ensure t
+  :defer 2
+  :diminish which-key-mode
+  :config (which-key-mode))
+
 (use-package dockerfile-mode
   :ensure t
   :defer t)
@@ -186,11 +198,6 @@
   :ensure t
   :defer t
   :init (add-hook 'html-mode 'emmet-mode))
-
-(use-package hungry-delete
-  :ensure t
-  :defer t
-  :init (add-hook 'emacs-lisp-mode-hook 'hungry-delete-mode))
 
 (use-package rainbow-delimiters
   :ensure t
@@ -240,6 +247,17 @@
   (add-hook 'scala-mode-hook 'subword-mode)
   (add-hook 'elm-mode-hook 'subword-mode)
   (add-hook 'js2-mode-hook 'subword-mode)
+  )
+
+(use-package hungry-delete
+  :defer t
+  :diminish hungry-delete-mode
+  :init
+  (add-hook 'haskell-mode-hook 'hungry-delete-mode)
+  (add-hook 'scala-mode-hook 'hungry-delete-mode)
+  (add-hook 'elm-mode-hook 'hungry-delete-mode)
+  (add-hook 'js2-mode-hook 'hungry-delete-mode)
+  (add-hook 'emacs-lisp-mode-hook 'hungry-delete-mode)
   )
 
 (use-package sml-mode
@@ -342,6 +360,7 @@
 
 (use-package yasnippet
   :ensure t
+  :defer 2
   :diminish yas-minor-mode
   :if (display-graphic-p)
   :init (setq yas-indent-line t)
@@ -424,6 +443,7 @@
         helm-ff-auto-update-initial-value t
         helm-full-frame nil
         helm-split-window-in-side-p t)
+  :config (helm-mode)
   )
 
 (use-package helm-descbinds
@@ -482,13 +502,6 @@
                                     tab-width 2
                                     indent-tabs-mode nil))))
 
-(use-package ensime
-  :ensure t
-  :pin melpa
-  :diminish ensime-mode
-  :defer t
-  :config (setq ensime-startup-notification nil
-                ensime-startup-snapshot-notification nil))
 
 (use-package scala-mode
   :ensure t
