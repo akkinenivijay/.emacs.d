@@ -110,6 +110,7 @@
 (unless (display-graphic-p)
   (menu-bar-mode -1))
 (transient-mark-mode -1)
+(delete-selection-mode)
 
 (use-package paren :config (show-paren-mode))
 (use-package isearch
@@ -408,8 +409,8 @@
   :ensure t
   :bind (("M-N" . untitled-new-buffer-with-select-major-mode)))
 
-(use-package helm-config
-  :ensure helm
+(use-package helm
+  :ensure t
   :pin melpa-stable
   :if (display-graphic-p)
   :diminish helm-mode
