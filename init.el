@@ -130,7 +130,7 @@
 (use-package saveplace :config (save-place-mode))
 
 (use-package ediff
-  :init
+  :config
   (defvar ctl-period-equals-map)
   (define-prefix-command 'ctl-period-equals-map)
   (bind-key "C-. =" #'ctl-period-equals-map)
@@ -150,17 +150,14 @@
          ("C-. = P" . ediff-patch-buffer)
          ("C-. = l" . ediff-regions-linewise)
          ("C-. = w" . ediff-regions-wordwise))
-
   :config
   (use-package ediff-keep))
 
 (use-package sh-script
-  :init (setq sh-indentation 2 sh-basic-offset 2)
-  :defer t)
+  :mode "\\.sh\\'"
+  :config (setq sh-indentation 2 sh-basic-offset 2))
 
-(use-package man
-  :init (setq Man-width 79)
-  :defer t)
+(use-package man :config (setq Man-width 79) :defer t)
 
 (use-package elisp-mode
   :mode (("\\.el\\'" . emacs-lisp-mode)
@@ -182,29 +179,25 @@
   (setq-default whitespace-style '(face trailing tab-mark))
   (add-hook 'prog-mode-hook 'whitespace-mode))
 
-(use-package electric
-  :init (add-hook 'prog-mode-hook 'electric-indent-mode))
+(use-package electric :config (add-hook 'prog-mode-hook 'electric-indent-mode))
+(use-package elec-pair :config (add-hook 'prog-mode-hook 'electric-pair-mode))
 
 (use-package which-key
-  :ensure t
-  :defer 2
   :diminish which-key-mode
   :config (which-key-mode))
 
 (use-package dockerfile-mode
   :ensure t
-  :defer t)
+  :mode "Dockerfile")
 
 (use-package emmet-mode
   :ensure t
-  :defer t
-  :init (add-hook 'html-mode 'emmet-mode))
+  :mode "\\.html\\'")
 
 (use-package rainbow-delimiters
   :ensure t
   :if (display-graphic-p)
-  :defer t
-  :init (add-hook 'emacs-lisp-mode-hook 'rainbow-delimiters-mode))
+  :config (add-hook 'emacs-lisp-mode-hook 'rainbow-delimiters-mode))
 
 (use-package avy
   :ensure t
@@ -241,9 +234,9 @@
   :bind ("C-@" . er/expand-region))
 
 (use-package subword
-  :defer t
   :diminish subword-mode
-  :init
+  :if (display-graphic-p)
+  :config
   (add-hook 'haskell-mode-hook 'subword-mode)
   (add-hook 'scala-mode-hook 'subword-mode)
   (add-hook 'elm-mode-hook 'subword-mode)
@@ -251,9 +244,9 @@
   )
 
 (use-package hungry-delete
-  :defer t
+  :ensure t
   :diminish hungry-delete-mode
-  :init
+  :config
   (add-hook 'haskell-mode-hook 'hungry-delete-mode)
   (add-hook 'scala-mode-hook 'hungry-delete-mode)
   (add-hook 'elm-mode-hook 'hungry-delete-mode)
@@ -282,11 +275,9 @@
 
 (use-package flycheck
   :ensure t
-  :if (display-graphic-p)
-  :defer t)
+  :if (display-graphic-p))
 
-(use-package gitignore-mode :ensure t :defer t)
-(use-package github-pullrequest :ensure t :defer t)
+(use-package gitignore-mode :ensure t :mode ".gitignore'")
 (use-package git-messenger
   :ensure t
   :if (display-graphic-p)
@@ -301,13 +292,12 @@
 (use-package github-browse-file
   :ensure t
   :bind ("C-x g b" . github-browse-file)
-  :init (setq github-browse-file-show-line-at-point t))
+  :config (setq github-browse-file-show-line-at-point t))
 (use-package magit
   :ensure t
-  :defer t
   :pin melpa-stable
   :if (display-graphic-p)
-  :init
+  :config
   (when (functionp 'ivy-completing-read)
     (setq magit-completing-read-function 'ivy-completing-read))
   (add-hook 'magit-mode-hook 'hl-line-mode))
@@ -318,14 +308,13 @@
 
 (use-package rainbow-mode
   :ensure t
-  :defer t
-  :init (add-hook 'css-mode-hook 'rainbow-mode))
+  :mode "\\.css\\'")
 
 (use-package json-mode
   :ensure t
   :mode "\\.json\\'"
-  :init (setq-default json-reformat:indent-width 2
-                      js-indent-level 2))
+  :config (setq-default json-reformat:indent-width 2
+                        js-indent-level 2))
 
 (use-package osx-trash
   :ensure t
@@ -336,9 +325,7 @@
   :ensure t
   :mode "\\.ya?ml\\'")
 
-(use-package tldr
-  :ensure t
-  :defer t)
+(use-package tldr :ensure t)
 
 (use-package markdown-mode
   :ensure t
@@ -402,8 +389,8 @@
 
 (use-package mac :if (eq system-type 'darwin))
 
-(use-package wgrep :ensure t :defer t)
-(use-package wgrep-ag :ensure t :defer t)
+(use-package wgrep :ensure t)
+(use-package wgrep-ag :ensure t)
 
 (use-package untitled-new-buffer
   :ensure t
@@ -431,7 +418,7 @@
          ("C-h C-l" . helm-locate-library)
          ("C-c h i" . helm-semantic-or-imenu)
          )
-  :init
+  :config
   (setq helm-command-prefix-key "C-c h"
         helm-split-window-in-side-p t
         helm-buffers-fuzzy-matching t
@@ -444,7 +431,7 @@
         helm-ff-auto-update-initial-value t
         helm-full-frame nil
         helm-split-window-in-side-p t)
-  :config (helm-mode)
+  (helm-mode)
   )
 
 (use-package helm-descbinds
@@ -496,8 +483,7 @@
   (helm-projectile-on))
 
 (use-package cc-mode
-  :defer t
-  :init
+  :config
   (add-hook 'java-mode-hook (defun my/java-mode-setup ()
                               (setq c-basic-offset 2
                                     tab-width 2
@@ -544,7 +530,6 @@
 (use-package spacemacs-theme :ensure t :defer t)
 (use-package paganini-theme :ensure t :defer t)
 (use-package nord-theme :ensure t :defer t)
-(use-package avk-emacs-themes :ensure t :defer t)
 (use-package challenger-deep-theme :ensure t :defer t)
 (use-package ir-black-theme :ensure t :defer t)
 (use-package solarized-theme :ensure t :defer t)
@@ -561,11 +546,9 @@
 (use-package clues-theme :ensure t :defer t)
 (use-package spacegray-theme :ensure t :defer t)
 (use-package soft-morning-theme :ensure t :defer t)
-(use-package niflheim-theme :ensure t :defer t)
 (use-package spacemacs-theme :ensure t :defer t)
 (use-package paganini-theme :ensure t :defer t)
 (use-package nord-theme :ensure t :defer t)
-(use-package avk-emacs-themes :ensure t :defer t)
 (use-package challenger-deep-theme :ensure t :defer t)
 (use-package ir-black-theme :ensure t :defer t)
 (use-package solarized-theme :ensure t :defer t)
