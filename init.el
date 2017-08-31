@@ -88,7 +88,7 @@
 (defalias 'yes-or-no-p 'y-or-n-p)
 
 (dolist (r `((?i . (file . ,(expand-file-name "init.el" user-emacs-directory)))
-             ))
+             (?c . (file . ,(expand-file-name "custom.el" user-emacs-directory)))))
   (set-register (car r) (cdr r)))
 
 (dolist (cmd '(narrow-to-region
@@ -192,7 +192,9 @@
 
 (use-package emmet-mode
   :ensure t
-  :mode "\\.html\\'")
+  :config
+  (add-hook 'web-mode-hook 'emmet-mode)
+  (add-hook 'rjsx-mode-hook 'emmet-mode))
 
 (use-package rainbow-delimiters
   :ensure t
@@ -430,7 +432,7 @@
         helm-ff-file-name-history-use-recentf t
         helm-ff-auto-update-initial-value t
         helm-full-frame nil
-        helm-split-window-in-side-p t)
+        )
   (helm-mode)
   )
 
@@ -482,6 +484,53 @@
   (projectile-global-mode)
   (helm-projectile-on))
 
+(use-package zygospore
+  :ensure t
+  :bind (("C-x 1" . zygospore-toggle-delete-other-windows)))
+
+(use-package golden-ratio :ensure t)
+
+(use-package kotlin-mode
+  :ensure t
+  :mode "\\.kt\\'")
+
+(use-package rjsx-mode
+  :ensure t
+  :mode "\\.js\\'"
+  :config (setq js2-basic-offset 2
+                js2-strict-missing-semi-warning nil
+                js2-missing-semi-one-line-override nil
+                js2-bounce-indent-p nil))
+
+(use-package cider :ensure t)
+(use-package clojure-mode
+  :ensure t
+  :mode "\\.clj\\'")
+
+(use-package web-mode
+  :ensure t
+  :mode "\\.html\\'"
+  :config
+  (setq web-mode-markup-indent-offset 2
+        web-mode-css-indent-offset 2
+        web-mode-code-indent-offset 2
+        web-mode-block-padding 2
+        web-mode-comment-style 2
+
+        web-mode-enable-css-colorization t
+        web-mode-enable-auto-pairing t
+        web-mode-enable-comment-keywords t
+        web-mode-enable-current-element-highlight t
+        ))
+
+(use-package sass-mode
+  :ensure t
+  :mode "\\.sass\\'")
+
+(use-package less-css-mode
+  :ensure t
+  :mode "\\.less\\'")
+
 (use-package cc-mode
   :config
   (add-hook 'java-mode-hook (defun my/java-mode-setup ()
@@ -494,6 +543,10 @@
   :ensure t
   :mode (("\\.scalaX?\\'" . scala-mode)
          ("\\.scX?\\'" . scala-mode)))
+
+(use-package ensime
+  :ensure t
+  :pin melpa-stable)
 
 (use-package remember-last-theme
   :ensure t
@@ -539,7 +592,6 @@
 (use-package zenburn-theme :ensure t :defer t)
 (use-package leuven-theme :ensure t :defer t)
 (use-package sublime-themes :ensure t :defer t)
-(use-package alect-themes :ensure t :defer t)
 (use-package paper-theme :ensure t :defer t)
 (use-package tao-theme :ensure t :defer t)
 (use-package organic-green-theme :ensure t :defer t)
