@@ -253,7 +253,6 @@
   (add-hook 'scala-mode-hook 'hungry-delete-mode)
   (add-hook 'elm-mode-hook 'hungry-delete-mode)
   (add-hook 'js2-mode-hook 'hungry-delete-mode)
-  (add-hook 'emacs-lisp-mode-hook 'hungry-delete-mode)
   )
 
 (use-package sml-mode
@@ -502,10 +501,28 @@
                 js2-missing-semi-one-line-override nil
                 js2-bounce-indent-p nil))
 
+(use-package aggressive-indent
+  :ensure t
+  :config
+  (add-hook 'clojure-mode-hook 'aggressive-indent-mode)
+  (add-hook 'emacs-lisp-mode-hook 'aggressive-indent-mode))
+
+(use-package paredit
+  :ensure t
+  :config
+  (add-hook 'clojure-mode-hook 'paredit-mode)
+  (add-hook 'emacs-lisp-mode-hook 'paredit-mode))
+
 (use-package cider :ensure t)
+(use-package 4clojure :ensure t)
 (use-package clojure-mode
   :ensure t
-  :mode "\\.clj\\'")
+  :mode "\\.clj\\'"
+  :config
+  (setq clojure-indent-style ':align-arguments)
+  (define-clojure-indent
+    (defcomponent '(2 nil nil (:defn))))
+  (add-hook 'clojure-mode-hook 'eldoc-mode))
 
 (use-package web-mode
   :ensure t
