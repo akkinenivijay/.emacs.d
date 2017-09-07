@@ -199,7 +199,9 @@
 (use-package rainbow-delimiters
   :ensure t
   :if (display-graphic-p)
-  :config (add-hook 'emacs-lisp-mode-hook 'rainbow-delimiters-mode))
+  :config
+  (add-hook 'emacs-lisp-mode-hook 'rainbow-delimiters-mode)
+  (add-hook 'clojure-mode-hook 'rainbow-delimiters-mode))
 
 (use-package avy
   :ensure t
@@ -240,6 +242,7 @@
   :if (display-graphic-p)
   :config
   (add-hook 'haskell-mode-hook 'subword-mode)
+  (add-hook 'clojure-mode-hook 'subword-mode)
   (add-hook 'scala-mode-hook 'subword-mode)
   (add-hook 'elm-mode-hook 'subword-mode)
   (add-hook 'js2-mode-hook 'subword-mode)
@@ -327,6 +330,10 @@
   :mode "\\.ya?ml\\'")
 
 (use-package tldr :ensure t)
+
+(use-package adoc-mode
+  :ensure t
+  :mode "\\.adoc\\'")
 
 (use-package markdown-mode
   :ensure t
@@ -513,7 +520,9 @@
   (add-hook 'clojure-mode-hook 'paredit-mode)
   (add-hook 'emacs-lisp-mode-hook 'paredit-mode))
 
-(use-package cider :ensure t)
+(use-package cider
+  :ensure t
+  :pin melpa-stable)
 (use-package 4clojure :ensure t)
 (use-package clojure-mode
   :ensure t
