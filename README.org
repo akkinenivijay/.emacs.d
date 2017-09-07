@@ -10,7 +10,7 @@ Emacs installation instrucctions for macOS.
 
 #+BEGIN_SRC sh
 brew tap railwaycat/emacsmacport && \
-brew install emacs-mac --with-xml2 --with-natural-title-bar --with-modern-icon -- with-imagemagick
+brew install emacs-mac --with-xml2 --with-natural-title-bar --with-modern-icon --with-imagemagick
 #+END_SRC
 
 ** Screenshots
