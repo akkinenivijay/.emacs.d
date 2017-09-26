@@ -41,13 +41,15 @@
 
 (setq-default indent-tabs-mode nil
               tab-width 2
-              indicate-empty-lines t)
+              indicate-empty-lines nil)
 
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory)
       custom-buffer-done-kill nil
       custom-buffer-verbose-help nil
       custom-unlispify-names nil
       custom-unlispify-menu-entries nil
+
+      initial-scratch-message nil
 
       custom-safe-themes t
 
@@ -129,6 +131,10 @@
 (use-package hi-lock :diminish hi-lock-mode)
 (use-package saveplace :config (save-place-mode))
 
+(use-package centered-window-mode
+  :ensure t
+  :config (setq cwm-incremental-padding t))
+
 (use-package ediff
   :config
   (defvar ctl-period-equals-map)
@@ -209,8 +215,16 @@
   :bind (("M-g M-g" . avy-goto-line)
          ("M-g w" . avy-goto-word-1)
          ("M-g e" . avy-goto-word-0)
-         ("C-:" . avy-goto-char)
-         ("C-'" . avy-goto-char-2)))
+         ("C-'" . avy-goto-char)
+         ("C-M-'" . avy-goto-char-2)))
+
+(use-package hl-todo
+  :ensure t
+  :bind (("C-c t n" . hl-todo-next)
+         ("C-c t p" . hl-todo-previous)
+         ("C-c t o" . hl-todo-occur))
+  :demand t
+  :config (global-hl-todo-mode))
 
 (use-package ace-window
   :ensure t
@@ -454,7 +468,7 @@
 (use-package helm-themes
   :ensure t
   :if (display-graphic-p)
-  :bind ([f9] . helm-themes))
+  :bind ("C-c h t" . helm-themes))
 
 (use-package helm-swoop
   :ensure t
@@ -520,10 +534,30 @@
   (add-hook 'clojure-mode-hook 'paredit-mode)
   (add-hook 'emacs-lisp-mode-hook 'paredit-mode))
 
+(use-package prog-mode
+  :config
+  (setq clojure--prettify-symbols-alist '(("fn" . 955)
+                                          ))
+  (add-hook 'clojure-mode-hook 'prettify-symbols-mode))
+
+(use-package idris-mode
+  :ensure t)
+
+(use-package helm-idris
+  :ensure t)
+
 (use-package cider
   :ensure t
-  :pin melpa-stable)
+  :pin melpa-stable
+  :bind (:map clojure-mode-map
+              ("C-c C-;" . cider-eval-defun-to-comment)
+              ("C-c C-SPC" . cider-format-buffer)))
 (use-package 4clojure :ensure t)
+(use-package clj-refactor
+  :ensure t
+  :config
+  (cljr-add-keybindings-with-prefix "C-c C-m")
+  (add-hook 'clojure-mode-hook 'clj-refactor-mode))
 (use-package clojure-mode
   :ensure t
   :mode "\\.clj\\'"
@@ -531,7 +565,11 @@
   (setq clojure-indent-style ':align-arguments)
   (define-clojure-indent
     (defcomponent '(2 nil nil (:defn))))
-  (add-hook 'clojure-mode-hook 'eldoc-mode))
+  )
+
+(use-package hideshow
+  :config
+  (add-hook 'clojure-mode-hook 'hs-minor-mode))
 
 (use-package web-mode
   :ensure t
@@ -585,6 +623,9 @@
   :ensure rtags
   :config (cmake-ide-setup))
 
+(use-package smart-window
+  :ensure t)
+
 (use-package atom-one-dark-theme :ensure t :defer t)
 (use-package birds-of-paradise-plus-theme :ensure t :defer t)
 (use-package bliss-theme :ensure t :defer t)
@@ -611,7 +652,6 @@
 (use-package nord-theme :ensure t :defer t)
 (use-package challenger-deep-theme :ensure t :defer t)
 (use-package ir-black-theme :ensure t :defer t)
-(use-package solarized-theme :ensure t :defer t)
 (use-package goose-theme :ensure t :defer t)
 (use-package doom-themes :ensure t :defer t)
 (use-package github-theme :ensure t :defer t)
@@ -633,3 +673,5 @@
 (use-package goose-theme :ensure t :defer t)
 (use-package doom-themes :ensure t :defer t)
 (use-package github-theme :ensure t :defer t)
+(use-package dracula-theme :ensure t :defer t)
+(use-package afternoon-theme :ensure t :defer t)
