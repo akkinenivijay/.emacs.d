@@ -43,7 +43,14 @@
               tab-width 2
               indicate-empty-lines nil)
 
-(setq custom-file (expand-file-name "custom.el" user-emacs-directory)
+(add-hook
+ 'after-init-hook
+ (defun my/set-faces ()
+   (custom-set-faces
+    '(default ((t (:height 160 :family "Operator Mono" :weight normal)))))
+   ))
+
+(setq custom-file (make-temp-file "emacs-custom-")
       custom-buffer-done-kill nil
       custom-buffer-verbose-help nil
       custom-unlispify-names nil
@@ -615,9 +622,7 @@
 (use-package remember-last-theme
   :ensure t
   :if (display-graphic-p)
-  :config
-  (remember-last-theme-enable)
-  (load custom-file))
+  :config (remember-last-theme-with-file-enable (expand-file-name "last-theme.el" user-emacs-directory)))
 
 (use-package cmake-ide
   :ensure rtags
@@ -625,6 +630,10 @@
 
 (use-package smart-window
   :ensure t)
+
+(use-package exec-path-from-shell
+  :ensure t
+  :config (exec-path-from-shell-initialize))
 
 (use-package atom-one-dark-theme :ensure t :defer t)
 (use-package birds-of-paradise-plus-theme :ensure t :defer t)
