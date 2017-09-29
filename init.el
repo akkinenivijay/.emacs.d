@@ -142,6 +142,16 @@
   :ensure t
   :config (setq cwm-incremental-padding t))
 
+(use-package discover
+  :ensure t
+  :config (global-discover-mode))
+
+(use-package discover-my-major
+  :ensure t
+  :bind (("C-h M-m" . discover-my-major)
+         ("C-h M-S-m" . discover-my-mode)))
+(use-package discover-clj-refactor :ensure t)
+
 (use-package ediff
   :config
   (defvar ctl-period-equals-map)
