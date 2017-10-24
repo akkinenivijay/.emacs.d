@@ -1,10 +1,10 @@
 (require 'package)
 (setq package-archives '(
-       ("elpa" . "http://elpa.gnu.org/packages/")
-       ("org" . "http://orgmode.org/elpa/")
-       ("melpa-stable" . "http://stable.melpa.org/packages/")
-       ("melpa" . "http://melpa.org/packages/")
-       )
+                         ("elpa" . "http://elpa.gnu.org/packages/")
+                         ("org" . "http://orgmode.org/elpa/")
+                         ("melpa-stable" . "http://stable.melpa.org/packages/")
+                         ("melpa" . "http://melpa.org/packages/")
+                         )
       )
 
 (package-initialize)
@@ -18,9 +18,11 @@
 (bind-keys*
  ("M-%" . query-replace-regexp)
  ("M-`" . other-frame)
+ ("M-z" . just-one-space)
  ("C-M-;" . comment-or-uncomment-region)
  ("M-M" . man)
  ("C-M-k" . kill-sexp)
+ ("C-<tab>" . mode-line-other-buffer)
  ("C-<tab>" . mode-line-other-buffer)
  ("C-S-<tab>" . next-buffer)
  ("C-;" . comment-line)
@@ -47,7 +49,7 @@
  'after-init-hook
  (defun my/set-faces ()
    (custom-set-faces
-    '(default ((t (:height 160 :family "Operator Mono" :weight normal)))))
+    '(default ((t (:height 170 :family "Operator Mono" :weight normal)))))
    ))
 
 (setq custom-file (make-temp-file "emacs-custom-")
@@ -57,6 +59,8 @@
       custom-unlispify-menu-entries nil
 
       initial-scratch-message nil
+      ;; initial-frame-alist `((scroll-bar-background . nil))
+      ;; default-frame-alist `((scroll-bar-background . nil))
 
       custom-safe-themes t
 
@@ -116,6 +120,7 @@
 
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
+(blink-cursor-mode -1)
 (unless (display-graphic-p)
   (menu-bar-mode -1))
 (transient-mark-mode -1)
@@ -145,6 +150,16 @@
 (use-package discover
   :ensure t
   :config (global-discover-mode))
+
+(use-package undo-tree
+  :ensure t
+  :diminish undo-tree-mode
+  :bind (:map undo-tree-map
+              ("C-?" . undo-tree-redo)
+              ("C-/" . undo-tree-undo)
+              ("C-x u" . undo-tree-visualize)
+              )
+  :config (global-undo-tree-mode))
 
 (use-package discover-my-major
   :ensure t
@@ -341,9 +356,9 @@
   :mode "\\.css\\'"
   :init (setq css-indent-offset 2))
 
-(use-package rainbow-mode
-  :ensure t
-  :mode "\\.css\\'")
+;; (use-package rainbow-mode
+;;   :ensure t
+;;   :mode "\\.css\\'")
 
 (use-package json-mode
   :ensure t
@@ -539,14 +554,15 @@
                 js2-missing-semi-one-line-override nil
                 js2-bounce-indent-p nil))
 
-(use-package aggressive-indent
-  :ensure t
-  :config
-  (add-hook 'clojure-mode-hook 'aggressive-indent-mode)
-  (add-hook 'emacs-lisp-mode-hook 'aggressive-indent-mode))
+;; (use-package aggressive-indent
+;;   :ensure t
+;;   :config
+;;   (add-hook 'clojure-mode-hook 'aggressive-indent-mode)
+;;   (add-hook 'emacs-lisp-mode-hook 'aggressive-indent-mode))
 
 (use-package paredit
   :ensure t
+  :diminish paredit-mode
   :config
   (add-hook 'clojure-mode-hook 'paredit-mode)
   (add-hook 'emacs-lisp-mode-hook 'paredit-mode))
@@ -575,14 +591,36 @@
   :config
   (cljr-add-keybindings-with-prefix "C-c C-m")
   (add-hook 'clojure-mode-hook 'clj-refactor-mode))
+
 (use-package clojure-mode
   :ensure t
   :mode "\\.clj\\'"
   :config
-  (setq clojure-indent-style ':align-arguments)
+  (setq clojure-indent-style ':align-arguments
+        cider-cljs-lein-repl (with-output-to-string
+                               (print '(cond
+                                        (and (resolve 'user/run)
+                                             (resolve 'user/browser-repl))
+                                        (eval '(do (user/run)
+                                                   (user/browser-repl)))
+
+                                        (try
+                                         (require 'figwheel-sidecar.repl-api :as sidecar)
+                                         (resolve 'sidecar/start-figwheel!)
+                                         (catch Throwable _))
+                                        (eval '(do (sidecar/start-figwheel!)
+                                                   (sidecar/cljs-repl)))
+
+                                        (try
+                                         (require 'cemerick.piggieback :as piggie)
+                                         (resolve 'piggie/cljs-repl)
+                                         (catch Throwable _))
+                                        (eval '(piggie/cljs-repl (cljs.repl.rhino/repl-env)))
+
+                                        :else
+                                        (throw (ex-info "Failed to initialize CLJS repl."))))))
   (define-clojure-indent
-    (defcomponent '(2 nil nil (:defn))))
-  )
+    (defcomponent '(2 nil nil (:defn)))))
 
 (use-package hideshow
   :config
@@ -694,3 +732,7 @@
 (use-package github-theme :ensure t :defer t)
 (use-package dracula-theme :ensure t :defer t)
 (use-package afternoon-theme :ensure t :defer t)
+(use-package avk-emacs-themes :ensure t :defer t)
+(use-package grayscale-theme :ensure t :defer t)
+(use-package sunburn-theme :ensure t :defer t)
+(use-package hemera-theme :ensure t :defer t)
