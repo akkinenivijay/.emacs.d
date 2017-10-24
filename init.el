@@ -75,14 +75,15 @@
       mouse-wheel-scroll-amount '(1 ((shift) . 1) ((control) . nil))
       mouse-wheel-progressive-speed nil
 
+      make-backup-files nil
       ;; auto-backup (filename~)
-      backup-directory-alist `((".*" . ,temporary-file-directory))
-      backup-by-copying t
-      delete-old-versions t
-      version-control t
+      ;; backup-directory-alist `((".*" . ,temporary-file-directory))
+      ;; backup-by-copying t
+      ;; delete-old-versions t
+      ;; version-control t
 
       ;; auto-save (#filename#)
-      auto-save-file-name-transforms `((".*" ,temporary-file-directory t))
+      ;; auto-save-file-name-transforms `((".*" ,temporary-file-directory t))
 
       confirm-kill-emacs nil ;#'y-or-n-p
 
@@ -597,7 +598,8 @@
   :mode "\\.clj\\'"
   :config
   (setq clojure-indent-style ':align-arguments
-        cider-cljs-lein-repl (with-output-to-string
+        cider-cljs-lein-repl (paredit-unescape-string
+                              (with-output-to-string
                                (print '(cond
                                         (and (resolve 'user/run)
                                              (resolve 'user/browser-repl))
@@ -605,20 +607,20 @@
                                                    (user/browser-repl)))
 
                                         (try
-                                         (require 'figwheel-sidecar.repl-api :as sidecar)
+                                         (require '[figwheel-sidecar.repl-api :as sidecar])
                                          (resolve 'sidecar/start-figwheel!)
                                          (catch Throwable _))
                                         (eval '(do (sidecar/start-figwheel!)
                                                    (sidecar/cljs-repl)))
 
                                         (try
-                                         (require 'cemerick.piggieback :as piggie)
+                                         (require '[cemerick.piggieback :as piggie])
                                          (resolve 'piggie/cljs-repl)
                                          (catch Throwable _))
                                         (eval '(piggie/cljs-repl (cljs.repl.rhino/repl-env)))
 
                                         :else
-                                        (throw (ex-info "Failed to initialize CLJS repl."))))))
+                                        (throw (ex-info "Failed to initialize CLJS repl.")))))))
   (define-clojure-indent
     (defcomponent '(2 nil nil (:defn)))))
 
