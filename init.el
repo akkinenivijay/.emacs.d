@@ -49,7 +49,7 @@
  'after-init-hook
  (defun my/set-faces ()
    (custom-set-faces
-    '(default ((t (:height 170 :family "Operator Mono" :weight normal)))))
+    '(default ((t (:height 150 :family "Monaco" :weight normal)))))
    ))
 
 (setq custom-file (make-temp-file "emacs-custom-")
@@ -63,6 +63,7 @@
       ;; default-frame-alist `((scroll-bar-background . nil))
 
       custom-safe-themes t
+      enable-local-variables t
 
       frame-title-format '("" "%b @ Emacs " emacs-version)
 
@@ -166,7 +167,6 @@
   :ensure t
   :bind (("C-h M-m" . discover-my-major)
          ("C-h M-S-m" . discover-my-mode)))
-(use-package discover-clj-refactor :ensure t)
 
 (use-package ediff
   :config
@@ -222,6 +222,7 @@
 (use-package elec-pair :config (add-hook 'prog-mode-hook 'electric-pair-mode))
 
 (use-package which-key
+  :ensure t
   :diminish which-key-mode
   :config (which-key-mode))
 
@@ -442,6 +443,11 @@
   :if (display-graphic-p)
   :config (fancy-narrow-mode))
 
+(use-package dired+ :ensure t)
+(use-package dired-explorer :ensure t)
+(use-package dired-imenu :ensure t)
+(use-package dired-k :ensure t :bind (:map dired-mode-map ("K" . dired-k)))
+
 (use-package mac :if (eq system-type 'darwin))
 
 (use-package wgrep :ensure t)
@@ -555,11 +561,19 @@
                 js2-missing-semi-one-line-override nil
                 js2-bounce-indent-p nil))
 
-;; (use-package aggressive-indent
-;;   :ensure t
-;;   :config
-;;   (add-hook 'clojure-mode-hook 'aggressive-indent-mode)
-;;   (add-hook 'emacs-lisp-mode-hook 'aggressive-indent-mode))
+(use-package js2-refactor
+  :ensure t
+  :config
+  (add-hook 'js2-mode-hook #'js2-refactor-mode)
+  (js2r-add-keybindings-with-prefix "C-c C-m")
+  )
+
+(use-package aggressive-indent
+  :ensure t
+  :config
+  (setq aggressive-indent-sit-for-time 0.5)
+  (add-hook 'clojure-mode-hook 'aggressive-indent-mode)
+  (add-hook 'emacs-lisp-mode-hook 'aggressive-indent-mode))
 
 (use-package paredit
   :ensure t
@@ -589,6 +603,7 @@
 (use-package 4clojure :ensure t)
 (use-package clj-refactor
   :ensure t
+  :pin melpa-stable
   :config
   (cljr-add-keybindings-with-prefix "C-c C-m")
   (add-hook 'clojure-mode-hook 'clj-refactor-mode))
@@ -683,7 +698,9 @@
 
 (use-package exec-path-from-shell
   :ensure t
-  :config (exec-path-from-shell-initialize))
+  :config
+  (setq exec-path-from-shell-check-startup-files nil)
+  (exec-path-from-shell-initialize))
 
 (use-package atom-one-dark-theme :ensure t :defer t)
 (use-package birds-of-paradise-plus-theme :ensure t :defer t)
@@ -738,3 +755,4 @@
 (use-package grayscale-theme :ensure t :defer t)
 (use-package sunburn-theme :ensure t :defer t)
 (use-package hemera-theme :ensure t :defer t)
+(use-package basic-theme :ensure t :defer t)
