@@ -100,6 +100,8 @@
       scroll-margin 2
       scroll-preserve-screen-position t)
 
+(put 'var 'safe-local-variable (lambda [& rest] true))
+
 (defalias 'yes-or-no-p 'y-or-n-p)
 
 (dolist (r `((?i . (file . ,(expand-file-name "init.el" user-emacs-directory)))
@@ -599,7 +601,11 @@
   :pin melpa-stable
   :bind (:map clojure-mode-map
               ("C-c C-;" . cider-eval-defun-to-comment)
-              ("C-c C-SPC" . cider-format-buffer)))
+              ("C-c C-SPC" . cider-format-buffer))
+  ;; :config
+  ;; (setq cider-lein-parameters-default cider-lein-parameters
+  ;;       cider-lein-parameters (concat "with-profile test " cider-lein-parameters-default))
+  )
 (use-package 4clojure :ensure t)
 (use-package clj-refactor
   :ensure t
