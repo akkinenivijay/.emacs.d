@@ -602,10 +602,10 @@
   :bind (:map clojure-mode-map
               ("C-c C-;" . cider-eval-defun-to-comment)
               ("C-c C-SPC" . cider-format-buffer))
-  ;; :config
-  ;; (setq cider-lein-parameters-default cider-lein-parameters
-  ;;       cider-lein-parameters (concat "with-profile test " cider-lein-parameters-default))
-  )
+  :config
+  (setq cider-lein-parameters-default cider-lein-parameters
+        cider-lein-parameters (concat "with-profile test " cider-lein-parameters-default)))
+(use-package helm-cider :ensure t :config (helm-cider-mode))
 (use-package 4clojure :ensure t)
 (use-package clj-refactor
   :ensure t
