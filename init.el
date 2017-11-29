@@ -49,7 +49,7 @@
  'after-init-hook
  (defun my/set-faces ()
    (custom-set-faces
-    '(default ((t (:height 150 :family "Monaco" :weight normal)))))
+    '(default ((t (:height 150 :family "Fira Code" :weight normal)))))
    ))
 
 (setq custom-file (make-temp-file "emacs-custom-")
@@ -349,9 +349,10 @@
   :config (setq github-browse-file-show-line-at-point t))
 (use-package magit
   :ensure t
-  :pin melpa-stable
+  :pin melpa
   :if (display-graphic-p)
   :config
+  (use-package magit-popup :ensure t :pin melpa)
   (when (functionp 'ivy-completing-read)
     (setq magit-completing-read-function 'ivy-completing-read))
   (add-hook 'magit-mode-hook 'hl-line-mode))
@@ -601,10 +602,7 @@
   :pin melpa-stable
   :bind (:map clojure-mode-map
               ("C-c C-;" . cider-eval-defun-to-comment)
-              ("C-c C-SPC" . cider-format-buffer))
-  :config
-  (setq cider-lein-parameters-default cider-lein-parameters
-        cider-lein-parameters (concat "with-profile test " cider-lein-parameters-default)))
+              ("C-c C-SPC" . cider-format-buffer)))
 (use-package helm-cider :ensure t :config (helm-cider-mode))
 (use-package 4clojure :ensure t)
 (use-package clj-refactor
@@ -707,6 +705,8 @@
   :config
   (setq exec-path-from-shell-check-startup-files nil)
   (exec-path-from-shell-initialize))
+
+(use-package sicp :ensure t)
 
 (use-package atom-one-dark-theme :ensure t :defer t)
 (use-package birds-of-paradise-plus-theme :ensure t :defer t)
