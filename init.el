@@ -4,6 +4,7 @@
                          ("org" . "http://orgmode.org/elpa/")
                          ("melpa-stable" . "http://stable.melpa.org/packages/")
                          ("melpa" . "http://melpa.org/packages/")
+                         ("marmalade" . "https://marmalade-repo.org/packages/")
                          )
       )
 
@@ -49,7 +50,7 @@
  'after-init-hook
  (defun my/set-faces ()
    (custom-set-faces
-    '(default ((t (:height 150 :family "Fira Code" :weight normal)))))
+    '(default ((t (:height 150 :family "Monaco" :weight normal)))))
    ))
 
 (setq custom-file (make-temp-file "emacs-custom-")
@@ -148,8 +149,9 @@
 (use-package saveplace :config (save-place-mode))
 
 (use-package centered-window-mode
-  :ensure t
-  :config (setq cwm-incremental-padding t))
+  :load-path "~/src/public/centered-window-mode"
+  :config (setq cwm-incremental-padding t
+                cwm-incremental-padding-% 5))
 
 (use-package discover
   :ensure t
@@ -580,7 +582,7 @@
 
 (use-package paredit
   :ensure t
-  :diminish paredit-mode
+  :diminish paredit
   :config
   (add-hook 'clojure-mode-hook 'paredit-mode)
   (add-hook 'emacs-lisp-mode-hook 'paredit-mode))
@@ -605,6 +607,11 @@
               ("C-c C-SPC" . cider-format-buffer)))
 (use-package helm-cider :ensure t :config (helm-cider-mode))
 (use-package 4clojure :ensure t)
+(use-package slamhound
+  :ensure t
+  :pin marmalade
+  :bind (:map clojure-mode-map
+              ("C-c C-s" . slamhound)))
 (use-package clj-refactor
   :ensure t
   :pin melpa-stable
@@ -693,8 +700,9 @@
   :if (display-graphic-p)
   :config (remember-last-theme-with-file-enable (expand-file-name "last-theme.el" user-emacs-directory)))
 
+(use-package rtags :ensure t)
 (use-package cmake-ide
-  :ensure rtags
+  :ensure t
   :config (cmake-ide-setup))
 
 (use-package smart-window
