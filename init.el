@@ -50,7 +50,7 @@
  'after-init-hook
  (defun my/set-faces ()
    (custom-set-faces
-    '(default ((t (:height 150 :family "Monaco" :weight normal)))))
+    '(default ((t (:height 170 :family "Operator Mono" :weight normal)))))
    ))
 
 (setq custom-file (make-temp-file "emacs-custom-")
@@ -157,6 +157,9 @@
   :ensure t
   :config (global-discover-mode))
 
+(use-package org
+  :config (setq org-src-fontify-natively t))
+
 (use-package undo-tree
   :ensure t
   :diminish undo-tree-mode
@@ -194,7 +197,7 @@
          ("C-. = l" . ediff-regions-linewise)
          ("C-. = w" . ediff-regions-wordwise))
   :config
-  (use-package ediff-keep))
+  (use-package ediff-keep :ensure t))
 
 (use-package sh-script
   :mode "\\.sh\\'"
@@ -397,7 +400,6 @@
    'markdown-mode-hook
    (defun configure-markdown-mode ()
      (interactive)
-     (use-package markdown-edit-indirect :ensure t :defer t)
      (use-package markdown-toc :ensure t :defer t)
      (local-set-key (kbd "C-c '") 'markdown-edit-indirect)
      (local-set-key (kbd "C-c t") 'markdown-toc-generate-toc)))
@@ -448,7 +450,6 @@
   :if (display-graphic-p)
   :config (fancy-narrow-mode))
 
-(use-package dired+ :ensure t)
 (use-package dired-explorer :ensure t)
 (use-package dired-imenu :ensure t)
 (use-package dired-k :ensure t :bind (:map dired-mode-map ("K" . dired-k)))
@@ -593,6 +594,13 @@
                                           ))
   (add-hook 'clojure-mode-hook 'prettify-symbols-mode))
 
+(use-package elfeed-goodies :ensure t)
+(use-package elfeed-web :ensure t)
+(use-package elfeed
+  :ensure t
+  :config
+  (setq elfeed-db-directory "~/Documents/feeds"))
+
 (use-package idris-mode
   :ensure t)
 
@@ -605,8 +613,53 @@
   :bind (:map clojure-mode-map
               ("C-c C-;" . cider-eval-defun-to-comment)
               ("C-c C-SPC" . cider-format-buffer)))
-(use-package helm-cider :ensure t :config (helm-cider-mode))
-(use-package 4clojure :ensure t)
+(use-package helm-cider
+  :ensure t
+  :pin melpa-stable
+  :config (eval-after-load "cider" (helm-cider-mode)))
+(use-package 4clojure
+  :ensure t
+  :config
+  (use-package cider :ensure t)
+  (defadvice 4clojure-open-question (around 4clojure-open-question-around)
+    "Start a cider/nREPL connection if one hasn't already been started when
+opening 4clojure questions"
+    ad-do-it
+    (unless cider-current-clojure-buffer
+      (cider-jack-in)))
+
+  (defun endless/4clojure-check-and-proceed ()
+    "Check the answer and show the next question if it worked."
+    (interactive)
+    (unless
+        (save-excursion
+          ;; Find last sexp (the answer).
+          (goto-char (point-max))
+          (forward-sexp -1)
+          ;; Check the answer.
+          (cl-letf ((answer
+                     (buffer-substring (point) (point-max)))
+                    ;; Preserve buffer contents, in case you failed.
+                    ((buffer-string)))
+            (goto-char (point-min))
+            (while (search-forward "__" nil t)
+              (replace-match answer))
+            (string-match "failed." (4clojure-check-answers))))
+      (4clojure-next-question)))
+
+  (defadvice 4clojure/start-new-problem
+      (after endless/4clojure/start-new-problem-advice () activate)
+    ;; Prettify the 4clojure buffer.
+    (goto-char (point-min))
+    (forward-line 2)
+    (forward-char 3)
+    (fill-paragraph)
+    ;; Position point for the answer
+    (goto-char (point-max))
+    (insert "\n\n\n")
+    (forward-char -1)
+    ;; Define our key.
+    (local-set-key (kbd "M-j") #'endless/4clojure-check-and-proceed)))
 (use-package slamhound
   :ensure t
   :pin marmalade
@@ -770,3 +823,4 @@
 (use-package sunburn-theme :ensure t :defer t)
 (use-package hemera-theme :ensure t :defer t)
 (use-package basic-theme :ensure t :defer t)
+(use-package tronesque-theme :ensure t :defer t)
