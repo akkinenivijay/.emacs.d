@@ -517,6 +517,7 @@
 
 (use-package helm-swoop
   :ensure t
+  :pin melpa-stable
   :if (display-graphic-p)
   :bind (("M-i" . helm-swoop)
          ("M-I" . helm-multi-swoop)))
@@ -824,3 +825,6 @@ opening 4clojure questions"
 (use-package hemera-theme :ensure t :defer t)
 (use-package basic-theme :ensure t :defer t)
 (use-package tronesque-theme :ensure t :defer t)
+(use-package nordless-theme :ensure t :defer t)
+(use-package monotropic-theme :ensure t :defer t)
+(use-package panda-theme :ensure t :defer t)
