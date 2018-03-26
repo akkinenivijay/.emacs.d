@@ -170,6 +170,13 @@
               )
   :config (global-undo-tree-mode))
 
+(use-package neotree
+  :ensure t
+  :bind (("<f8>" . neotree-toggle))
+  :config
+  (setq neo-theme 'arrow
+        neo-smart-open t))
+
 (use-package discover-my-major
   :ensure t
   :bind (("C-h M-m" . discover-my-major)
@@ -195,9 +202,7 @@
          ("C-. = p" . ediff-patch-file)
          ("C-. = P" . ediff-patch-buffer)
          ("C-. = l" . ediff-regions-linewise)
-         ("C-. = w" . ediff-regions-wordwise))
-  :config
-  (use-package ediff-keep :ensure t))
+         ("C-. = w" . ediff-regions-wordwise)))
 
 (use-package sh-script
   :mode "\\.sh\\'"
@@ -216,12 +221,15 @@
 
 (use-package whitespace
   :bind (("C-x S" . whitespace-cleanup-save-buffer))
-  :diminish ((global-whitespace-mode . "") (whitespace-mode . ""))
+  :diminish (global-whitespace-mode
+             whitespace-mode
+             whitespace-newline-mode)
   :init
   (defun whitespace-cleanup-save-buffer ()
     (interactive)
     (whitespace-cleanup)
     (save-buffer))
+  :config
   (setq-default whitespace-style '(face trailing tab-mark))
   (add-hook 'prog-mode-hook 'whitespace-mode))
 
@@ -387,9 +395,9 @@
 
 (use-package tldr :ensure t)
 
-(use-package adoc-mode
-  :ensure t
-  :mode "\\.adoc\\'")
+;; (use-package adoc-mode
+;;   :ensure t
+;;   :mode "\\.adoc\\'")
 
 (use-package markdown-mode
   :ensure t
@@ -412,7 +420,7 @@
 (use-package yasnippet
   :ensure t
   :defer 2
-  :diminish yas-minor-mode
+  :diminish (yas-minor-mode yas-global-mode)
   :if (display-graphic-p)
   :init (setq yas-indent-line t)
   :config (yas-global-mode))
@@ -554,6 +562,13 @@
   :ensure t
   :bind (("C-x 1" . zygospore-toggle-delete-other-windows)))
 
+(use-package fullframe
+  :ensure t
+  :if (display-graphic-p)
+  :config
+  (fullframe magit-status magit-mode-quit-window nil)
+  (fullframe projectile-vc magit-mode-quit-window nil))
+
 (use-package golden-ratio :ensure t)
 
 (use-package kotlin-mode
@@ -577,17 +592,18 @@
 
 (use-package aggressive-indent
   :ensure t
+  :diminish aggressive-indent-mode
   :config
   (setq aggressive-indent-sit-for-time 0.5)
   (add-hook 'clojure-mode-hook 'aggressive-indent-mode)
   (add-hook 'emacs-lisp-mode-hook 'aggressive-indent-mode))
 
 (use-package paredit
-  :ensure t
-  :diminish paredit
+  :ensure t 
   :config
   (add-hook 'clojure-mode-hook 'paredit-mode)
-  (add-hook 'emacs-lisp-mode-hook 'paredit-mode))
+  (add-hook 'emacs-lisp-mode-hook 'paredit-mode)
+  :diminish (paredit paredit-mode))
 
 (use-package prog-mode
   :config
@@ -707,6 +723,16 @@ opening 4clojure questions"
 (use-package hideshow
   :config
   (add-hook 'clojure-mode-hook 'hs-minor-mode))
+
+(use-package eshell-prompt-extras
+  :ensure t
+  :config
+  (with-eval-after-load "esh-opt"
+    (autoload 'epe-theme-lambda "eshell-prompt-extras")
+    (setq eshell-highlight-prompt nil
+          eshell-prompt-function 'epe-theme-lambda)))
+
+(use-package nyan-mode :ensure t)
 
 (use-package web-mode
   :ensure t
