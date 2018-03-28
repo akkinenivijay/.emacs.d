@@ -389,6 +389,13 @@
   :if (eq system-type 'darwin)
   :config (osx-trash-setup))
 
+(use-package dash-at-point
+  :ensure t
+  :if (and (display-graphic-p)
+           (eq system-type 'darwin))
+  :bind (("C-c d f" . dash-at-point)
+         ("C-c d e" . dash-at-point-with-docset)))
+
 (use-package yaml-mode
   :ensure t
   :mode "\\.ya?ml\\'")
