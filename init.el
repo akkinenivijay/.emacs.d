@@ -50,7 +50,7 @@
  'after-init-hook
  (defun my/set-faces ()
    (custom-set-faces
-    '(default ((t (:height 170 :family "Operator Mono" :weight normal)))))
+    '(default ((t (:height 180 :family "Fantasque Sans Mono" :weight normal)))))
    ))
 
 (setq custom-file (make-temp-file "emacs-custom-")
@@ -140,8 +140,7 @@
           "End current search in the opposite side of the match."
           (interactive)
           (funcall #'isearch-done nopush edit)
-          (when isearch-other-end (goto-char isearch-other-end)))
-  )
+          (when isearch-other-end (goto-char isearch-other-end))))
 (use-package autorevert
   :diminish auto-revert-mode
   :config (global-auto-revert-mode))
@@ -294,6 +293,9 @@
          ("C-S-c C-S-c" . mc/edit-lines)
          ("C-M-0" . mc/mark-all-like-this)
          ("M-<down-mouse-1>" . mc/add-cursor-on-click)))
+
+(use-package multi-term
+  :ensure t)
 
 (use-package expand-region
   :ensure t
@@ -641,59 +643,11 @@
   :ensure t
   :pin melpa-stable
   :config (eval-after-load "cider" (helm-cider-mode)))
-(use-package 4clojure
-  :ensure t
-  :config
-  (use-package cider :ensure t)
-  (defadvice 4clojure-open-question (around 4clojure-open-question-around)
-    "Start a cider/nREPL connection if one hasn't already been started when
-opening 4clojure questions"
-    ad-do-it
-    (unless cider-current-clojure-buffer
-      (cider-jack-in)))
 
-  (defun endless/4clojure-check-and-proceed ()
-    "Check the answer and show the next question if it worked."
-    (interactive)
-    (unless
-        (save-excursion
-          ;; Find last sexp (the answer).
-          (goto-char (point-max))
-          (forward-sexp -1)
-          ;; Check the answer.
-          (cl-letf ((answer
-                     (buffer-substring (point) (point-max)))
-                    ;; Preserve buffer contents, in case you failed.
-                    ((buffer-string)))
-            (goto-char (point-min))
-            (while (search-forward "__" nil t)
-              (replace-match answer))
-            (string-match "failed." (4clojure-check-answers))))
-      (4clojure-next-question)))
-
-  (defadvice 4clojure/start-new-problem
-      (after endless/4clojure/start-new-problem-advice () activate)
-    ;; Prettify the 4clojure buffer.
-    (goto-char (point-min))
-    (forward-line 2)
-    (forward-char 3)
-    (fill-paragraph)
-    ;; Position point for the answer
-    (goto-char (point-max))
-    (insert "\n\n\n")
-    (forward-char -1)
-    ;; Define our key.
-    (local-set-key (kbd "M-j") #'endless/4clojure-check-and-proceed)))
-(use-package slamhound
-  :ensure t
-  :pin marmalade
-  :bind (:map clojure-mode-map
-              ("C-c C-s" . slamhound)))
 (use-package clj-refactor
   :ensure t
-  :pin melpa-stable
   :config
-  (cljr-add-keybindings-with-prefix "C-c C-m")
+  (cljr-add-keybindings-with-prefix "C-c C-n")
   (add-hook 'clojure-mode-hook 'clj-refactor-mode))
 
 (use-package clojure-mode
@@ -703,27 +657,27 @@ opening 4clojure questions"
   (setq clojure-indent-style ':align-arguments
         cider-cljs-lein-repl (paredit-unescape-string
                               (with-output-to-string
-                               (print '(cond
-                                        (and (resolve 'user/run)
-                                             (resolve 'user/browser-repl))
-                                        (eval '(do (user/run)
-                                                   (user/browser-repl)))
+                                (print '(cond
+                                         (and (resolve 'user/run)
+                                              (resolve 'user/browser-repl))
+                                         (eval '(do (user/run)
+                                                    (user/browser-repl)))
 
-                                        (try
-                                         (require '[figwheel-sidecar.repl-api :as sidecar])
-                                         (resolve 'sidecar/start-figwheel!)
-                                         (catch Throwable _))
-                                        (eval '(do (sidecar/start-figwheel!)
-                                                   (sidecar/cljs-repl)))
+                                         (try
+                                          (require '[figwheel-sidecar.repl-api :as sidecar])
+                                          (resolve 'sidecar/start-figwheel!)
+                                          (catch Throwable _))
+                                         (eval '(do (sidecar/start-figwheel!)
+                                                    (sidecar/cljs-repl)))
 
-                                        (try
-                                         (require '[cemerick.piggieback :as piggie])
-                                         (resolve 'piggie/cljs-repl)
-                                         (catch Throwable _))
-                                        (eval '(piggie/cljs-repl (cljs.repl.rhino/repl-env)))
+                                         (try
+                                          (require '[cemerick.piggieback :as piggie])
+                                          (resolve 'piggie/cljs-repl)
+                                          (catch Throwable _))
+                                         (eval '(piggie/cljs-repl (cljs.repl.rhino/repl-env)))
 
-                                        :else
-                                        (throw (ex-info "Failed to initialize CLJS repl.")))))))
+                                         :else
+                                         (throw (ex-info "Failed to initialize CLJS repl.")))))))
   (define-clojure-indent
     (defcomponent '(2 nil nil (:defn)))))
 
@@ -833,7 +787,6 @@ opening 4clojure questions"
 (use-package doom-themes :ensure t :defer t)
 (use-package github-theme :ensure t :defer t)
 (use-package zenburn-theme :ensure t :defer t)
-(use-package leuven-theme :ensure t :defer t)
 (use-package sublime-themes :ensure t :defer t)
 (use-package paper-theme :ensure t :defer t)
 (use-package tao-theme :ensure t :defer t)
@@ -861,3 +814,4 @@ opening 4clojure questions"
 (use-package nordless-theme :ensure t :defer t)
 (use-package monotropic-theme :ensure t :defer t)
 (use-package panda-theme :ensure t :defer t)
+(use-package poet-theme :ensure t :defer t)
