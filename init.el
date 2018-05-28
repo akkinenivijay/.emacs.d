@@ -50,7 +50,7 @@
  'after-init-hook
  (defun my/set-faces ()
    (custom-set-faces
-    '(default ((t (:height 180 :family "Fantasque Sans Mono" :weight normal)))))
+    '(default ((t (:height 160 :family "Hack" :weight normal)))))
    ))
 
 (setq custom-file (make-temp-file "emacs-custom-")
@@ -130,6 +130,7 @@
   (menu-bar-mode -1))
 (transient-mark-mode -1)
 (delete-selection-mode)
+(column-number-mode)
 
 (use-package paren :config (show-paren-mode))
 (use-package isearch
@@ -235,6 +236,9 @@
 (use-package electric :config (add-hook 'prog-mode-hook 'electric-indent-mode))
 (use-package elec-pair :config (add-hook 'prog-mode-hook 'electric-pair-mode))
 
+(use-package flycheck :ensure t :if (display-graphic-p))
+(use-package company :ensure t :if (display-graphic-p))
+
 (use-package which-key
   :ensure t
   :diminish which-key-mode
@@ -256,6 +260,33 @@
   :config
   (add-hook 'emacs-lisp-mode-hook 'rainbow-delimiters-mode)
   (add-hook 'clojure-mode-hook 'rainbow-delimiters-mode))
+
+(use-package cargo :ensure t :pin melpa)
+;; $ rustup component add rust-src
+;; $ cargo install racer
+(use-package racer :ensure t :pin melpa :config (add-hook 'racer-mode-hook 'eldoc-mode))
+(use-package rust-mode
+  :ensure t
+  :pin melpa
+  :config
+  (setq rust-format-on-save t)
+  (add-hook 'rust-mode-hook 'cargo-minor-mode)
+  (add-hook 'rust-mode-hook 'racer-mode))
+(use-package rust-playground :ensure t :pin melpa)
+
+(use-package tide :ensure t)
+(use-package typescript-mode
+  :ensure t
+  :config
+  (setq typescript-indent-level 2)
+  (add-hook 'typescript-mode-hook (defun setup-tide ()
+                                    (interactive)
+                                    (tide-setup)
+                                    (flycheck-mode)
+                                    (setq flycheck-check-syntax-automatically '(save mode-enabled))
+                                    (eldoc-mode +1)
+                                    (tide-hl-identifier-mode +1)
+                                    (company-mode +1))))
 
 (use-package avy
   :ensure t
@@ -311,6 +342,7 @@
   (add-hook 'scala-mode-hook 'subword-mode)
   (add-hook 'elm-mode-hook 'subword-mode)
   (add-hook 'js2-mode-hook 'subword-mode)
+  (add-hook 'typescript-mode-hook 'subword-mode)
   )
 
 (use-package hungry-delete
@@ -341,10 +373,6 @@
       (haskell-mode-stylish-buffer)
       (haskell-sort-imports)))
   )
-
-(use-package flycheck
-  :ensure t
-  :if (display-graphic-p))
 
 (use-package gitignore-mode :ensure t :mode ".gitignore'")
 (use-package git-messenger
@@ -694,10 +722,11 @@
           eshell-prompt-function 'epe-theme-lambda)))
 
 (use-package nyan-mode :ensure t)
-
 (use-package web-mode
   :ensure t
-  :mode "\\.html\\'"
+  :mode (("\\.html?\\'" . web-mode)
+         ("\\.tsx\\'" . web-mode)
+         ("\\.jsx\\'" . web-mode))
   :config
   (setq web-mode-markup-indent-offset 2
         web-mode-css-indent-offset 2
@@ -709,7 +738,17 @@
         web-mode-enable-auto-pairing t
         web-mode-enable-comment-keywords t
         web-mode-enable-current-element-highlight t
-        ))
+        )
+  
+  (add-hook 'web-mode-hook
+            (lambda ()
+              (when (string-equal "tsx" (file-name-extension buffer-file-name))
+                (setup-tide-mode))
+              (when (string-equal "jsx" (file-name-extension buffer-file-name))
+                (setup-tide-mode))))
+  ;; enable typescript-tslint checker
+  (flycheck-add-mode 'typescript-tslint 'web-mode)
+  )
 
 (use-package sass-mode
   :ensure t
