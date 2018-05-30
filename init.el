@@ -50,7 +50,7 @@
  'after-init-hook
  (defun my/set-faces ()
    (custom-set-faces
-    '(default ((t (:height 160 :family "Hack" :weight normal)))))
+    '(default ((t (:height 160 :family "Fantasque Sans Mono" :weight normal)))))
    ))
 
 (setq custom-file (make-temp-file "emacs-custom-")
@@ -105,8 +105,7 @@
 
 (defalias 'yes-or-no-p 'y-or-n-p)
 
-(dolist (r `((?i . (file . ,(expand-file-name "init.el" user-emacs-directory)))
-             (?c . (file . ,(expand-file-name "custom.el" user-emacs-directory)))))
+(dolist (r `((?i . (file . ,(expand-file-name "init.el" user-emacs-directory)))))
   (set-register (car r) (cdr r)))
 
 (dolist (cmd '(narrow-to-region
@@ -126,7 +125,8 @@
 (scroll-bar-mode -1)
 (tool-bar-mode -1)
 (blink-cursor-mode -1)
-(unless (display-graphic-p)
+(unless (and (display-graphic-p)
+             (eq system-type 'darwin))
   (menu-bar-mode -1))
 (transient-mark-mode -1)
 (delete-selection-mode)
@@ -148,14 +148,20 @@
 (use-package hi-lock :diminish hi-lock-mode)
 (use-package saveplace :config (save-place-mode))
 
-(use-package centered-window-mode
-  :load-path "~/src/public/centered-window-mode"
-  :config (setq cwm-incremental-padding t
-                cwm-incremental-padding-% 5))
+;; (use-package centered-window-mode
+;;   :load-path "~/src/public/centered-window-mode"
+;;   :config (setq cwm-incremental-padding t
+;;                 cwm-incremental-padding-% 5))
 
 (use-package discover
   :ensure t
   :config (global-discover-mode))
+
+(use-package move-text
+  :ensure t
+  :pin melpa
+  :bind* (("M-<up>" . move-text-up)
+          ("M-<down>" . move-text-down)))
 
 (use-package org
   :config (setq org-src-fontify-natively t))
@@ -343,6 +349,7 @@
   (add-hook 'elm-mode-hook 'subword-mode)
   (add-hook 'js2-mode-hook 'subword-mode)
   (add-hook 'typescript-mode-hook 'subword-mode)
+  (add-hook 'web-mode-hook 'subword-mode)
   )
 
 (use-package hungry-delete
@@ -399,6 +406,7 @@
   (when (functionp 'ivy-completing-read)
     (setq magit-completing-read-function 'ivy-completing-read))
   (add-hook 'magit-mode-hook 'hl-line-mode))
+(use-package gist :ensure t :pin melpa)
 
 (use-package css-mode
   :mode "\\.css\\'"
