@@ -164,7 +164,12 @@
           ("M-<down>" . move-text-down)))
 
 (use-package org
+  :pin org
   :config (setq org-src-fontify-natively t))
+
+(use-package toc-org
+  :ensure t
+  :pin melpa)
 
 (use-package undo-tree
   :ensure t
@@ -669,22 +674,25 @@
 (use-package helm-idris
   :ensure t)
 
+(use-package lua-mode
+  :ensure t)
+
 (use-package cider
   :ensure t
   :pin melpa-stable
   :bind (:map clojure-mode-map
               ("C-c C-;" . cider-eval-defun-to-comment)
               ("C-c C-SPC" . cider-format-buffer)))
-(use-package helm-cider
-  :ensure t
-  :pin melpa-stable
-  :config (eval-after-load "cider" (helm-cider-mode)))
+;; (use-package helm-cider
+;;   :ensure t
+;;   :pin melpa-stable
+;;   :config (eval-after-load "cider" (helm-cider-mode)))
 
-(use-package clj-refactor
-  :ensure t
-  :config
-  (cljr-add-keybindings-with-prefix "C-c C-n")
-  (add-hook 'clojure-mode-hook 'clj-refactor-mode))
+;; (use-package clj-refactor
+;;   :ensure t
+;;   :config
+;;   (cljr-add-keybindings-with-prefix "C-c C-n")
+;;   (add-hook 'clojure-mode-hook 'clj-refactor-mode))
 
 (use-package clojure-mode
   :ensure t
@@ -799,7 +807,13 @@
 (use-package exec-path-from-shell
   :ensure t
   :config
-  (setq exec-path-from-shell-check-startup-files nil)
+  (setq exec-path-from-shell-check-startup-files nil
+        exec-path-from-shell-variables '("PATH" "ZSH" "MANPATH"
+                                         "SSH_AUTH_SOCK"
+                                         "SSH_AGENT_PID"
+                                         "GPG_AGENT_INFO"
+                                         "GNOME_KEYRING_CONTROL"
+                                         "GNOME_KEYRING_PID"))
   (exec-path-from-shell-initialize))
 
 (use-package sicp :ensure t)
