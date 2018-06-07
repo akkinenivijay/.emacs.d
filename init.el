@@ -50,7 +50,7 @@
  'after-init-hook
  (defun my/set-faces ()
    (custom-set-faces
-    '(default ((t (:height 160 :family "Fantasque Sans Mono" :weight normal)))))
+    '(default ((t (:height 180 :family "Fantasque Sans Mono" :weight normal)))))
    ))
 
 (setq custom-file (make-temp-file "emacs-custom-")
@@ -166,6 +166,9 @@
 (use-package org
   :pin org
   :config (setq org-src-fontify-natively t))
+
+(use-package rainbow-mode :ensure t :pin melpa)
+(use-package gitconfig-mode :ensure t :pin melpa)
 
 (use-package toc-org
   :ensure t
