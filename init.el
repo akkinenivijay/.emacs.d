@@ -108,6 +108,8 @@
 (dolist (r `((?i . (file . ,(expand-file-name "init.el" user-emacs-directory)))))
   (set-register (car r) (cdr r)))
 
+(bind-key* "C-x r j i" 'jump-to-register)
+
 (dolist (cmd '(narrow-to-region
                narrow-to-page
                narrow-to-defun
@@ -167,22 +169,13 @@
   :pin org
   :config (setq org-src-fontify-natively t))
 
-(use-package rainbow-mode :ensure t :pin melpa)
+(use-package rainbow-mode :load-path "vendor")
+
 (use-package gitconfig-mode :ensure t :pin melpa)
 
 (use-package toc-org
   :ensure t
   :pin melpa)
-
-(use-package undo-tree
-  :ensure t
-  :diminish undo-tree-mode
-  :bind (:map undo-tree-map
-              ("C-?" . undo-tree-redo)
-              ("C-/" . undo-tree-undo)
-              ("C-x u" . undo-tree-visualize)
-              )
-  :config (global-undo-tree-mode))
 
 (use-package neotree
   :ensure t
@@ -407,7 +400,7 @@
   :config (setq github-browse-file-show-line-at-point t))
 (use-package magit
   :ensure t
-  :pin melpa
+  :pin melpa-stable
   :if (display-graphic-p)
   :config
   (use-package magit-popup :ensure t :pin melpa)
@@ -419,10 +412,6 @@
 (use-package css-mode
   :mode "\\.css\\'"
   :init (setq css-indent-offset 2))
-
-;; (use-package rainbow-mode
-;;   :ensure t
-;;   :mode "\\.css\\'")
 
 (use-package json-mode
   :ensure t
@@ -498,7 +487,6 @@
 
 (use-package server
   :config
-  (setq server-socket-dir "~/.emacs.d/server")
   (unless (server-running-p) (server-mode)))
 
 (use-package persistent-scratch
@@ -669,7 +657,7 @@
 (use-package elfeed
   :ensure t
   :config
-  (setq elfeed-db-directory "~/Documents/feeds"))
+  (setq elfeed-db-directory (expand-file-name "feeds" user-emacs-directory)))
 
 (use-package idris-mode
   :ensure t)
@@ -741,6 +729,9 @@
           eshell-prompt-function 'epe-theme-lambda)))
 
 (use-package nyan-mode :ensure t)
+(use-package nodejs-repl :ensure t)
+(use-package twittering-mode :ensure t)
+
 (use-package web-mode
   :ensure t
   :mode (("\\.html?\\'" . web-mode)
