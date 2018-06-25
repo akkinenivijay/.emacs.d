@@ -14,7 +14,8 @@
   (package-refresh-contents)
   (package-install 'use-package))
 
-(require 'use-package)
+(eval-when-compile
+  (require 'use-package))
 
 (bind-keys*
  ("M-%" . query-replace-regexp)
@@ -108,7 +109,7 @@
 (dolist (r `((?i . (file . ,(expand-file-name "init.el" user-emacs-directory)))))
   (set-register (car r) (cdr r)))
 
-(bind-key* "C-x r j i" 'jump-to-register)
+(bind-key* "C-x r j" 'jump-to-register)
 
 (dolist (cmd '(narrow-to-region
                narrow-to-page
@@ -236,15 +237,22 @@
     (interactive)
     (whitespace-cleanup)
     (save-buffer))
+  :hook (prog-mode . whitespace-mode)
   :config
-  (setq-default whitespace-style '(face trailing tab-mark))
-  (add-hook 'prog-mode-hook 'whitespace-mode))
+  (setq-default whitespace-style '(face trailing tab-mark)))
 
-(use-package electric :config (add-hook 'prog-mode-hook 'electric-indent-mode))
-(use-package elec-pair :config (add-hook 'prog-mode-hook 'electric-pair-mode))
+(use-package electric :hook (prog-mode . electric-indent-mode))
+(use-package elec-pair :hook (prog-mode . electric-pair-mode))
 
-(use-package flycheck :ensure t :if (display-graphic-p))
-(use-package company :ensure t :if (display-graphic-p))
+(use-package flycheck
+  :ensure t
+  :if (display-graphic-p)
+  :hook (typescript-mode . flycheck-mode))
+
+(use-package company
+  :ensure t
+  :if (display-graphic-p)
+  :hook (typescript-mode . company-mode))
 
 (use-package which-key
   :ensure t
@@ -257,43 +265,43 @@
 
 (use-package emmet-mode
   :ensure t
-  :config
-  (add-hook 'web-mode-hook 'emmet-mode)
-  (add-hook 'rjsx-mode-hook 'emmet-mode))
+  :hook (((web-mode rjsx-mode) . emmet-mode)))
 
 (use-package rainbow-delimiters
   :ensure t
   :if (display-graphic-p)
-  :config
-  (add-hook 'emacs-lisp-mode-hook 'rainbow-delimiters-mode)
-  (add-hook 'clojure-mode-hook 'rainbow-delimiters-mode))
+  :hook ((emacs-lisp-mode clojure-mode) . rainbow-delimiters-mode))
 
-(use-package cargo :ensure t :pin melpa)
+(use-package cargo
+  :ensure t
+  :pin melpa
+  :hook (rust-mode . cargo-minor-mode))
 ;; $ rustup component add rust-src
 ;; $ cargo install racer
-(use-package racer :ensure t :pin melpa :config (add-hook 'racer-mode-hook 'eldoc-mode))
+(use-package racer
+  :ensure t
+  :pin melpa
+  :hook (rust-mode . racer-mode))
 (use-package rust-mode
   :ensure t
   :pin melpa
   :config
-  (setq rust-format-on-save t)
-  (add-hook 'rust-mode-hook 'cargo-minor-mode)
-  (add-hook 'rust-mode-hook 'racer-mode))
+  (setq rust-format-on-save t))
 (use-package rust-playground :ensure t :pin melpa)
 
-(use-package tide :ensure t)
+(use-package eldoc :hook (prog-mode . eldoc-mode))
+
+(use-package tide
+  :ensure t
+  :after (typescript-mode company flycheck)
+  :hook ((typescript-mode . tide-setup)
+         (typescript-mode . tide-hl-identifier-mode)
+         (before-save . tide-format-before-save)))
+
 (use-package typescript-mode
   :ensure t
   :config
-  (setq typescript-indent-level 2)
-  (add-hook 'typescript-mode-hook (defun setup-tide ()
-                                    (interactive)
-                                    (tide-setup)
-                                    (flycheck-mode)
-                                    (setq flycheck-check-syntax-automatically '(save mode-enabled))
-                                    (eldoc-mode +1)
-                                    (tide-hl-identifier-mode +1)
-                                    (company-mode +1))))
+  (setq typescript-indent-level 2))
 
 (use-package avy
   :ensure t
@@ -306,10 +314,10 @@
 
 (use-package hl-todo
   :ensure t
+  :demand t
   :bind (("C-c t n" . hl-todo-next)
          ("C-c t p" . hl-todo-previous)
          ("C-c t o" . hl-todo-occur))
-  :demand t
   :config (global-hl-todo-mode))
 
 (use-package ace-window
@@ -343,25 +351,18 @@
 (use-package subword
   :diminish subword-mode
   :if (display-graphic-p)
-  :config
-  (add-hook 'haskell-mode-hook 'subword-mode)
-  (add-hook 'clojure-mode-hook 'subword-mode)
-  (add-hook 'scala-mode-hook 'subword-mode)
-  (add-hook 'elm-mode-hook 'subword-mode)
-  (add-hook 'js2-mode-hook 'subword-mode)
-  (add-hook 'typescript-mode-hook 'subword-mode)
-  (add-hook 'web-mode-hook 'subword-mode)
-  )
+  :hook ((haskell-mode
+          clojure-mode
+          scala-mode
+          elm-mode
+          js2-mode
+          typescript-mode
+          web-mode) . subword-mode))
 
 (use-package hungry-delete
   :ensure t
   :diminish hungry-delete-mode
-  :config
-  (add-hook 'haskell-mode-hook 'hungry-delete-mode)
-  (add-hook 'scala-mode-hook 'hungry-delete-mode)
-  (add-hook 'elm-mode-hook 'hungry-delete-mode)
-  (add-hook 'js2-mode-hook 'hungry-delete-mode)
-  )
+  :hook ((haskell-mode scala-mode elm-mode js2-mode typescript-mode) . hungry-delete-mode))
 
 (use-package sml-mode
   :ensure t
@@ -370,10 +371,10 @@
 (use-package haskell-mode
   :ensure t
   :mode "\\.hs\\'"
+  :hook ((haskell-mode-hook . haskell-doc-mode)
+         (haskell-mode-hook . turn-on-haskell-indentation))
   :init
   (setq haskell-stylish-on-save t)
-  (add-hook 'haskell-mode-hook 'haskell-doc-mode)
-  (add-hook 'haskell-mode-hook 'turn-on-haskell-indentation)
 
   (defun haskell-mode-before-save-handler ()
     "Function that will be called before buffer's saving."
@@ -402,11 +403,11 @@
   :ensure t
   :pin melpa-stable
   :if (display-graphic-p)
+  :hook (magit-mode . hl-line-mode)
   :config
   (use-package magit-popup :ensure t :pin melpa)
   (when (functionp 'ivy-completing-read)
-    (setq magit-completing-read-function 'ivy-completing-read))
-  (add-hook 'magit-mode-hook 'hl-line-mode))
+    (setq magit-completing-read-function 'ivy-completing-read)))
 (use-package gist :ensure t :pin melpa)
 
 (use-package css-mode
@@ -444,16 +445,7 @@
 (use-package markdown-mode
   :ensure t
   :mode (("\\.md" . gfm-mode)
-         ("\\.markdown" . gfm-mode))
-  :init
-  (add-hook
-   'markdown-mode-hook
-   (defun configure-markdown-mode ()
-     (interactive)
-     (use-package markdown-toc :ensure t :defer t)
-     (local-set-key (kbd "C-c '") 'markdown-edit-indirect)
-     (local-set-key (kbd "C-c t") 'markdown-toc-generate-toc)))
-  )
+         ("\\.markdown" . gfm-mode)))
 
 (use-package python-mode
   :mode "\\.py\\'"
@@ -626,31 +618,29 @@
 
 (use-package js2-refactor
   :ensure t
+  :hook (js2-mode . js2-refactor-mode)
   :config
-  (add-hook 'js2-mode-hook #'js2-refactor-mode)
-  (js2r-add-keybindings-with-prefix "C-c C-m")
-  )
+  (js2r-add-keybindings-with-prefix "C-c C-m"))
 
 (use-package aggressive-indent
   :ensure t
   :diminish aggressive-indent-mode
+  :hook ((clojure-mode emacs-lisp-mode) . aggressive-indent-mode)
   :config
-  (setq aggressive-indent-sit-for-time 0.5)
-  (add-hook 'clojure-mode-hook 'aggressive-indent-mode)
-  (add-hook 'emacs-lisp-mode-hook 'aggressive-indent-mode))
+  (setq aggressive-indent-sit-for-time 0.5))
 
 (use-package paredit
-  :ensure t 
+  :ensure t
+  :hook ((clojure-mode emacs-lisp-mode) . paredit-mode)
   :config
-  (add-hook 'clojure-mode-hook 'paredit-mode)
-  (add-hook 'emacs-lisp-mode-hook 'paredit-mode)
   :diminish (paredit paredit-mode))
 
-(use-package prog-mode
-  :config
-  (setq clojure--prettify-symbols-alist '(("fn" . 955)
-                                          ))
-  (add-hook 'clojure-mode-hook 'prettify-symbols-mode))
+;; (use-package prog-mode
+;;   :hook 
+;;   (add-hook 'clojure-mode-hook 'prettify-symbols-mode)
+;;   :config
+;;   (setq clojure--prettify-symbols-alist '(("fn" . 955)
+;;                                           )))
 
 (use-package elfeed-goodies :ensure t)
 (use-package elfeed-web :ensure t)
@@ -717,8 +707,7 @@
     (defcomponent '(2 nil nil (:defn)))))
 
 (use-package hideshow
-  :config
-  (add-hook 'clojure-mode-hook 'hs-minor-mode))
+  :hook (clojure-mode . hs-minor-mode))
 
 (use-package eshell-prompt-extras
   :ensure t
