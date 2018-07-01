@@ -356,6 +356,7 @@
           scala-mode
           elm-mode
           js2-mode
+          json-mode
           typescript-mode
           web-mode) . subword-mode))
 
@@ -859,3 +860,4 @@
 (use-package monotropic-theme :ensure t :defer t)
 (use-package panda-theme :ensure t :defer t)
 (use-package poet-theme :ensure t :defer t)
+(use-package jazz-theme :ensure t :defer t)
