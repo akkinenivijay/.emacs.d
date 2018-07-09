@@ -79,16 +79,8 @@
       mouse-wheel-progressive-speed nil
 
       make-backup-files nil
-      ;; auto-backup (filename~)
-      ;; backup-directory-alist `((".*" . ,temporary-file-directory))
-      ;; backup-by-copying t
-      ;; delete-old-versions t
-      ;; version-control t
 
-      ;; auto-save (#filename#)
-      ;; auto-save-file-name-transforms `((".*" ,temporary-file-directory t))
-
-      confirm-kill-emacs nil ;#'y-or-n-p
+      confirm-kill-emacs nil
 
       echo-keystrokes 0.2
       ring-bell-function #'ignore
@@ -97,7 +89,6 @@
 
       inhibit-default-init t
       inhibit-startup-screen t
-      ;; initial-scratch-message nil
 
       scroll-margin 2
       scroll-preserve-screen-position t)
@@ -135,7 +126,9 @@
 (delete-selection-mode)
 (column-number-mode)
 
-(use-package paren :config (show-paren-mode))
+(use-package paren
+  :config (show-paren-mode))
+
 (use-package isearch
   :bind (:map isearch-mode-map
               ("C-<return>" . isearch-done-opposite)
@@ -145,16 +138,22 @@
           (interactive)
           (funcall #'isearch-done nopush edit)
           (when isearch-other-end (goto-char isearch-other-end))))
+
 (use-package autorevert
   :diminish auto-revert-mode
   :config (global-auto-revert-mode))
-(use-package hi-lock :diminish hi-lock-mode)
-(use-package saveplace :config (save-place-mode))
 
-;; (use-package centered-window-mode
-;;   :load-path "~/src/public/centered-window-mode"
-;;   :config (setq cwm-incremental-padding t
-;;                 cwm-incremental-padding-% 5))
+(use-package hi-lock
+  :diminish hi-lock-mode)
+
+(use-package saveplace
+  :config (save-place-mode))
+
+(use-package delight
+  :ensure t)
+
+(use-package diminish
+  :ensure t)
 
 (use-package discover
   :ensure t
@@ -162,7 +161,6 @@
 
 (use-package move-text
   :ensure t
-  :pin melpa
   :bind* (("M-<up>" . move-text-up)
           ("M-<down>" . move-text-down)))
 
@@ -170,13 +168,14 @@
   :pin org
   :config (setq org-src-fontify-natively t))
 
-(use-package rainbow-mode :load-path "vendor")
+(use-package rainbow-mode
+  :load-path "vendor")
 
-(use-package gitconfig-mode :ensure t :pin melpa)
+(use-package gitconfig-mode
+  :ensure t)
 
 (use-package toc-org
-  :ensure t
-  :pin melpa)
+  :ensure t)
 
 (use-package neotree
   :ensure t
@@ -196,9 +195,7 @@
   (define-prefix-command 'ctl-period-equals-map)
   (bind-key "C-. =" #'ctl-period-equals-map)
 
-  (setq
-   ;; ediff-window-setup-function 'ediff-setup-windows-plain
-   ediff-diff-options "-w")
+  (setq ediff-diff-options "-w")
 
   :bind (("C-. = b" . ediff-buffers)
          ("C-. = B" . ediff-buffers3)
@@ -216,16 +213,18 @@
   :mode "\\.sh\\'"
   :config (setq sh-indentation 2 sh-basic-offset 2))
 
-(use-package man :config (setq Man-width 79) :defer t)
-
-(use-package elisp-mode
-  :mode (("\\.el\\'" . emacs-lisp-mode)
-         ("Cask" . emacs-lisp-mode)))
+(use-package man
+  :config (setq Man-width 79)
+  :defer t)
 
 (use-package smooth-scrolling
   :ensure t
   :if (display-graphic-p)
   :config (smooth-scrolling-mode))
+
+(use-package elisp-mode
+  :mode (("\\.el\\'" . emacs-lisp-mode)
+         ("Cask" . emacs-lisp-mode)))
 
 (use-package whitespace
   :bind (("C-x S" . whitespace-cleanup-save-buffer))
@@ -241,18 +240,32 @@
   :config
   (setq-default whitespace-style '(face trailing tab-mark)))
 
-(use-package electric :hook (prog-mode . electric-indent-mode))
-(use-package elec-pair :hook (prog-mode . electric-pair-mode))
+(use-package electric
+  :hook (prog-mode . electric-indent-mode))
+
+(use-package elec-pair
+  :hook (prog-mode . electric-pair-mode))
 
 (use-package flycheck
   :ensure t
   :if (display-graphic-p)
-  :hook (typescript-mode . flycheck-mode))
+  :config
+  (add-hook 'typescript-mode-hook 'flycheck-mode)
+  (add-hook 'rust-mode-hook 'flycheck-mode))
+
+(use-package flycheck-rust
+  :ensure t
+  :hook (flycheck-mode . flycheck-rust-setup))
+
+(use-package rust-mode
+  :ensure t
+  :config (setq rust-format-on-save t))
 
 (use-package company
   :ensure t
   :if (display-graphic-p)
-  :hook (typescript-mode . company-mode))
+  :hook ((typescript-mode . company-mode)
+         (racer-mode . company-mode)))
 
 (use-package which-key
   :ensure t
@@ -272,36 +285,35 @@
   :if (display-graphic-p)
   :hook ((emacs-lisp-mode clojure-mode) . rainbow-delimiters-mode))
 
+(use-package eldoc
+  :hook ((racer-mode . eldoc-mode)))
+
 (use-package cargo
   :ensure t
-  :pin melpa
   :hook (rust-mode . cargo-minor-mode))
+
 ;; $ rustup component add rust-src
 ;; $ cargo install racer
 (use-package racer
   :ensure t
-  :pin melpa
   :hook (rust-mode . racer-mode))
-(use-package rust-mode
-  :ensure t
-  :pin melpa
-  :config
-  (setq rust-format-on-save t))
-(use-package rust-playground :ensure t :pin melpa)
-
-(use-package eldoc :hook (prog-mode . eldoc-mode))
 
 (use-package tide
   :ensure t
-  :after (typescript-mode company flycheck)
-  :hook ((typescript-mode . tide-setup)
-         (typescript-mode . tide-hl-identifier-mode)
-         (before-save . tide-format-before-save)))
+  :after (typescript-mode company flycheck eldoc))
 
 (use-package typescript-mode
   :ensure t
   :config
-  (setq typescript-indent-level 2))
+  (setq typescript-indent-level 2)
+  (add-hook
+   'typescript-mode-hook
+   (defun setup/typescript ()
+     (interactive)
+     (tide-setup)
+     (tide-hl-identifier-mode)
+     (eldoc-mode)
+     (add-hook 'before-save-hook 'tide-format-before-save))))
 
 (use-package avy
   :ensure t
@@ -384,22 +396,29 @@
       (haskell-sort-imports)))
   )
 
-(use-package gitignore-mode :ensure t :mode ".gitignore'")
+(use-package gitignore-mode
+  :ensure t
+  :mode ".gitignore'")
+
 (use-package git-messenger
   :ensure t
   :if (display-graphic-p)
   :bind ("C-x g p" . git-messenger:popup-message))
+
 (use-package git-timemachine
   :ensure t
   :if (display-graphic-p)
   :bind ("C-x g t" . git-timemachine-toggle))
+
 (use-package what-the-commit
   :ensure t
   :bind ("C-x g c" . what-the-commit-insert))
+
 (use-package github-browse-file
   :ensure t
   :bind ("C-x g b" . github-browse-file)
   :config (setq github-browse-file-show-line-at-point t))
+
 (use-package magit
   :ensure t
   :pin melpa-stable
@@ -409,7 +428,13 @@
   (use-package magit-popup :ensure t :pin melpa)
   (when (functionp 'ivy-completing-read)
     (setq magit-completing-read-function 'ivy-completing-read)))
-(use-package gist :ensure t :pin melpa)
+
+(use-package magit-todos
+  :ensure t
+  :hook (magit-mode . magit-todos-mode))
+
+(use-package gist
+  :ensure t)
 
 (use-package css-mode
   :mode "\\.css\\'"
@@ -438,10 +463,6 @@
   :mode "\\.ya?ml\\'")
 
 (use-package tldr :ensure t)
-
-;; (use-package adoc-mode
-;;   :ensure t
-;;   :mode "\\.adoc\\'")
 
 (use-package markdown-mode
   :ensure t
@@ -482,24 +503,26 @@
   :config
   (unless (server-running-p) (server-mode)))
 
-(use-package persistent-scratch
-  :ensure t
-  :config (persistent-scratch-setup-default))
-
 (use-package fancy-narrow
   :ensure t
   :diminish fancy-narrow-mode
   :if (display-graphic-p)
   :config (fancy-narrow-mode))
 
-(use-package dired-explorer :ensure t)
-(use-package dired-imenu :ensure t)
-(use-package dired-k :ensure t :bind (:map dired-mode-map ("K" . dired-k)))
+(use-package dired-explorer
+  :ensure t)
 
-(use-package mac :if (eq system-type 'darwin))
+(use-package dired-imenu
+  :ensure t)
 
-(use-package wgrep :ensure t)
-(use-package wgrep-ag :ensure t)
+(use-package mac
+  :if (eq system-type 'darwin))
+
+(use-package wgrep
+  :ensure t)
+
+(use-package wgrep-ag
+  :ensure t)
 
 (use-package untitled-new-buffer
   :ensure t
@@ -540,17 +563,22 @@
         helm-ff-auto-update-initial-value t
         helm-full-frame nil
         )
-  (helm-mode)
-  )
+  (helm-mode))
 
 (use-package helm-descbinds
   :ensure t
   :if (display-graphic-p)
-  :bind (("C-h b" . helm-descbinds))
-  )
+  :bind (("C-h b" . helm-descbinds)))
 
-(use-package helm-ag :ensure t :if (display-graphic-p) :defer t)
-(use-package helm-tramp :ensure t :if (display-graphic-p) :defer t)
+(use-package helm-ag
+  :ensure t
+  :if (display-graphic-p)
+  :defer t)
+
+(use-package helm-tramp
+  :ensure t
+  :if (display-graphic-p)
+  :defer t)
 
 (use-package helm-themes
   :ensure t
@@ -603,11 +631,10 @@
   (fullframe magit-status magit-mode-quit-window nil)
   (fullframe projectile-vc magit-mode-quit-window nil))
 
-(use-package golden-ratio :ensure t)
-
-(use-package kotlin-mode
+(use-package golden-ratio
   :ensure t
-  :mode "\\.kt\\'")
+  :delight
+  :config (golden-ratio-mode))
 
 (use-package rjsx-mode
   :ensure t
@@ -636,12 +663,12 @@
   :config
   :diminish (paredit paredit-mode))
 
-;; (use-package prog-mode
-;;   :hook 
-;;   (add-hook 'clojure-mode-hook 'prettify-symbols-mode)
-;;   :config
-;;   (setq clojure--prettify-symbols-alist '(("fn" . 955)
-;;                                           )))
+(use-package prog-mode
+  :hook
+  (add-hook 'clojure-mode-hook 'prettify-symbols-mode)
+  :config
+  (setq clojure--prettify-symbols-alist '(("fn" . 955)
+                                          )))
 
 (use-package elfeed-goodies :ensure t)
 (use-package elfeed-web :ensure t)
@@ -661,20 +688,18 @@
 
 (use-package cider
   :ensure t
-  :pin melpa-stable
   :bind (:map clojure-mode-map
               ("C-c C-;" . cider-eval-defun-to-comment)
               ("C-c C-SPC" . cider-format-buffer)))
-;; (use-package helm-cider
-;;   :ensure t
-;;   :pin melpa-stable
-;;   :config (eval-after-load "cider" (helm-cider-mode)))
+(use-package helm-cider
+  :ensure t
+  :config (eval-after-load "cider" (helm-cider-mode)))
 
-;; (use-package clj-refactor
-;;   :ensure t
-;;   :config
-;;   (cljr-add-keybindings-with-prefix "C-c C-n")
-;;   (add-hook 'clojure-mode-hook 'clj-refactor-mode))
+(use-package clj-refactor
+  :ensure t
+  :config
+  (cljr-add-keybindings-with-prefix "C-c C-n")
+  (add-hook 'clojure-mode-hook 'clj-refactor-mode))
 
 (use-package clojure-mode
   :ensure t
@@ -719,8 +744,6 @@
           eshell-prompt-function 'epe-theme-lambda)))
 
 (use-package nyan-mode :ensure t)
-(use-package nodejs-repl :ensure t)
-(use-package twittering-mode :ensure t)
 
 (use-package web-mode
   :ensure t
@@ -739,7 +762,7 @@
         web-mode-enable-comment-keywords t
         web-mode-enable-current-element-highlight t
         )
-  
+
   (add-hook 'web-mode-hook
             (lambda ()
               (when (string-equal "tsx" (file-name-extension buffer-file-name))
