@@ -126,6 +126,10 @@
 (delete-selection-mode)
 (column-number-mode)
 
+(use-package replace
+  :config (setq case-replace t
+                case-fold-search nil))
+
 (use-package paren
   :config (show-paren-mode))
 
@@ -278,7 +282,7 @@
 
 (use-package emmet-mode
   :ensure t
-  :hook (((web-mode rjsx-mode) . emmet-mode)))
+  :hook (((typescript-mode web-mode rjsx-mode) . emmet-mode)))
 
 (use-package rainbow-delimiters
   :ensure t
@@ -286,6 +290,7 @@
   :hook ((emacs-lisp-mode clojure-mode) . rainbow-delimiters-mode))
 
 (use-package eldoc
+  :diminish eldoc-mode
   :hook ((racer-mode . eldoc-mode)))
 
 (use-package cargo
@@ -304,6 +309,7 @@
 
 (use-package typescript-mode
   :ensure t
+  :mode "\\.tsx?\\'"
   :config
   (setq typescript-indent-level 2)
   (add-hook
@@ -414,10 +420,17 @@
   :ensure t
   :bind ("C-x g c" . what-the-commit-insert))
 
-(use-package github-browse-file
+;; (use-package browse-at-remote
+;; :ensure t
+;; :bind ("C-x g b" . github-browse-file)
+;; :config (setq github-browse-file-show-line-at-point t)
+;; )
+
+(use-package edit-server
   :ensure t
-  :bind ("C-x g b" . github-browse-file)
-  :config (setq github-browse-file-show-line-at-point t))
+  :config
+  (setq edit-server-new-frame nil)
+  (edit-server-start))
 
 (use-package magit
   :ensure t
@@ -429,9 +442,9 @@
   (when (functionp 'ivy-completing-read)
     (setq magit-completing-read-function 'ivy-completing-read)))
 
-(use-package magit-todos
-  :ensure t
-  :hook (magit-mode . magit-todos-mode))
+;; (use-package magit-todos
+;;   :ensure t
+;;   :hook (magit-mode . magit-todos-mode))
 
 (use-package gist
   :ensure t)
@@ -481,6 +494,9 @@
   :init (setq yas-indent-line t)
   :config (yas-global-mode))
 
+(use-package yasnippet-snippets
+  :ensure t)
+
 (use-package purescript-mode
   :ensure t
   :mode "\\.purs\\'")
@@ -523,6 +539,11 @@
 
 (use-package wgrep-ag
   :ensure t)
+
+;; (use-package centered-window
+;;   :ensure t
+;;   :config (setq cwm-incremental-padding t
+;;                 cwm-incremental-padding-% 2))
 
 (use-package untitled-new-buffer
   :ensure t
@@ -747,9 +768,7 @@
 
 (use-package web-mode
   :ensure t
-  :mode (("\\.html?\\'" . web-mode)
-         ("\\.tsx\\'" . web-mode)
-         ("\\.jsx\\'" . web-mode))
+  :mode (("\\.html?\\'" . web-mode))
   :config
   (setq web-mode-markup-indent-offset 2
         web-mode-css-indent-offset 2
@@ -761,17 +780,7 @@
         web-mode-enable-auto-pairing t
         web-mode-enable-comment-keywords t
         web-mode-enable-current-element-highlight t
-        )
-
-  (add-hook 'web-mode-hook
-            (lambda ()
-              (when (string-equal "tsx" (file-name-extension buffer-file-name))
-                (setup-tide-mode))
-              (when (string-equal "jsx" (file-name-extension buffer-file-name))
-                (setup-tide-mode))))
-  ;; enable typescript-tslint checker
-  (flycheck-add-mode 'typescript-tslint 'web-mode)
-  )
+        ))
 
 (use-package sass-mode
   :ensure t
@@ -884,3 +893,7 @@
 (use-package panda-theme :ensure t :defer t)
 (use-package poet-theme :ensure t :defer t)
 (use-package jazz-theme :ensure t :defer t)
+(use-package night-owl-theme :ensure t :defer t)
+(use-package django-theme :ensure t :defer t)
+(use-package eziam-theme :ensure t :defer t)
+(use-package habamax-theme :ensure t :defer t)
