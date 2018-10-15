@@ -35,13 +35,16 @@
  'custom-theme-load-path
  (expand-file-name "themes" user-emacs-directory))
 
+(add-to-list 'auto-mode-alist '("\\.h\\'" . c++-mode))
+
 (prefer-coding-system 'utf-8)
 (set-default-coding-systems 'utf-8)
 (set-terminal-coding-system 'utf-8)
 (set-keyboard-coding-system 'utf-8)
 
 ;; Treat clipboard input as UTF-8 string first; compound text next, etc.
-(setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING))
+(setq x-select-request-type '(UTF8_STRING COMPOUND_TEXT TEXT STRING)
+      source-directory "/usr/local/src/emacs")
 
 (setq-default indent-tabs-mode nil
               tab-width 2
@@ -126,9 +129,15 @@
 (delete-selection-mode)
 (column-number-mode)
 
-(use-package replace
-  :config (setq case-replace t
-                case-fold-search nil))
+(defun unpop-to-mark-command ()
+  "Unpop off mark ring. Does nothing if mark ring is empty."
+  (interactive)
+  (when mark-ring
+    (setq mark-ring (cons (copy-marker (mark-marker)) mark-ring))
+    (set-marker (mark-marker) (car (last mark-ring)) (current-buffer))
+    (when (null (mark t)) (ding))
+    (setq mark-ring (nbutlast mark-ring))
+    (goto-char (marker-position (car (last mark-ring))))))
 
 (use-package paren
   :config (show-paren-mode))
@@ -168,11 +177,34 @@
   :bind* (("M-<up>" . move-text-up)
           ("M-<down>" . move-text-down)))
 
+(use-package toml-mode :ensure t)
+
+(use-package simple
+  :hook ((org-mode) . auto-fill-mode))
+
+(use-package nhexl-mode :ensure t)
+
+(use-package nasm-mode :ensure t)
+
 (use-package org
   :pin org
   :config (setq org-src-fontify-natively t))
 
+(use-package org-present
+  :ensure t
+  :config
+  (setq org-present-text-scale 15)
+  (add-hook 'org-present-mode-hook (defun org-present/start ()
+                                     (org-present-big)
+                                     (org-present-read-only)))
+  (add-hook 'org-present-mode-quit-hook (defun org-present/start ()
+                                          (org-present-small)
+                                          (org-present-read-write))))
+
 (use-package rainbow-mode
+  :load-path "vendor")
+
+(use-package hide-mode-line
   :load-path "vendor")
 
 (use-package gitconfig-mode
@@ -253,9 +285,11 @@
 (use-package flycheck
   :ensure t
   :if (display-graphic-p)
-  :config
-  (add-hook 'typescript-mode-hook 'flycheck-mode)
-  (add-hook 'rust-mode-hook 'flycheck-mode))
+  :hook ((c++-mode typescript-mode rust-mode) . flycheck-mode))
+
+(use-package function-args
+  :ensure t
+  :config (fa-config-default))
 
 (use-package flycheck-rust
   :ensure t
@@ -309,7 +343,7 @@
 
 (use-package typescript-mode
   :ensure t
-  :mode "\\.tsx?\\'"
+  :mode "\\.ts\\'"
   :config
   (setq typescript-indent-level 2)
   (add-hook
@@ -344,8 +378,8 @@
   :init (defun other-window-backwards ()
           (interactive)
           (other-window -1))
-  :bind (("M-o" . other-window)
-         ("M-O" . other-window-backwards)))
+  :bind* (("M-o" . other-window)
+          ("M-O" . other-window-backwards)))
 
 (use-package multiple-cursors
   :ensure t
@@ -376,6 +410,7 @@
           js2-mode
           json-mode
           typescript-mode
+          rust-mode
           web-mode) . subword-mode))
 
 (use-package hungry-delete
@@ -426,11 +461,11 @@
 ;; :config (setq github-browse-file-show-line-at-point t)
 ;; )
 
-(use-package edit-server
-  :ensure t
-  :config
-  (setq edit-server-new-frame nil)
-  (edit-server-start))
+;; (use-package edit-server
+;;   :ensure t
+;;   :config
+;;   (setq edit-server-new-frame nil)
+;;   (edit-server-start))
 
 (use-package magit
   :ensure t
@@ -442,9 +477,9 @@
   (when (functionp 'ivy-completing-read)
     (setq magit-completing-read-function 'ivy-completing-read)))
 
-;; (use-package magit-todos
-;;   :ensure t
-;;   :hook (magit-mode . magit-todos-mode))
+(use-package magit-todos
+  :ensure t
+  :hook (magit-mode . magit-todos-mode))
 
 (use-package gist
   :ensure t)
@@ -482,6 +517,9 @@
   :mode (("\\.md" . gfm-mode)
          ("\\.markdown" . gfm-mode)))
 
+(use-package flymd
+  :ensure t)
+
 (use-package python-mode
   :mode "\\.py\\'"
   :init (setq python-indent-offset 2))
@@ -517,13 +555,13 @@
 
 (use-package server
   :config
-  (unless (server-running-p) (server-mode)))
+  (unless (server-running-p) (server-start)))
 
-(use-package fancy-narrow
-  :ensure t
-  :diminish fancy-narrow-mode
-  :if (display-graphic-p)
-  :config (fancy-narrow-mode))
+;; (use-package fancy-narrow
+;;   :ensure t
+;;   :diminish fancy-narrow-mode
+;;   :if (display-graphic-p)
+;;   :config (fancy-narrow-mode))
 
 (use-package dired-explorer
   :ensure t)
@@ -559,6 +597,7 @@
          ("M-Y" . helm-show-kill-ring)
          ("C-x b" . helm-mini)
          ("C-x C-b" . helm-buffers-list)
+         ("C-M-l" . helm-buffers-list)
          ("C-x C-S-b" . ibuffer)
          ("C-x C-f" . helm-find-files)
          ("C-x C-r" . helm-recentf)
@@ -632,7 +671,8 @@
           )
   :diminish projectile-mode
   :init
-  (setq projectile-enable-caching t
+  (setq projectile-keymap-prefix (kbd "C-c p")
+        projectile-enable-caching t
         projectile-indexing-method 'alien
         projectile-completion-system 'helm
         projectile-mode-line '(:eval (format " {%s}" (projectile-project-name))))
@@ -640,6 +680,37 @@
   :config
   (projectile-global-mode)
   (helm-projectile-on))
+
+;; (use-package ggtags
+;;   :ensure t
+;;   :bind (:map ggtags-mode-map
+;;               ("C-c g s" . ggtags-find-other-symbol)
+;;               ("C-c g h" . ggtags-view-tag-history)
+;;               ("C-c g r" . ggtags-find-reference)
+;;               ("C-c g f" . ggtags-find-file)
+;;               ("C-c g c" . ggtags-create-tags)
+;;               ("C-c g u" . ggtags-update-tags)
+;;               ("M-," . ggtags-pop-tag-mark))
+;;   :hook ((c-mode c++-mode java-mode asm-mode) . ggtags-mode))
+
+;; (use-package helm-gtags
+;;   :ensure t
+;;   :bind (:map helm-gtags-mode-map
+;;               ("C-c g a" . helm-gtags-tags-in-this-function)
+;;               ("C-j" . helm-gtags-select)
+;;               ("M-." . helm-gtags-dwim)
+;;               ("M-," . helm-gtags-pop-stack)
+;;               ("C-c <" . helm-gtags-previous-history)
+;;               ("C-c >" . helm-gtags-next-history)
+;;               )
+;;   :init
+;;   (setq helm-gtags-ignore-case t
+;;         helm-gtags-auto-update t
+;;         helm-gtags-use-input-at-cursor t
+;;         helm-gtags-pulse-at-cursor t
+;;         helm-gtags-prefix-key "\C-cg"
+;;         helm-gtags-suggested-key-mapping t)
+;;   :hook ((dired-mode eshell-mode c-mode c++-mode asm-mode) . helm-gtags-mode))
 
 (use-package zygospore
   :ensure t
@@ -665,6 +736,13 @@
                 js2-missing-semi-one-line-override nil
                 js2-bounce-indent-p nil))
 
+;; (use-package centered-window
+;;   :ensure t)
+
+(use-package nand2tetris
+  :ensure t
+  :mode ("\\.hdl\\'" . nand2tetris-mode))
+
 (use-package js2-refactor
   :ensure t
   :hook (js2-mode . js2-refactor-mode)
@@ -685,11 +763,10 @@
   :diminish (paredit paredit-mode))
 
 (use-package prog-mode
-  :hook
-  (add-hook 'clojure-mode-hook 'prettify-symbols-mode)
   :config
   (setq clojure--prettify-symbols-alist '(("fn" . 955)
-                                          )))
+                                          ))
+  (add-hook 'clojure-mode-hook 'prettify-symbols-mode))
 
 (use-package elfeed-goodies :ensure t)
 (use-package elfeed-web :ensure t)
@@ -768,8 +845,10 @@
 
 (use-package web-mode
   :ensure t
-  :mode (("\\.html?\\'" . web-mode))
+  :mode (("\\.html?\\'" . web-mode)
+         ("\\.tsx\\'" . web-mode))
   :config
+  (flycheck-add-mode 'typescript-tslint 'web-mode)
   (setq web-mode-markup-indent-offset 2
         web-mode-css-indent-offset 2
         web-mode-code-indent-offset 2
@@ -779,8 +858,17 @@
         web-mode-enable-css-colorization t
         web-mode-enable-auto-pairing t
         web-mode-enable-comment-keywords t
-        web-mode-enable-current-element-highlight t
-        ))
+        web-mode-enable-current-element-highlight nil
+        )
+  (add-hook 'web-mode-hook
+            (defun setup/tsx ()
+              (setq flycheck-checker 'tsx-tide)
+              (when (string-equal "tsx" (file-name-extension buffer-file-name))
+                (tide-setup)
+                (tide-hl-identifier-mode)
+                (eldoc-mode)
+                (flycheck-mode)
+                (add-hook 'before-save-hook 'tide-format-before-save)))))
 
 (use-package sass-mode
   :ensure t
@@ -897,3 +985,6 @@
 (use-package django-theme :ensure t :defer t)
 (use-package eziam-theme :ensure t :defer t)
 (use-package habamax-theme :ensure t :defer t)
+(use-package purple-haze-theme :ensure t :defer t)
+(use-package leuven-theme :ensure t :defer t)
+(use-package ubuntu-theme :ensure t :defer t)
